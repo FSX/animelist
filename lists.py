@@ -77,13 +77,15 @@ class Lists():
             frame[i].add(self.treeview[i])
             self.tabs.append_page(frame[i], gtk.Label(self.al.config.lists[i]))
 
-        thread.start_new_thread(self.create_rows, (self.al.config.prefs['startup_refresh'],))
+        thread.start_new_thread(self.create_rows,
+            (self.al.config.prefs['startup_refresh'],))
 
         self.menu.show_all()
 
     #
-    #  Update the current tab number and hide the corrent menu item in the "Move to" menu
-    #  Note: this method is also called when the tabs are created (at startup) (5 or 6 times).
+    #  Update the current tab number and hide the corrent menu item in the
+    #  "Move to" menu. Note: this method is also called when the tabs are
+    #  created (at startup) (5 or 6 times).
     #
     def update_current_tab(self, notebook, page, page_num):
 
@@ -174,7 +176,8 @@ class Lists():
     #  Convert numbers (1, 2, 3) to human readable text (TV, OVA, Movie)
     #
     def cell_type_display(self, column, cell, model, iter):
-        cell.set_property('text', self.al.config.types[int(model.get_value(iter, 2))])
+        cell.set_property('text',
+            self.al.config.types[int(model.get_value(iter, 2))])
 
     #
     #  Put "my watched episodes/total episodes" in column
@@ -185,7 +188,8 @@ class Lists():
         episodes = self.anime_data[anime_id][6]
         if episodes == '0': episodes = '?'
 
-        cell.set_property('text', self.anime_data[anime_id][5] + '/' + episodes)
+        cell.set_property('text',
+            self.anime_data[anime_id][5] + '/' + episodes)
 
     #
     #  Validate given progress and update score cell, local cache and MAL
@@ -207,7 +211,8 @@ class Lists():
             episodes = self.anime_data[anime_id][6]
             if episodes == '0': episodes = '?'
 
-            self.liststore[list_id][row][3] = str(new_progress) + '/' + episodes
+            self.liststore[list_id][row][3] = str(new_progress) + '/' \
+                + episodes
             self.anime_data[anime_id][5] = str(new_progress)
 
             # Update MAL
@@ -334,7 +339,8 @@ class Lists():
         # Progess
         renderer = gtk.CellRendererText()
         renderer.set_property('editable', True)
-        renderer.connect('editing-started', self.cell_progress_start_edit, list_id)
+        renderer.connect('editing-started', self.cell_progress_start_edit,
+            list_id)
         renderer.connect('edited', self.cell_progress_edited, list_id)
         column = gtk.TreeViewColumn('Progress', renderer, text=3)
         column.set_sort_column_id(3)

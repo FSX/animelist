@@ -28,7 +28,9 @@ class Mal():
     #
     def fetch_list(self):
 
-        url      = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + urllib.quote(self.al.config.user['name']) + '&status=all&type=anime'
+        url = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + \
+            urllib.quote(self.al.config.user['name']) + \
+            '&status=all&type=anime'
         request  = urllib2.Request(url)
 
         try:                      response = urllib2.urlopen(request)
@@ -95,7 +97,8 @@ class Mal():
         xml = {'id': int(id), 'data': self._make_xml_values(data)}
         path = 'api/animelist/update/' + str(int(id)) + '.xml'
 
-        return self._request(path, params=xml, method='POST', authenticate=True)
+        return self._request(path, params=xml, method='POST',
+            authenticate=True)
 
     #
     #  Remove anime from the list
@@ -143,9 +146,7 @@ class Mal():
     #
     def _request(self, path, params=None, method='GET', authenticate=False, ssl=False):
 
-        headers = {
-            'User-Agent': self.al.app_name + '/' + self.al.app_version
-            }
+        headers = {'User-Agent': self.al.app_name + '/' + self.al.app_version}
 
         if method == 'POST':
             headers['Content-type'] = 'application/x-www-form-urlencoded'
@@ -154,11 +155,12 @@ class Mal():
             params = urllib.urlencode(params)
 
         if authenticate == True:
-            encoded = base64.encodestring('%s:%s' % (self.al.config.user['name'], self.al.config.user['password']))[:-1]
+            encoded = base64.encodestring('%s:%s' % (self.al.config.user['name'],
+                self.al.config.user['password']))[:-1]
             headers['Authorization'] = 'Basic %s' % encoded
 
         if ssl == True: connection = httplib.HTTPSConnection(self.al.config.mal['host'])
-        else:           connection = httplib.HTTPConnection(self.al.config.mal['host'])
+        else: connection = httplib.HTTPConnection(self.al.config.mal['host'])
 
         request = connection.request(method.upper(), '/' + path, params, headers)
         response = connection.getresponse()

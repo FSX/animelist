@@ -9,9 +9,13 @@
 
 import os
 
-import gtk, gobject
+import gtk
+import gobject
 
-import config, toolbar, myanimelist, lists
+import config
+import toolbar
+import myanimelist
+import lists
 
 gtk.gdk.threads_init()
 
@@ -73,7 +77,8 @@ class AnimeList():
 
         if not self.statusbar_message_id is None:
             if not remove_timeout is None:
-                gobject.timeout_add(remove_timeout, self.statusbar.remove, 0, self.statusbar_message_id)
+                gobject.timeout_add(remove_timeout, self.statusbar.remove, 0,
+                    self.statusbar_message_id)
             else:
                 self.statusbar.remove(0, self.statusbar_message_id)
 
@@ -84,7 +89,8 @@ class AnimeList():
 
         from modules.utils import cache_data
 
-        cache_data(self.HOME + '/' + self.config.user['name'] + '_animelist.cpickle', self.lists.anime_data)
+        cache_data(self.HOME + '/' + self.config.user['name'] + \
+            '_animelist.cpickle', self.lists.anime_data)
         gtk.main_quit()
 
 if __name__ == '__main__':
