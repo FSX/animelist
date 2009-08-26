@@ -1,0 +1,17 @@
+TODO for AnimeList
+
+ - Preferences (dialog).
+   - Should be saved in a secure file/format, because the username
+     and password are saved in the preferences file.
+ - About dialog.
+ - Search system (dialog, search result parsing, etc.).
+   - Add anime via search dialog.
+ - Save tasks when they could not be executed at shutdown.
+ - Execute tasks at shutdown or startup.
+ - lists.py
+   - Actions for "Details" and "Delete" items in the popup menu.
+ - Media player detection (for Mplayer etc.) (+GUI).
+ - Proper error handling.
+ - Make it work on Windows. The usage of threads is probably preventing
+   it to work correctly on Windows.
+ - Clean up code.
