@@ -8,7 +8,6 @@
 # =============================================================================
 
 import os
-import ConfigParser
 import base64
 import cPickle
 
@@ -81,7 +80,7 @@ class Config():
             self._generate_box(
                 'User details', {
                     'username': ('Username', 'entry'),
-                    'password': ('Password', 'entry')}),
+                    'password': ('Password', 'secret_entry')}),
             self._generate_box(
                 'Options', {
                     'startup_refresh': (
@@ -112,10 +111,8 @@ class Config():
                 widget_type = widget.get_name()
 
                 if widget_type == 'GtkEntry':
-                    #print widget.get_text()
                     self.settings[field_id] = widget.get_text()
                 elif widget_type == 'GtkCheckButton':
-                    #print widget.get_active()
                     self.settings[field_id] = widget.get_active()
 
             self._save_settings()
@@ -141,8 +138,11 @@ class Config():
 
         for field_id, field in fields.iteritems():
 
-            if field[1] == 'entry':
+            if field[1] == 'entry' or field[1] == 'secret_entry':
                 self.fields[field_id] = gtk.Entry()
+
+                if field[1] == 'secret_entry':
+                    self.fields[field_id].set_visibility(False)
 
                 if self.settings[field_id]:
                     self.fields[field_id].set_text(self.settings[field_id])

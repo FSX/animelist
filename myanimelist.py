@@ -10,7 +10,7 @@
 import os
 import sys
 import urllib
-import urllib2
+#import urllib2
 import httplib
 import base64
 from xml.dom.minidom import parseString
@@ -28,16 +28,18 @@ class Mal():
     #
     def fetch_list(self):
 
-        url = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + \
-            urllib.quote(self.al.config.settings['username']) + \
-            '&status=all&type=anime'
-        request  = urllib2.Request(url)
+#         url = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + \
+#             urllib.quote(self.al.config.settings['username']) + \
+#             '&status=all&type=anime'
+#         request  = urllib2.Request(url)
+#
+#         try:                      response = urllib2.urlopen(request)
+#         except urllib2.HTTPError: return False
+#         except urllib2.URLError:  return False
+#
+#         return response.read()
 
-        try:                      response = urllib2.urlopen(request)
-        except urllib2.HTTPError: return False
-        except urllib2.URLError:  return False
-
-        return response.read()
+        return self._request('/malappinfo.php?u=' + urllib.quote(self.al.config.settings['username']) + '&status=all&type=anime')
 
     #
     #  Parse the xml data that contains the anime list from MAL

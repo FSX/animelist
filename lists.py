@@ -7,8 +7,8 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import thread
 import os
+import thread
 
 import gtk
 
