@@ -32,6 +32,8 @@ class AnimeList():
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.set_title('AnimeList')
 
+        self.window.set_icon(self.get_icon('./pixmaps/animelist_logo_32.png'))
+
         self.statusbar = gtk.Statusbar()
         self.statusbar_message_id = None
 
@@ -81,6 +83,16 @@ class AnimeList():
                     self.statusbar_message_id)
             else:
                 self.statusbar.remove(0, self.statusbar_message_id)
+
+    #
+    #  Returns a gtk.gdk.Pixbuf
+    #
+    def get_icon(self, icon):
+
+        if os.access(icon, os.F_OK):
+            return gtk.gdk.pixbuf_new_from_file(icon)
+
+        return None
 
     #
     #  Terminates the application cleanly.

@@ -67,5 +67,13 @@ class Toolbar():
         print 'Show information/manual.'
 
     def on_about(self, widget):
-        # TODO: Show about dialog.
-        print 'Show about dialog.'
+        about = gtk.AboutDialog()
+        about.set_program_name(self.al.app_name)
+        about.set_version(self.al.app_version)
+        about.set_copyright('Copyright (c) 2009 Frank Smit')
+        about.set_comments('MyAnimeList.net anime list manager + some extra stuff.')
+        about.set_website('http://61924.nl')
+        about.set_logo(self.al.get_icon('./pixmaps/animelist_logo_256.png'))
+        about.run()
+        about.destroy()
+
