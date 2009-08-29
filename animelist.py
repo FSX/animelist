@@ -89,8 +89,10 @@ class AnimeList():
 
         from modules.utils import cache_data
 
-        cache_data(self.HOME + '/' + self.config.user['name'] + \
-            '_animelist.cpickle', self.lists.anime_data)
+        if self.config.no_user_defined == False:
+            cache_data(self.HOME + '/' + self.config.settings['username'] + \
+                '_animelist.cpickle', self.lists.anime_data)
+
         gtk.main_quit()
 
 if __name__ == '__main__':

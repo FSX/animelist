@@ -54,7 +54,7 @@ class Lists():
 
             self.treeview[i] = gtk.TreeView(self.liststore[i])
             self.treeview[i].set_rules_hint(True)
-            self.treeview[i].set_search_column(0)
+            self.treeview[i].set_search_column(1)
             self.treeview[i].set_tooltip_column(1)
             self.treeview[i].columns_autosize()
             self.treeview[i].set_reorderable(True)
@@ -77,8 +77,9 @@ class Lists():
             frame[i].add(self.treeview[i])
             self.tabs.append_page(frame[i], gtk.Label(self.al.config.lists[i]))
 
-        thread.start_new_thread(self.create_rows,
-            (self.al.config.prefs['startup_refresh'],))
+        if self.al.config.no_user_defined == False:
+            thread.start_new_thread(self.create_rows,
+                (self.al.config.settings['startup_refresh'],))
 
         self.menu.show_all()
 
@@ -271,7 +272,7 @@ class Lists():
 
         list_cache = None
         invalid_cache = False
-        cache_filename = self.al.HOME + '/' + self.al.config.user['name'] + \
+        cache_filename = self.al.HOME + '/' + self.al.config.settings['username'] + \
             '_animelist.cpickle'
 
         if refresh == False:

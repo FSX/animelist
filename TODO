@@ -1,8 +1,5 @@
 TODO for AnimeList
 
- - Preferences (dialog).
-   - Should be saved in a secure file/format, because the username
-     and password are saved in the preferences file.
  - About dialog.
  - Search system (dialog, search result parsing, etc.).
    - Add anime via search dialog.

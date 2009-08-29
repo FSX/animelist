@@ -29,7 +29,7 @@ class Mal():
     def fetch_list(self):
 
         url = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + \
-            urllib.quote(self.al.config.user['name']) + \
+            urllib.quote(self.al.config.settings['username']) + \
             '&status=all&type=anime'
         request  = urllib2.Request(url)
 
@@ -155,8 +155,7 @@ class Mal():
             params = urllib.urlencode(params)
 
         if authenticate == True:
-            encoded = base64.encodestring('%s:%s' % (self.al.config.user['name'],
-                self.al.config.user['password']))[:-1]
+            encoded = base64.encodestring('%s:%s' % (self.al.config.settings['username'], self.al.config.settings['password']))[:-1]
             headers['Authorization'] = 'Basic %s' % encoded
 
         if ssl == True: connection = httplib.HTTPSConnection(self.al.config.mal['host'])

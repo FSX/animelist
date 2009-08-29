@@ -2,12 +2,6 @@ AnimeList is still under development and not everything works yet and stuff can 
 Only tested on Linux (Arch linux), does not work on Windows (XP) (yet) and Mac (OSX) has
 not bee tested yet.
 
-To startup AnimeList you need to make a ".animelist" directory in your home directory and
-put a file called "preferences.cfg" in it. In that file you put the following text:
-
-[user]
-name=yourusername
-password=yourpassword
-
-After that you can 'cd' to the AnimeList directory and make "animelist.py" executable
-(if needed) and do "./animelist.py".
+To startup AnimeList you need 'cd' to the AnimeList directory and make "animelist.py" executable
+(if needed) and do "./animelist.py". A dialog will popup and ask about your login details.
+After you've done that it will load your list.

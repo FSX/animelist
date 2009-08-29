@@ -46,20 +46,21 @@ class Toolbar():
         quit.connect('clicked', self.al.quit)
 
     def on_refresh(self, widget):
-        self.al.lists.refresh_lists()
+        if self.al.config.no_user_defined == False:
+            self.al.lists.refresh_lists()
 
     def on_save(self, widget):
 
-        self.al.update_statusbar('Saving data to local cache...')
-        self.al.clear_statusbar(2000)
+        if self.al.config.no_user_defined == False:
+            self.al.update_statusbar('Saving data to local cache...')
+            self.al.clear_statusbar(2000)
 
-        from modules import utils
-        utils.cache_data(self.al.HOME + '/' + self.al.config.user['name'] + \
-            '_animelist.cpickle', self.al.lists.anime_data)
+            from modules import utils
+            utils.cache_data(self.al.HOME + '/' + self.al.config.settings['username'] + \
+                '_animelist.cpickle', self.al.lists.anime_data)
 
     def on_prefs(self, widget):
-        # TODO: Show preferences window.
-        print 'Show preferences window.'
+        self.al.config.preferences_dialog()
 
     def on_info(self, widget):
         # TODO: Show a new window with information about the selected anime.

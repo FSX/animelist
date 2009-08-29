@@ -4,7 +4,7 @@
 # modules/utils.py
 #
 # Copyright (c) 2009 Frank Smit (FSX)
-# License: GPL v3, see COPYING file for details
+# License: GPL v3, see the COPYING file for details
 # =============================================================================
 
 import cPickle
