@@ -7,6 +7,8 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
+import thread
+
 import gtk
 
 class Toolbar():
@@ -38,18 +40,18 @@ class Toolbar():
         self.bar.insert(quit, 10)
 
         # Events
-        refresh.connect('clicked', self.on_refresh)
-        save.connect('clicked', self.on_save)
-        info.connect('clicked', self.on_info)
-        prefs.connect('clicked', self.on_prefs)
-        about.connect('clicked', self.on_about)
+        refresh.connect('clicked', self._on_refresh)
+        save.connect('clicked', self._on_save)
+        info.connect('clicked', self._on_info)
+        prefs.connect('clicked', self._on_prefs)
+        about.connect('clicked', self._on_about)
         quit.connect('clicked', self.al.quit)
 
-    def on_refresh(self, widget):
+    def _on_refresh(self, widget):
         if self.al.config.no_user_defined == False:
-            self.al.lists.refresh_lists()
+            thread.start_new_thread(self.al.lists.create_rows, (True,))
 
-    def on_save(self, widget):
+    def _on_save(self, widget):
 
         if self.al.config.no_user_defined == False:
             self.al.update_statusbar('Saving data to local cache...')
@@ -59,14 +61,14 @@ class Toolbar():
             utils.cache_data(self.al.HOME + '/' + self.al.config.settings['username'] + \
                 '_animelist.cpickle', self.al.lists.anime_data)
 
-    def on_prefs(self, widget):
+    def _on_prefs(self, widget):
         self.al.config.preferences_dialog()
 
-    def on_info(self, widget):
+    def _on_info(self, widget):
         # TODO: Show a new window with information about the selected anime.
         print 'Show information/manual.'
 
-    def on_about(self, widget):
+    def _on_about(self, widget):
         about = gtk.AboutDialog()
         about.set_program_name(self.al.app_name)
         about.set_version(self.al.app_version)

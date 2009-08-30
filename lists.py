@@ -44,7 +44,7 @@ class Lists():
         # Tabs
         self.tabs = gtk.Notebook()
         self.tabs.set_tab_pos(gtk.POS_TOP)
-        self.tabs.connect('switch-page', self.update_current_tab)
+        self.tabs.connect('switch-page', self._update_current_tab)
 
         # Loop lists, boxes and tabs together
         for i in self.al.config.lists:
@@ -62,10 +62,10 @@ class Lists():
             self.create_columns(self.treeview[i], i)
 
             # Menu (events and menu items)
-            self.treeview[i].connect('button-press-event', self.show_menu, i)
+            self.treeview[i].connect('button-press-event', self._show_menu, i)
 
             self.move_to_item[i] = gtk.MenuItem(self.al.config.lists[i])
-            self.move_to_item[i].connect('activate', self.menu_move_row, i)
+            self.move_to_item[i].connect('activate', self._menu_move_row, i)
             move_row_submenu.append(self.move_to_item[i])
 
             # Create scrollbox
@@ -88,7 +88,7 @@ class Lists():
     #  "Move to" menu. Note: this method is also called when the tabs are
     #  created (at startup) (5 or 6 times).
     #
-    def update_current_tab(self, notebook, page, page_num):
+    def _update_current_tab(self, notebook, page, page_num):
 
         previous_tab = self.al.config.tab_numbers[self.current_tab_num]
         self.move_to_item[previous_tab].show()
@@ -102,7 +102,7 @@ class Lists():
     #  Displays the main popup menu on a button-press-event
     #  with options for the selected row in the list.
     #
-    def show_menu(self, treeview, event, list_id):
+    def _show_menu(self, treeview, event, list_id):
 
         if event.button != 3:  # Only on right click
             return False
@@ -121,7 +121,7 @@ class Lists():
     #
     #  Wrapper method for move_row()
     #
-    def menu_move_row(self, menuitem, dest_list):
+    def _menu_move_row(self, menuitem, dest_list):
 
         current_list = self.al.config.tab_numbers[self.current_tab_num]
         selection = self.treeview[current_list].get_selection()
@@ -162,28 +162,17 @@ class Lists():
             self.anime_data[anime_id][4],
             self.anime_data[anime_id][3])))
 
-
-    #
-    #  Re-download the xml list and update all the lists in the tabs
-    #
-    def refresh_lists(self):
-
-        for i in self.al.config.lists:
-            self.liststore[i].clear()
-
-        thread.start_new_thread(self.create_rows, (True,))
-
     #
     #  Convert numbers (1, 2, 3) to human readable text (TV, OVA, Movie)
     #
-    def cell_type_display(self, column, cell, model, iter):
+    def _cell_type_display(self, column, cell, model, iter):
         cell.set_property('text',
             self.al.config.types[int(model.get_value(iter, 2))])
 
     #
     #  Put "my watched episodes/total episodes" in column
     #
-    def cell_progress_display(self, column, cell, model, iter):
+    def _cell_progress_display(self, column, cell, model, iter):
 
         anime_id = int(model.get_value(iter, 0))
         episodes = self.anime_data[anime_id][6]
@@ -195,14 +184,14 @@ class Lists():
     #
     #  Validate given progress and update score cell, local cache and MAL
     #
-    def cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
+    def _cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
 
         editable.set_text(editable.get_text().split('/', 1)[0])
 
     #
     #  Validate given progress and update score cell, local cache and MAL
     #
-    def cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
+    def _cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
 
         anime_id = int(self.liststore[list_id][row][0])
         old_progress = int(self.anime_data[anime_id][5])
@@ -225,7 +214,7 @@ class Lists():
     #
     #  Validate given score and update score cell, local cache and MAL
     #
-    def cell_score_edited(self, cellrenderer, row, new_score, list_id):
+    def _cell_score_edited(self, cellrenderer, row, new_score, list_id):
 
         anime_id = int(self.liststore[list_id][row][0])
         old_score = self.liststore[list_id][row][4]
@@ -243,8 +232,9 @@ class Lists():
 
     #
     #  Update anime
+    #  data = (episodes, status, score)
     #
-    def _update_anime(self, id, data):
+    def update_anime(self, id, data):
 
         self.al.update_statusbar('Sending changes to MyAnimeList...')
 
@@ -297,6 +287,9 @@ class Lists():
             list_cache = self.al.mal.parse_list(xml_data)
             utils.cache_data(cache_filename, list_cache)
 
+        for i in self.al.config.lists:
+            self.liststore[i].clear()
+
         # Fill lists
         if not list_cache is None:
             self.anime_data = list_cache
@@ -334,18 +327,17 @@ class Lists():
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('Type', renderer, text=2)
         column.set_sort_column_id(2)
-        column.set_cell_data_func(renderer, self.cell_type_display)
+        column.set_cell_data_func(renderer, self._cell_type_display)
         treeview.append_column(column)
 
         # Progess
         renderer = gtk.CellRendererText()
         renderer.set_property('editable', True)
-        renderer.connect('editing-started', self.cell_progress_start_edit,
-            list_id)
-        renderer.connect('edited', self.cell_progress_edited, list_id)
+        renderer.connect('editing-started', self._cell_progress_start_edit, list_id)
+        renderer.connect('edited', self._cell_progress_edited, list_id)
         column = gtk.TreeViewColumn('Progress', renderer, text=3)
         column.set_sort_column_id(3)
-        column.set_cell_data_func(renderer, self.cell_progress_display)
+        column.set_cell_data_func(renderer, self._cell_progress_display)
         treeview.append_column(column)
 
         # Score
@@ -353,7 +345,7 @@ class Lists():
         renderer.set_property('editable', True)
         adjustment = gtk.Adjustment(0, 0, 10, 1)
         renderer.set_property('adjustment', adjustment)
-        renderer.connect('edited', self.cell_score_edited, list_id)
+        renderer.connect('edited', self._cell_score_edited, list_id)
         column = gtk.TreeViewColumn('Score', renderer, text=4)
         column.set_sort_column_id(4)
         treeview.append_column(column)

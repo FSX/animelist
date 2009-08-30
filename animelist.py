@@ -16,6 +16,7 @@ import config
 import toolbar
 import myanimelist
 import lists
+from modules.utils import cache_data
 
 gtk.gdk.threads_init()
 
@@ -114,8 +115,6 @@ class AnimeList():
     #  Terminates the application cleanly.
     #
     def quit(self, widget, data=None):
-
-        from modules.utils import cache_data
 
         if self.config.no_user_defined == False:
             cache_data(self.HOME + '/' + self.config.settings['username'] + \

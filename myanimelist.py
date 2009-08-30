@@ -28,18 +28,12 @@ class Mal():
     #
     def fetch_list(self):
 
-#         url = 'http://' + self.al.config.mal['host'] + '/malappinfo.php?u=' + \
-#             urllib.quote(self.al.config.settings['username']) + \
-#             '&status=all&type=anime'
-#         request  = urllib2.Request(url)
-#
-#         try:                      response = urllib2.urlopen(request)
-#         except urllib2.HTTPError: return False
-#         except urllib2.URLError:  return False
-#
-#         return response.read()
+        try:
+            response = self._request('/malappinfo.php?u=' + urllib.quote(self.al.config.settings['username']) + '&status=all&type=anime')
+        except (HttpRequestError, HttpStatusError):
+            return False
 
-        return self._request('/malappinfo.php?u=' + urllib.quote(self.al.config.settings['username']) + '&status=all&type=anime')
+        return response
 
     #
     #  Parse the xml data that contains the anime list from MAL
@@ -62,11 +56,7 @@ class Mal():
                     leaves[14].text,                   # 4 = Status
 
                     leaves[10].text,                   # 5 = Watched episodes
-                    leaves[4].text,                    # 6 = Episodes
-
-                    # Extra data
-                    leaves[9].text,                    # 7 = My ID
-                    leaves[8].text                     # 8 = Image
+                    leaves[4].text                     # 6 = Episodes
                     ]
 
         return parsed_list
@@ -163,25 +153,27 @@ class Mal():
         if ssl == True: connection = httplib.HTTPSConnection(self.al.config.mal['host'])
         else: connection = httplib.HTTPConnection(self.al.config.mal['host'])
 
-        request = connection.request(method.upper(), '/' + path, params, headers)
-        response = connection.getresponse()
-        response_read = response.read()
+        try:
+            request = connection.request(method.upper(), '/' + path, params, headers)
 
-        connection.close()
+            response = connection.getresponse()
 
-        return response_read
+            if response.status != httplib.OK:
+                connection.close()
+                raise HttpStatusError()
 
+            response_read = response.read()
+            connection.close()
 
+            return response_read
+        except:
+            raise HttpRequestError()
 
+#
+#  Exceptions
+#
+class HttpRequestError(Exception):
+    pass
 
-
-
-
-
-
-
-
-
-
-
-
+class HttpStatusError(Exception):
+    pass
