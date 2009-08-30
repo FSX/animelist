@@ -23,7 +23,8 @@ class Config():
         self.settings = {
             'username': '',
             'password': '',
-            'startup_refresh': True
+            'startup_refresh': True,
+            'systray': True
             }
 
         # Load settings
@@ -77,6 +78,7 @@ class Config():
             )
 
         frames = (
+            gtk.Label('Settings marked with a * will take effect\nwhen the application if restarted.'),
             self._generate_box(
                 'User details', {
                     'username': ('Username', 'entry'),
@@ -85,13 +87,17 @@ class Config():
                 'Options', {
                     'startup_refresh': (
                         'Sync list with MyAnimeList on startup',
-                        'checkbox')})
+                        'checkbox'),
+                    'systray': (
+                        'Enable system tray icon *',
+                        'checkbox'),
+                        })
             )
 
         # Main table
-        table = gtk.Table(2, 1)
-        table.set_row_spacings(5)
-        table.set_col_spacings(5)
+        table = gtk.Table(3, 1)
+        table.set_row_spacings(10)
+        table.set_col_spacings(10)
 
         for i, frame in enumerate(frames):
             table.attach(frame, 0, 1, i, i+1)
@@ -106,6 +112,8 @@ class Config():
         dialog.vbox.pack_start(hbox, False, True, 5)
 
         if dialog.run() == gtk.RESPONSE_ACCEPT:
+
+            # Update settings in self.settings
             for field_id, widget in self.fields.iteritems():
 
                 widget_type = widget.get_name()
@@ -115,8 +123,10 @@ class Config():
                 elif widget_type == 'GtkCheckButton':
                     self.settings[field_id] = widget.get_active()
 
+            # Save settings to settings file
             self._save_settings()
 
+            # When user details are entered for the first time
             if self.no_user_defined == True:
                 self.no_user_defined = False
 
@@ -144,7 +154,7 @@ class Config():
                 if field[1] == 'secret_entry':
                     self.fields[field_id].set_visibility(False)
 
-                if self.settings[field_id]:
+                if field_id in self.settings:
                     self.fields[field_id].set_text(self.settings[field_id])
 
                 table.attach(gtk.Label(field[0]), 0, 1, count, count+1)
@@ -152,7 +162,7 @@ class Config():
             elif field[1] == 'checkbox':
                 self.fields[field_id] = gtk.CheckButton(field[0])
 
-                if self.settings[field_id] and self.settings[field_id] == True:
+                if field_id in self.settings and self.settings[field_id] == True:
                     self.fields[field_id].set_active(True)
 
                 table.attach(self.fields[field_id], 0, 1, count, count+1)

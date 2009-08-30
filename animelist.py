@@ -24,6 +24,7 @@ class AnimeList():
     app_name = 'AnimeList'
     app_version = '0.1-dev'
     tasks = []
+    position = (0, 0)
 
     def __init__(self):
 
@@ -43,6 +44,11 @@ class AnimeList():
         self.mal = myanimelist.Mal(self)
         self.lists = lists.Lists(self)
 
+        # Only load systray module when the system is enabled
+        if 'systray' in self.config.settings and self.config.settings['systray'] == True:
+            import systray
+            self.systray = systray.Systray(self)
+
         # Put everything together
         vbox = gtk.VBox(False, 0)
         vbox.pack_start(self.toolbar.bar, False, False, 0)
@@ -50,6 +56,7 @@ class AnimeList():
         vbox.pack_end(self.statusbar, False, False, 0)
 
         # Events
+        self.window.connect('configure-event', self._store_position)
         self.window.connect('destroy', self.quit)
 
         # Create settings folder in home directory
@@ -93,6 +100,12 @@ class AnimeList():
             return gtk.gdk.pixbuf_new_from_file(icon)
 
         return None
+
+    #
+    #  Store the position of the window when it's moved or resized
+    #
+    def _store_position(self, event, position):
+        self.position = (position.x, position.y)
 
     #
     #  Terminates the application cleanly.

@@ -1,6 +1,5 @@
 TODO for AnimeList
 
- - About dialog.
  - Search system (dialog, search result parsing, etc.).
    - Add anime via search dialog.
  - Save tasks when they could not be executed at shutdown.
