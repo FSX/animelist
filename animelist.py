@@ -32,7 +32,6 @@ class AnimeList():
         self.window.set_default_size(800, 600)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.set_title('AnimeList')
-
         self.window.set_icon(self.get_icon('./pixmaps/animelist_logo_32.png'))
 
         self.statusbar = gtk.Statusbar()
@@ -63,9 +62,13 @@ class AnimeList():
         if not os.access(self.HOME, os.F_OK | os.W_OK):
             os.mkdir(self.HOME)
 
-        # Show
+        # Show everything
         self.window.add(vbox)
         self.window.show_all()
+
+        # Show preferences window when no user has been defined
+        if self.config.no_user_defined == True:
+            self.config.preferences_dialog()
 
         gtk.main()
 

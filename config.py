@@ -30,9 +30,10 @@ class Config():
         # Load settings
         if os.access(self.al.HOME + '/settings.cfg', os.F_OK | os.W_OK):
             self._load_settings()
-        else:
+
+        if not ('username' in self.settings and 'password' in self.settings and\
+            len(self.settings['username']) > 0 and len(self.settings['password']) > 0):
             self.no_user_defined = True
-            self.preferences_dialog()
 
         self.lists = {
             1: 'Watching',
@@ -77,7 +78,7 @@ class Config():
             gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
             )
 
-        frames = (
+        objects = (
             gtk.Label('Settings marked with a * will take effect\nwhen the application if restarted.'),
             self._generate_box(
                 'User details', {
@@ -95,12 +96,12 @@ class Config():
             )
 
         # Main table
-        table = gtk.Table(3, 1)
+        table = gtk.Table(len(objects), 1)
         table.set_row_spacings(10)
         table.set_col_spacings(10)
 
-        for i, frame in enumerate(frames):
-            table.attach(frame, 0, 1, i, i+1)
+        for i, obj in enumerate(objects):
+            table.attach(obj, 0, 1, i, i+1)
 
         # Boxes for padding
         hbox = gtk.HBox()
@@ -179,23 +180,18 @@ class Config():
 
         return frame
 
+    #
+    #  Save a piclked, base64 encoded version of self.settings in settings.cfg
+    #
     def _save_settings(self):
 
         with open(self.al.HOME + '/settings.cfg', 'w') as f:
             f.write(base64.b64encode(cPickle.dumps(self.settings)))
 
+    #
+    #  Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings
+    #
     def _load_settings(self):
 
         with open(self.al.HOME + '/settings.cfg', 'r') as f:
             self.settings = cPickle.loads(base64.b64decode(f.read()))
-
-
-
-
-
-
-
-
-
-
-

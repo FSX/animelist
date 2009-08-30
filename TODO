@@ -11,3 +11,8 @@ TODO for AnimeList
  - Make it work on Windows. The usage of threads is probably preventing
    it to work correctly on Windows.
  - Clean up code.
+
+Maybe:
+ - Support for manga list. I don't use MAL for keeping track of manga so
+   I'm not sure if this feature is going to be implemented. It shouldn't
+   be too hard to do though.
