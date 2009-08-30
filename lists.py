@@ -236,7 +236,7 @@ class Lists():
     #
     def update_anime(self, id, data):
 
-        self.al.update_statusbar('Sending changes to MyAnimeList...')
+        self.al.sb.update('Sending changes to MyAnimeList...')
 
         mal_response = self.al.mal.update_anime(id,
             (data[0], data[1], data[2]))
@@ -246,12 +246,12 @@ class Lists():
         if mal_response.strip() != 'Updated':
             self.tasks.append({'update': (id, data)})
 
-            self.al.update_statusbar('Could not send changes to MyAnimeList. Changes will be send when the program exits.')
-            self.al.clear_statusbar(5000)
+            self.al.sb.update('Could not send changes to MyAnimeList. Changes will be send when the program exits.')
+            self.al.sb.clear(5000)
 
             return False
 
-        self.al.clear_statusbar(1000)
+        self.al.sb.clear(1000)
 
         return True
 
@@ -275,20 +275,20 @@ class Lists():
         if refresh == True or invalid_cache == True:
 
             if invalid_cache == True:
-                self.al.update_statusbar('Cache is not valid. Syncing with MyAnimeList...')
+                self.al.sb.update('Cache is not valid. Syncing with MyAnimeList...')
             else:
-                self.al.update_statusbar('Syncing with MyAnimeList...')
+                self.al.sb.update('Syncing with MyAnimeList...')
 
             xml_data = self.al.mal.fetch_list()
             if xml_data == False:
-                self.al.update_statusbar('Data could not be downloaded from MyAnimelist.')
+                self.al.sb.update('Data could not be downloaded from MyAnimelist.')
                 return False
 
             list_cache = self.al.mal.parse_list(xml_data)
             utils.cache_data(cache_filename, list_cache)
 
-        for i in self.al.config.lists:
-            self.liststore[i].clear()
+            for i in self.al.config.lists:
+                self.liststore[i].clear()
 
         # Fill lists
         if not list_cache is None:
@@ -302,7 +302,7 @@ class Lists():
                     v[3]  # Score
                     ))
 
-        self.al.clear_statusbar(1000)
+        self.al.sb.clear(1000)
 
     #
     #  Create columns

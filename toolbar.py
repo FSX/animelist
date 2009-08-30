@@ -54,8 +54,8 @@ class Toolbar():
     def _on_save(self, widget):
 
         if self.al.config.no_user_defined == False:
-            self.al.update_statusbar('Saving data to local cache...')
-            self.al.clear_statusbar(2000)
+            self.al.sb.update('Saving data to local cache...')
+            self.al.sb.clear(2000)
 
             from modules import utils
             utils.cache_data(self.al.HOME + '/' + self.al.config.settings['username'] + \

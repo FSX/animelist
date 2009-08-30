@@ -7,12 +7,12 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import os
+import os, sys
 
 import gtk
-import gobject
 
 import config
+import statusbar
 import toolbar
 import myanimelist
 import lists
@@ -35,11 +35,9 @@ class AnimeList():
         self.window.set_title('AnimeList')
         self.window.set_icon(self.get_icon('./pixmaps/animelist_logo_32.png'))
 
-        self.statusbar = gtk.Statusbar()
-        self.statusbar_message_id = None
-
         # Classes
         self.config = config.Config(self)
+        self.sb = statusbar.Statusbar(self)
         self.toolbar = toolbar.Toolbar(self)
         self.mal = myanimelist.Mal(self)
         self.lists = lists.Lists(self)
@@ -53,7 +51,7 @@ class AnimeList():
         vbox = gtk.VBox(False, 0)
         vbox.pack_start(self.toolbar.bar, False, False, 0)
         vbox.pack_start(self.lists.tabs, True, True, 0)
-        vbox.pack_end(self.statusbar, False, False, 0)
+        vbox.pack_end(self.sb.statusbar, False, False, 0)
 
         # Events
         self.window.connect('configure-event', self._store_position)
@@ -72,28 +70,6 @@ class AnimeList():
             self.config.preferences_dialog()
 
         gtk.main()
-
-    #
-    #  Set/Update/Change statusbar text
-    #
-    def update_statusbar(self, text):
-
-        if not self.statusbar_message_id is None:
-            self.statusbar.remove(0, self.statusbar_message_id)
-
-        self.statusbar_message_id = self.statusbar.push(0, text)
-
-    #
-    #  Clear statusbar
-    #
-    def clear_statusbar(self, remove_timeout=None):
-
-        if not self.statusbar_message_id is None:
-            if not remove_timeout is None:
-                gobject.timeout_add(remove_timeout, self.statusbar.remove, 0,
-                    self.statusbar_message_id)
-            else:
-                self.statusbar.remove(0, self.statusbar_message_id)
 
     #
     #  Returns a gtk.gdk.Pixbuf
