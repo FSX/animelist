@@ -13,7 +13,7 @@ import urllib
 #import urllib2
 import httplib
 import base64
-from xml.dom.minidom import parseString
+import xml.etree.cElementTree as et
 
 from modules import utils
 
@@ -47,27 +47,27 @@ class Mal():
     def parse_list(self, xml_data):
 
         parsed_list = {}
-        dom         = parseString(xml_data)
-        dom_list    = dom.getElementsByTagName('anime')
+        tree = et.fromstring(xml_data)
+        branches = tree.getchildren()
 
-        # Put data in the list
-        for item in dom_list:
-            parsed_list[int(item.getElementsByTagName('series_animedb_id')[0].childNodes[0].data)] = [
-                item.getElementsByTagName('series_animedb_id')[0].childNodes[0].data,               # 0 = Anime ID
-                utils.htmldecode(item.getElementsByTagName('series_title')[0].childNodes[0].data),  # 1 = Title
-                item.getElementsByTagName('series_type')[0].childNodes[0].data,                     # 2 = Type
-                item.getElementsByTagName('my_score')[0].childNodes[0].data,                        # 3 = Score
-                item.getElementsByTagName('my_status')[0].childNodes[0].data,                       # 4 = Status
+        for branch in branches:
+            if branch.tag == 'anime':
 
-                item.getElementsByTagName('my_watched_episodes')[0].childNodes[0].data,             # 5 = Watched episodes
-                item.getElementsByTagName('series_episodes')[0].childNodes[0].data,                 # 6 = Episodes
+                leaves = branch.getchildren()
+                parsed_list[int(leaves[0].text)] = [
+                    leaves[0].text,                    # 0 = Anime ID
+                    utils.htmldecode(leaves[1].text),  # 1 = Title
+                    leaves[3].text,                    # 2 = Type
+                    leaves[13].text,                   # 3 = Score
+                    leaves[14].text,                   # 4 = Status
 
-                # Extra data
-                item.getElementsByTagName('my_id')[0].childNodes[0].data,                           # 7 = My ID
-                item.getElementsByTagName('series_image')[0].childNodes[0].data                     # 8 = Image
-                ]
+                    leaves[10].text,                   # 5 = Watched episodes
+                    leaves[4].text,                    # 6 = Episodes
 
-        dom.unlink()
+                    # Extra data
+                    leaves[9].text,                    # 7 = My ID
+                    leaves[8].text                     # 8 = Image
+                    ]
 
         return parsed_list
 
