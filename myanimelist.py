@@ -13,9 +13,7 @@ import sys
 import urllib
 import httplib
 import base64
-import xml.etree.cElementTree as et
-import htmlentitydefs
-import re
+from lxml import etree as et
 
 from modules import utils
 
@@ -108,14 +106,8 @@ class Mal():
         except (HttpRequestError, HttpStatusError):
             return False
 
-        # Convert entities to prevent cElementTree from spitting out erros
-        response = unquotehtml(response)
-
-        #try:
-        tree = et.fromstring(response)
-        #except SyntaxError:
-        #    print response
-        #    return False
+        parser = et.XMLParser(recover=True)
+        tree = et.fromstring(response, parser)
 
         parsed_list = {}
         branches = tree.getchildren()
@@ -197,30 +189,6 @@ class Mal():
             return response_read
         except:
             raise HttpRequestError()
-
-#
-#  Convert a HTML entity into normal string (ISO-8859-1
-#  http://groups.google.com/group/comp.lang.python/browse_thread/thread/7f96723282376f8c/
-#
-def convertentity(m):
-
-    if m.group(1) == '#':
-        try:
-            return chr(int(m.group(2)))
-        except ValueError:
-            return '&#%s;' % m.group(2)
-    try:
-        return htmlentitydefs.entitydefs[m.group(2)]
-    except KeyError:
-        return '&%s;' % m.group(2)
-
-#
-#  Convert a HTML quoted string into normal string (ISO-8859-1).
-#  Works with &#XX; and with &nbsp; &gt; etc.
-#  http://groups.google.com/group/comp.lang.python/browse_thread/thread/7f96723282376f8c/
-#
-def unquotehtml(s):
-    return re.sub(r'&(#?)(.+?);', convertentity, s)
 
 #
 #  Exceptions

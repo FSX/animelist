@@ -57,7 +57,6 @@ class Lists():
             self.treeview[i].set_search_column(1)
             self.treeview[i].set_tooltip_column(1)
             self.treeview[i].columns_autosize()
-            self.treeview[i].set_reorderable(True)
 
             self.create_columns(self.treeview[i], i)
 
