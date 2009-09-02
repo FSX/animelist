@@ -21,8 +21,8 @@ class Toolbar():
         refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
         save = gtk.ToolButton(gtk.STOCK_SAVE)
         info = gtk.ToolButton(gtk.STOCK_INFO)
-        find = gtk.ToolButton(gtk.STOCK_FIND)
-        media = gtk.ToolButton(gtk.STOCK_MEDIA_PLAY)
+        search = gtk.ToolButton(gtk.STOCK_FIND)
+        # media = gtk.ToolButton(gtk.STOCK_MEDIA_PLAY) # For future use
         prefs = gtk.ToolButton(gtk.STOCK_PREFERENCES)
         about = gtk.ToolButton(gtk.STOCK_ABOUT)
         quit = gtk.ToolButton(gtk.STOCK_QUIT)
@@ -31,18 +31,18 @@ class Toolbar():
         self.bar.insert(save, 1)
         self.bar.insert(gtk.SeparatorToolItem(), 2)
         self.bar.insert(info, 3)
-        self.bar.insert(find, 4)
-        self.bar.insert(media, 5)
-        self.bar.insert(gtk.SeparatorToolItem(), 6)
-        self.bar.insert(prefs, 7)
-        self.bar.insert(gtk.SeparatorToolItem(), 8)
-        self.bar.insert(about, 9)
-        self.bar.insert(quit, 10)
+        self.bar.insert(search, 4)
+        self.bar.insert(gtk.SeparatorToolItem(), 5)
+        self.bar.insert(prefs, 6)
+        self.bar.insert(gtk.SeparatorToolItem(), 7)
+        self.bar.insert(about, 8)
+        self.bar.insert(quit, 9)
 
         # Events
         refresh.connect('clicked', self._on_refresh)
         save.connect('clicked', self._on_save)
         info.connect('clicked', self._on_info)
+        search.connect('clicked', self._on_search)
         prefs.connect('clicked', self._on_prefs)
         about.connect('clicked', self._on_about)
         quit.connect('clicked', self.al.quit)
@@ -65,8 +65,10 @@ class Toolbar():
         self.al.config.preferences_dialog()
 
     def _on_info(self, widget):
-        # TODO: Show a new window with information about the selected anime.
-        print 'Show information/manual.'
+        self.al.switch_view(1)
+
+    def _on_search(self, widget):
+        self.al.switch_view(2)
 
     def _on_about(self, widget):
         about = gtk.AboutDialog()

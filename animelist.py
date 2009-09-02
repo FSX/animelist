@@ -7,7 +7,8 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import os, sys
+import os
+import sys
 
 import gtk
 
@@ -16,6 +17,7 @@ import statusbar
 import toolbar
 import myanimelist
 import lists
+import search
 from modules.utils import cache_data
 
 gtk.gdk.threads_init()
@@ -26,6 +28,7 @@ class AnimeList():
     app_version = '0.1-dev'
     tasks = []
     position = (0, 0)
+    current_view = 1
 
     def __init__(self):
 
@@ -41,6 +44,7 @@ class AnimeList():
         self.toolbar = toolbar.Toolbar(self)
         self.mal = myanimelist.Mal(self)
         self.lists = lists.Lists(self)
+        self.search = search.Search(self)
 
         # Only load systray module when the system is enabled
         if 'systray' in self.config.settings and self.config.settings['systray'] == True:
@@ -51,6 +55,7 @@ class AnimeList():
         vbox = gtk.VBox(False, 0)
         vbox.pack_start(self.toolbar.bar, False, False, 0)
         vbox.pack_start(self.lists.tabs, True, True, 0)
+        vbox.pack_start(self.search.box, True, True, 0)
         vbox.pack_end(self.sb.statusbar, False, False, 0)
 
         # Events
@@ -65,11 +70,30 @@ class AnimeList():
         self.window.add(vbox)
         self.window.show_all()
 
+        # Hide search
+        #self.lists.tabs.hide()
+        self.search.box.hide()
+
         # Show preferences window when no user has been defined
         if self.config.no_user_defined == True:
             self.config.preferences_dialog()
 
         gtk.main()
+
+    #
+    #  Switch view (list to search or search to list)\
+    #
+    def switch_view(self, view):
+
+        if view in (1, 2):
+            if view == 1 and self.current_view == 2:
+                self.search.box.hide()
+                self.lists.tabs.show()
+            elif view == 2 and self.current_view == 1:
+                self.lists.tabs.hide()
+                self.search.box.show()
+
+            self.current_view = view
 
     #
     #  Returns a gtk.gdk.Pixbuf

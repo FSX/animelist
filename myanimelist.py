@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # =============================================================================
 # myanimelist.py
@@ -10,18 +11,17 @@
 import os
 import sys
 import urllib
-#import urllib2
 import httplib
 import base64
 import xml.etree.cElementTree as et
+import htmlentitydefs
+import re
 
 from modules import utils
 
 class Mal():
     def __init__(self, al):
         self.al = al
-
-        #self.search_anime('bleach')
 
     #
     #  Fetch/Download aime list from MAL
@@ -103,9 +103,38 @@ class Mal():
     #
     def search_anime(self, search_query):
 
-        # TODO: Parse xml
-        path = 'api/anime/search.xml?q=' + urllib.quote(search_query)
-        return self._request(path, authenticate=True)
+        try:
+            response = self._request('api/anime/search.xml?q=' + urllib.quote(search_query), authenticate=True)
+        except (HttpRequestError, HttpStatusError):
+            return False
+
+        # Convert entities to prevent cElementTree from spitting out erros
+        response = unquotehtml(response)
+
+        #try:
+        tree = et.fromstring(response)
+        #except SyntaxError:
+        #    print response
+        #    return False
+
+        parsed_list = {}
+        branches = tree.getchildren()
+
+        for branch in branches:
+            leaves = branch.getchildren()
+            parsed_list[int(leaves[0].text)] = [
+                leaves[0].text,                    # 0 = Anime ID
+                utils.htmldecode(leaves[1].text),  # 1 = Title
+                leaves[6].text,                    # 2 = Type
+                leaves[4].text,                    # 3 = Episodes
+                leaves[5].text                     # 4 = Score
+
+                #leaves[14].text,                   # 4 = Status
+                #leaves[10].text,                   # 5 = Watched episodes
+                #leaves[4].text                     # 6 = Episodes
+                ]
+
+        return parsed_list
 
     #
     #  Make xml values
@@ -168,6 +197,30 @@ class Mal():
             return response_read
         except:
             raise HttpRequestError()
+
+#
+#  Convert a HTML entity into normal string (ISO-8859-1
+#  http://groups.google.com/group/comp.lang.python/browse_thread/thread/7f96723282376f8c/
+#
+def convertentity(m):
+
+    if m.group(1) == '#':
+        try:
+            return chr(int(m.group(2)))
+        except ValueError:
+            return '&#%s;' % m.group(2)
+    try:
+        return htmlentitydefs.entitydefs[m.group(2)]
+    except KeyError:
+        return '&%s;' % m.group(2)
+
+#
+#  Convert a HTML quoted string into normal string (ISO-8859-1).
+#  Works with &#XX; and with &nbsp; &gt; etc.
+#  http://groups.google.com/group/comp.lang.python/browse_thread/thread/7f96723282376f8c/
+#
+def unquotehtml(s):
+    return re.sub(r'&(#?)(.+?);', convertentity, s)
 
 #
 #  Exceptions

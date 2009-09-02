@@ -1,6 +1,6 @@
 AnimeList is still under development and not everything works yet and stuff can be bugged.
 Only tested on Linux (Arch linux), does not work on Windows (XP) (yet) and Mac (OSX) has
-not bee tested yet.
+not been tested yet.
 
 To startup AnimeList you need 'cd' to the AnimeList directory and make "animelist.py" executable
 (if needed) and do "./animelist.py". A dialog will popup and ask about your login details.
