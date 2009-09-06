@@ -336,7 +336,8 @@ class Anime(gtk.Notebook):
             episodes = self.data[anime_id]['episodes']
             if episodes == '0': episodes = '?'
 
-            self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
+            # This isn't needed because __cell_progress_display already does this
+            # self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
             self.data[anime_id]['watched_episodes'] = unicode(new_progress)
 
             # Update MAL

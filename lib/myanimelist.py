@@ -55,6 +55,34 @@ class Anime():
 
         return data
 
+    #
+    #  Fetch/Download anime list from MAL
+    #
+    def search(self, query):
+
+        try:
+            response = self.request.do(path='anime/search?q=%s' % urllib.quote(query), authenticate=True)
+        except (HttpRequestError, HttpStatusError):
+            return False
+
+        # All the data goes into a new dict to keep because the API
+        # doesn't provide all the information yet.
+        response_data = json.loads(response)
+        data = {}
+
+        for e in response_data:
+                data[int(e['id'])] = {
+                    'id':               e['id'],
+                    'title':            utils.htmldecode(e['title']),
+                    'type':             e['type'],             # TV, Movie, OVA, ONA, Special, Music
+                    'episodes':         e['episodes'],
+                    'status':           e['status'],           # finished airing, currently airing, not yet aired
+                    'members_score':    e['members_score']
+                    }
+
+        response_data = None
+
+        return data
 
     #
     #  Add anime to list. data = (status, episodes, score)
@@ -118,6 +146,8 @@ class Request():
         try:
             request = connection.request(method.upper(), '/' + path, params, headers)
             response = connection.getresponse()
+
+            # print response.status
 
             # Raise an exception if the status code is something else then 200
             if response.status != httplib.OK:

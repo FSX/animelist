@@ -1,6 +1,9 @@
 TODO for AnimeList
 
- - Search section.
+- = Still have to be done.
+* = In process.
+
+ * Search section.
  - Code cleanup and doc strings.
  - Windows support: AnimeList currently doesn't work on Windows
    (tested on Windows XP), because threads are used. I (Frank)
@@ -13,3 +16,4 @@ TODO for AnimeList
 
 Maybe
  - Media player detection.
+ - Torrent section.

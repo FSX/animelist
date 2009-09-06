@@ -65,10 +65,12 @@ class Toolbar(gtk.Toolbar):
     def __on_anime(self, widget):
         self.buttons['search'].set_sensitive(True)
         self.buttons['anime'].set_sensitive(False)
+        self.al.switch_section(1)
 
     def __on_search(self, widget):
         self.buttons['anime'].set_sensitive(True)
         self.buttons['search'].set_sensitive(False)
+        self.al.switch_section(2)
 
     def __on_about(self, widget):
         about = gtk.AboutDialog()

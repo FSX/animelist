@@ -54,11 +54,14 @@ class AnimeList():
         # Put everything together
         vbox = gtk.VBox(False, 0)
         vbox.pack_start(self.toolbar, False, False, 0)
+        vbox.pack_start(self.search, True, True, 0)
         vbox.pack_start(self.anime, True, True, 0)
         vbox.pack_end(self.statusbar, False, False, 0)
 
         self.window.add(vbox)
         self.window.show_all()
+
+        self.search.hide()
 
         # Events
         self.window.connect('configure-event', self.__store_position)
@@ -77,13 +80,15 @@ class AnimeList():
     #
     def switch_section(self, id):
 
-        if id in (1, 3):
+        if id in (1, 2):
             if id == 1 and self.current_section == 2:
-                pass
-            elif id == 2 and self.current_section == 3:
-                pass
+                self.search.hide()
+                self.anime.show()
+            elif id == 2 and self.current_section == 1:
+                self.anime.hide()
+                self.search.show()
 
-            self.current = name
+            self.current_section = id
 
     #
     #  Returns a gtk.gdk.Pixbuf
