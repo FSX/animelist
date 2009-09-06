@@ -10,13 +10,12 @@
 import gtk
 import gobject
 
-class Statusbar():
+class Statusbar(gtk.Statusbar):
 
     def __init__(self, al):
 
-        self.al = al
-
-        self.statusbar = gtk.Statusbar()
+        # self.al = al # Is not needed in this class
+        gtk.Statusbar.__init__(self)
         self.statusbar_message_id = None
 
     #
@@ -25,9 +24,9 @@ class Statusbar():
     def update(self, text):
 
         if not self.statusbar_message_id is None:
-            self.statusbar.remove(0, self.statusbar_message_id)
+            self.remove(0, self.statusbar_message_id)
 
-        self.statusbar_message_id = self.statusbar.push(0, text)
+        self.statusbar_message_id = self.push(0, text)
 
     #
     #  Clear statusbar
@@ -36,7 +35,7 @@ class Statusbar():
 
         if not self.statusbar_message_id is None:
             if not remove_timeout is None:
-                gobject.timeout_add(remove_timeout, self.statusbar.remove, 0,
+                gobject.timeout_add(remove_timeout, self.remove, 0,
                     self.statusbar_message_id)
             else:
-                self.statusbar.remove(0, self.statusbar_message_id)
+                self.remove(0, self.statusbar_message_id)

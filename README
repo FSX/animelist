@@ -2,8 +2,6 @@ AnimeList is still under development and not everything works yet and stuff can 
 Only tested on Linux (Arch linux), does not work on Windows (XP) (yet) and Mac (OSX) has
 not been tested yet.
 
-There's one depency: python-lxml.
-
 To startup AnimeList you need 'cd' to the AnimeList directory and make "animelist.py" executable
 (if needed) and do "./animelist.py". A dialog will popup and ask about your login details.
 After you've done that it will load your list.

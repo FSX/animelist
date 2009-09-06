@@ -2,16 +2,13 @@ TODO for AnimeList
 
  X Search system (dialog, search result parsing, etc.).
    - Add anime via search dialog.
- - Save tasks when they could not be executed at shutdown.
- - Execute tasks at shutdown or startup.
  - lists.py
-   - Actions for "Details" and "Delete" items in the popup menu.
+   - Actions for "Details" item in the popup menu.
  - Media player detection (for Mplayer etc.) (+GUI).
  - Proper error handling.
  - Make it work on Windows. The usage of threads is probably preventing
    it to work correctly on Windows.
  - Clean up code.
- - Resolve/cleanup HTML entities in XML.
 
 Maybe:
  - Support for manga list. I don't use MAL for keeping track of manga so

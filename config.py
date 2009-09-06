@@ -14,6 +14,7 @@ import cPickle
 import gtk
 
 class Config():
+
     def __init__(self, al):
 
         self.al = al
@@ -29,39 +30,41 @@ class Config():
 
         # Load settings
         if os.access(self.al.HOME + '/settings.cfg', os.F_OK | os.W_OK):
-            self._load_settings()
+            self.__load_settings()
 
-        if not ('username' in self.settings and 'password' in self.settings and\
-            len(self.settings['username']) > 0 and len(self.settings['password']) > 0):
+        if not (('username' in self.settings and 'password' in self.settings) or\
+            (len(self.settings['username']) > 0 and len(self.settings['password'])) > 0):
             self.no_user_defined = True
 
-        self.lists = {
-            1: 'Watching',
-            2: 'Completed',
-            3: 'On-hold',
-            4: 'Dropped',
-            6: 'Plan to watch'
+        # Tab number -> watched status
+        self.status = (
+            'watching',
+            'completed',
+            'on-hold',
+            'dropped',
+            'plan to watch'
+            )
+
+        # Watched status -> tab number
+        self.rstatus = {
+            'watching':      0,
+            'completed':     1,
+            'on-hold':       2,
+            'dropped':       3,
+            'plan to watch': 4
             }
 
-        self.tab_numbers = {
-            0: 1,
-            1: 2,
-            2: 3,
-            3: 4,
-            4: 6
+        # Color status
+        self.cstatus = {
+            'finished airing':  gtk.gdk.Color('#50ce18'), # Green
+            'currently airing': gtk.gdk.Color('#1173e2'), # Bright/Light blue
+            'not yet aired':    gtk.gdk.Color('#e20d0d')  # Red
             }
 
-        self.types = {
-            1: 'TV',
-            2: 'OVA',
-            3: 'Movie',
-            4: 'Special',
-            5: 'ONA',
-            6: 'Music'
-            }
-
-        self.mal = {
-            'host': 'myanimelist.net'
+        # API settings
+        self.api = {
+            'host': 'mal-api.com',
+            'user_agent': '%s:%s' % (self.al.name, self.al.version)
             }
 
     #
@@ -69,22 +72,24 @@ class Config():
     #
     def preferences_dialog(self):
 
+        # Field (entry, checknutton) objects are saved in this variable
         self.fields = {}
 
+        # Dialog flags and buttons
         flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
-
         buttons = (
             gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
             gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
             )
 
+        # Objects (fields, text, frames) that are displayed in the prefs dialog
         objects = (
-            gtk.Label('Settings marked with a * will take effect\nwhen the application if restarted.'),
-            self._generate_box(
+            gtk.Label('Settings marked with a * will take effect after\nthe application has been restarted.'),
+            self.__generate_box(
                 'User details', {
                     'username': ('Username', 'entry'),
                     'password': ('Password', 'secret_entry')}),
-            self._generate_box(
+            self.__generate_box(
                 'Options', {
                     'startup_refresh': (
                         'Sync list with MyAnimeList on startup',
@@ -108,6 +113,7 @@ class Config():
         hbox.pack_start(table, False, True, 5)
         hbox.show_all()
 
+        # Create dialog
         dialog = gtk.Dialog('Preferences', self.al.window, flags, buttons)
         dialog.set_default_response(gtk.RESPONSE_ACCEPT)
         dialog.vbox.pack_start(hbox, False, True, 5)
@@ -125,10 +131,10 @@ class Config():
                     self.settings[field_id] = widget.get_active()
 
             # Save settings to settings file
-            self._save_settings()
+            self.__save_settings()
 
-            # When user details are entered for the first time
-            if self.no_user_defined == True:
+            # Check if user details are entered
+            if len(self.settings['username']) > 0 and len(self.settings['password']) > 0:
                 self.no_user_defined = False
 
         dialog.destroy()
@@ -138,7 +144,7 @@ class Config():
     #  All field objects are saved in self.fields (dict)
     #  Note: only support for gtk.Entry and gtk.CheckButton at this moment
     #
-    def _generate_box(self, name, fields):
+    def __generate_box(self, name, fields):
 
         frame = gtk.Frame(name)
         table = gtk.Table(2, 2)
@@ -183,7 +189,7 @@ class Config():
     #
     #  Save a piclked, base64 encoded version of self.settings in settings.cfg
     #
-    def _save_settings(self):
+    def __save_settings(self):
 
         with open(self.al.HOME + '/settings.cfg', 'w') as f:
             f.write(base64.b64encode(cPickle.dumps(self.settings)))
@@ -191,7 +197,7 @@ class Config():
     #
     #  Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings
     #
-    def _load_settings(self):
+    def __load_settings(self):
 
         with open(self.al.HOME + '/settings.cfg', 'r') as f:
             self.settings = cPickle.loads(base64.b64decode(f.read()))
