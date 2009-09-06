@@ -100,7 +100,15 @@ class Search(gtk.VBox):
     #  Get text from text field and search
     #
     def __on_search(self, button):
-        utils.sthread(self.__process_search, (self.search_entry.get_text(),))
+
+        query = self.search_entry.get_text().strip()
+
+        if len(query) < 3:
+            self.al.statusbar.update('Please enter a longer search query.')
+            self.search_entry.grab_focus()
+            return False
+
+        utils.sthread(self.__process_search, (query,))
 
     #
     #  Send request and fill the list
@@ -119,6 +127,7 @@ class Search(gtk.VBox):
             self.al.statusbar.update('Search failed. Please try again later.')
             self.search_entry.set_sensitive(True)
             self.search_button.set_sensitive(True)
+            self.search_entry.grab_focus()
             return False
 
         # Fill lists
@@ -142,6 +151,7 @@ class Search(gtk.VBox):
 
         self.search_entry.set_sensitive(True)
         self.search_button.set_sensitive(True)
+        self.search_entry.grab_focus()
 
     #
     #  Set background for status column
