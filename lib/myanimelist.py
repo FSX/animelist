@@ -85,10 +85,23 @@ class Anime():
         return data
 
     #
-    #  Add anime to list. data = (status, episodes, score)
+    #  Add anime to list. params = (id, status, episodes, score)
     #
-    def add(self, id, data):
-        pass
+    def add(self, params):
+
+        less_params = {
+            'anime_id': params['id'],
+            'status': params['api_watched_status'],
+            'episodes': params['watched_episodes'],
+            'score': params['score']
+            }
+
+        try:
+            response = self.request.do(path='animelist/anime', params=less_params, method='POST', authenticate=True)
+        except (HttpRequestError, HttpStatusError):
+            return False
+
+        return response
 
     #
     #  Update anime in the list. data = (status, episodes, score)
@@ -147,7 +160,9 @@ class Request():
             request = connection.request(method.upper(), '/' + path, params, headers)
             response = connection.getresponse()
 
-            # print response.status
+            #print response.status
+            #response_read = response.read()
+            #print response_read
 
             # Raise an exception if the status code is something else then 200
             if response.status != httplib.OK:

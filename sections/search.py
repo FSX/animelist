@@ -25,11 +25,18 @@ class Search(gtk.VBox):
         # Search bar
         self.search_entry = gtk.Entry()
         self.search_button = gtk.Button('Search')
-        self.search_button.set_size_request(120, 30)
+        self.search_button.set_size_request(120, -1)
+
+        self.add_button = gtk.Button('Add')
+        self.add_button.set_size_request(120, -1)
+        self.add_button.set_sensitive(False)
 
         searchbar = gtk.HBox(False, 0)
         searchbar.pack_start(self.search_entry, expand=True, fill=True, padding=5)
-        searchbar.pack_end(self.search_button, expand=False, fill=False, padding=5)
+        searchbar.pack_start(self.search_button, expand=False, fill=False, padding=5)
+
+        searchbar.pack_start(gtk.VSeparator(), expand=False, fill=False, padding=5)
+        searchbar.pack_start(self.add_button, expand=False, fill=False, padding=5)
 
         # Search results list
         self.liststore = gtk.ListStore(str, str, str, str, str, str)
@@ -45,6 +52,7 @@ class Search(gtk.VBox):
         # Events
         self.search_entry.connect('key-release-event', self.__handle_key)
         self.search_button.connect('clicked', self.__on_search)
+        self.add_button.connect('clicked', self.__on_add)
         self.treeview.connect('button-release-event', self.__handle_selection)
 
         # Create scrollbox
@@ -93,8 +101,10 @@ class Search(gtk.VBox):
             if self.selected_path == path:
                 self.selected_path = None
                 selection.unselect_path(path)
+                self.add_button.set_sensitive(False)
             else:
                 self.selected_path = path
+                self.add_button.set_sensitive(True) # Activate "Add" button when a row is selected
 
     #
     #  Get text from text field and search
@@ -109,6 +119,28 @@ class Search(gtk.VBox):
             return False
 
         utils.sthread(self.__process_search, (query,))
+
+    #
+    #  Add selected anime/row to the list
+    #
+    def __on_add(self, button):
+
+        selection = self.treeview.get_selection()
+        anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
+
+        params = {
+            'id':                 self.data[anime_id]['id'],
+            'title':              self.data[anime_id]['title'],
+            'type':               self.data[anime_id]['type'],             # TV, Movie, OVA, ONA, Special, Music
+            'episodes':           self.data[anime_id]['episodes'],
+            'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
+            'watched_status':     'plan to watch',
+            'api_watched_status': '"plantowatch"',
+            'watched_episodes':   '0',
+            'score':              '0'
+            }
+
+        self.al.anime.add(params)
 
     #
     #  Send request and fill the list

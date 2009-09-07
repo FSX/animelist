@@ -107,12 +107,17 @@ class Anime(gtk.Notebook):
     #
     #  Prepend a row to a list
     #
-    def add(self, list_id, data):
+    def add(self, params):
         #self.liststore[list_id].insert(0, data)
-        pass
+
+        # Add to local cache
+        # Add to list
+        # Add to MAL list
+
+        utils.sthread(self.__add, (params,))
 
     #
-    #  Remove a row from a list
+    #  Remove a row from a list (not used)
     #
     def remove(self, id):
         utils.sthread(self.__delete, (id,))
@@ -139,6 +144,37 @@ class Anime(gtk.Notebook):
             self.data[anime_id]['score'])))
 
     #
+    #  Add anime
+    #
+    def __add(self, params):
+
+        self.al.statusbar.update('Sending changes to MyAnimeList...')
+
+        response = self.mal.add(params)
+
+        if response == False:
+            self.al.statusbar.update('Could not send changes to MyAnimeList.')
+            self.al.statusbar.clear(5000)
+
+            return False
+
+        self.data[int(params['id'])] = {
+            'id':               params['id'],
+            'title':            params['title'],
+            'type':             params['type'],
+            'episodes':         params['episodes'],
+            'status':           params['status'],
+            'watched_status':   params['watched_status'],
+            'watched_episodes': params['watched_episodes'],
+            'score':            params['score']
+            }
+
+        list_data = (params['id'], None, params['title'], params['type'], None, params['score'])
+        self.liststore[self.al.config.rstatus['plan to watch']].insert(0, list_data)
+
+        self.al.statusbar.clear(1000)
+
+    #
     #  Update anime. data = (status, episodes, score)
     #
     def __update(self, id, data):
@@ -156,7 +192,7 @@ class Anime(gtk.Notebook):
         self.al.statusbar.clear(1000)
 
     #
-    #  Update anime. data = (status, episodes, score)
+    #  Delete anime. data = (status, episodes, score)
     #
     def __delete(self, id):
 
@@ -320,6 +356,8 @@ class Anime(gtk.Notebook):
     #  Split the episodes from the watched episodes
     #
     def __cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
+
+        self.selected_path = None # Don't unselect row when editing
         editable.set_text(editable.get_text().split('/', 1)[0])
 
     #
@@ -346,6 +384,12 @@ class Anime(gtk.Notebook):
                 (self.data[anime_id]['watched_status'],
                 self.data[anime_id]['watched_episodes'],
                 self.data[anime_id]['score'])))
+
+    #
+    #  Don't unselect row when editing
+    #
+    def __cell_score_start_edit(self, cellrenderer, editable, row):
+        self.selected_path = None
 
     #
     #  Validate given score and update score cell, local cache and MAL
@@ -417,6 +461,7 @@ class Anime(gtk.Notebook):
         renderer.set_property('editable', True)
         adjustment = gtk.Adjustment(0, 0, 10, 1)
         renderer.set_property('adjustment', adjustment)
+        renderer.connect('editing-started', self.__cell_score_start_edit)
         renderer.connect('edited', self.__cell_score_edited, list_id)
         column = gtk.TreeViewColumn('Score', renderer, text=5)
         column.set_sort_column_id(5)

@@ -3,8 +3,7 @@ TODO for AnimeList
 - = Still have to be done.
 * = In process.
 
- * Search section.
- - Code cleanup and doc strings.
+ - Code cleanup and doc strings! (first priority)
  - Windows support: AnimeList currently doesn't work on Windows
    (tested on Windows XP), because threads are used. I (Frank)
    only have Linux, so I can't fix this.
