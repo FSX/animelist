@@ -92,9 +92,12 @@ class Anime():
         less_params = {
             'anime_id': params['id'],
             'status': params['api_watched_status'],
-            'episodes': params['watched_episodes'],
-            'score': params['score']
+            #'episodes': params['watched_episodes'],
+            #'score': params['score']
             }
+
+        #print less_params
+        #return False
 
         try:
             response = self.request.do(path='animelist/anime', params=less_params, method='POST', authenticate=True)

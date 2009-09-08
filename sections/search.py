@@ -135,7 +135,7 @@ class Search(gtk.VBox):
             'episodes':           self.data[anime_id]['episodes'],
             'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
             'watched_status':     'plan to watch',
-            'api_watched_status': '"plantowatch"',
+            'api_watched_status': 'plan to watch',
             'watched_episodes':   '0',
             'score':              '0'
             }

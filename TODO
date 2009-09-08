@@ -3,6 +3,11 @@ TODO for AnimeList
 - = Still have to be done.
 * = In process.
 
+ * Search section:
+   - Select status menu for "Add" button (plan to watch, watching etc.).
+     - Show a dialog that aks for the wachted episodes when "watching",
+       "on-hold" or "dropped" is selected.
+   - Disable "Add" button when an anime is selected which is already in the user's list.
  - Code cleanup and doc strings! (first priority)
  - Windows support: AnimeList currently doesn't work on Windows
    (tested on Windows XP), because threads are used. I (Frank)
@@ -12,6 +17,7 @@ TODO for AnimeList
  - Block application when no user details are entered and validated.
  - Save window size on exit.
  - Details dialog for anime.
+ - Modularize sections for better extensibility.
 
 Maybe
  - Media player detection.
