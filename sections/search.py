@@ -19,7 +19,7 @@ class Search(gtk.VBox):
         self.al = al
         gtk.VBox.__init__(self)
 
-        self.selected_path = None
+        self.already_in_list = []
         self.fonts = (pango.FontDescription('normal'), pango.FontDescription('bold'))
 
         # Search bar
@@ -27,16 +27,27 @@ class Search(gtk.VBox):
         self.search_button = gtk.Button('Search')
         self.search_button.set_size_request(120, -1)
 
-        self.add_button = gtk.Button('Add')
-        self.add_button.set_size_request(120, -1)
-        self.add_button.set_sensitive(False)
-
         searchbar = gtk.HBox(False, 0)
         searchbar.pack_start(self.search_entry, expand=True, fill=True, padding=5)
         searchbar.pack_start(self.search_button, expand=False, fill=False, padding=5)
 
-        searchbar.pack_start(gtk.VSeparator(), expand=False, fill=False, padding=5)
-        searchbar.pack_start(self.add_button, expand=False, fill=False, padding=5)
+        # Menu
+        self.menu = gtk.Menu()
+        self.menu.add_to = {}
+
+        self.menu.details = gtk.MenuItem('Details')
+        self.menu.add = gtk.MenuItem('Add to')
+        self.menu.add_submenu = gtk.Menu()
+        self.menu.add.set_submenu(self.menu.add_submenu)
+
+        self.menu.append(self.menu.details)
+        self.menu.append(gtk.SeparatorMenuItem())
+        self.menu.append(self.menu.add)
+
+        for k, v in enumerate(self.al.config.status):
+            self.menu.add_to[k] = gtk.MenuItem(v.capitalize())
+            self.menu.add_to[k].connect('activate', self.__menu_add_anime, k)
+            self.menu.add_submenu.append(self.menu.add_to[k])
 
         # Search results list
         self.liststore = gtk.ListStore(str, str, str, str, str, str)
@@ -52,8 +63,8 @@ class Search(gtk.VBox):
         # Events
         self.search_entry.connect('key-release-event', self.__handle_key)
         self.search_button.connect('clicked', self.__on_search)
-        self.add_button.connect('clicked', self.__on_add)
-        self.treeview.connect('button-release-event', self.__handle_selection)
+
+        self.treeview.connect('button-press-event', self.__show_menu)
 
         # Create scrollbox
         frame = gtk.ScrolledWindow()
@@ -64,6 +75,8 @@ class Search(gtk.VBox):
         frame.add(self.treeview)
         self.pack_start(searchbar, expand=False, fill=False, padding=5)
         self.pack_end(frame, expand=True, fill=True)
+
+        self.menu.show_all()
 
         # Set setting for the MAL api
         self.mal = myanimelist.Anime((
@@ -85,26 +98,46 @@ class Search(gtk.VBox):
             self.__on_search(None)
 
     #
-    # Unselect row, if it's selected, onclick
+    #  Displays the main popup menu on a button-press-event
+    #  with options for the selected row in the list.
     #
-    def __handle_selection(self, treeview, event):
+    def __show_menu(self, treeview, event):
 
-        if event.button != 1:  # Only on left click
+        if event.button != 3:  # Only on right click
             return False
 
-        pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
+        selection = self.treeview.get_selection()
+        anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
 
-        if pthinfo is not None:
-            path, col, cellx, celly = pthinfo
-            selection = treeview.get_selection()
+        # Disable "Add to" on anime that are already i the list. Or should it be hidden?
+        if int(anime_id) in self.already_in_list:
+            self.menu.add.set_sensitive(False)
+        else:
+            self.menu.add.set_sensitive(True)
 
-            if self.selected_path == path:
-                self.selected_path = None
-                selection.unselect_path(path)
-                self.add_button.set_sensitive(False)
-            else:
-                self.selected_path = path
-                self.add_button.set_sensitive(True) # Activate "Add" button when a row is selected
+        self.menu.popup(None, None, None, 3, event.time)
+
+    #
+    #  Wrapper method for move()
+    #
+    def __menu_add_anime(self, menuitem, dest_list):
+
+        selection = self.treeview.get_selection()
+        anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
+
+        params = {
+            'id':                 self.data[anime_id]['id'],
+            'title':              self.data[anime_id]['title'],
+            'type':               self.data[anime_id]['type'],             # TV, Movie, OVA, ONA, Special, Music
+            'episodes':           self.data[anime_id]['episodes'],
+            'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
+            #'watched_status':     'plan to watch',
+            'watched_status':     self.al.config.status[dest_list],
+            'watched_episodes':   '0',
+            'score':              '0'
+            }
+
+        self.al.anime.add(params)
 
     #
     #  Get text from text field and search
@@ -121,28 +154,6 @@ class Search(gtk.VBox):
         utils.sthread(self.__process_search, (query,))
 
     #
-    #  Add selected anime/row to the list
-    #
-    def __on_add(self, button):
-
-        selection = self.treeview.get_selection()
-        anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
-
-        params = {
-            'id':                 self.data[anime_id]['id'],
-            'title':              self.data[anime_id]['title'],
-            'type':               self.data[anime_id]['type'],             # TV, Movie, OVA, ONA, Special, Music
-            'episodes':           self.data[anime_id]['episodes'],
-            'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
-            'watched_status':     'plan to watch',
-            'api_watched_status': 'plan to watch',
-            'watched_episodes':   '0',
-            'score':              '0'
-            }
-
-        self.al.anime.add(params)
-
-    #
     #  Send request and fill the list
     #
     def __process_search(self, query):
@@ -153,6 +164,7 @@ class Search(gtk.VBox):
         self.al.statusbar.update('Searching...')
         self.liststore.clear()
         self.data = {}
+        self.already_in_list = []
 
         results = self.mal.search(query)
         if results == False:
@@ -204,8 +216,18 @@ class Search(gtk.VBox):
 
         if anime_id in self.al.anime.data:
             cell.set_property('font-desc', self.fonts[1])
+
+            try:
+                self.already_in_list.index(anime_id)
+            except ValueError:
+                self.already_in_list.append(anime_id)
         else:
             cell.set_property('font-desc', self.fonts[0])
+
+            try:
+                self.already_in_list.pop(self.already_in_list.index(anime_id))
+            except ValueError:
+                pass
 
     #
     #  Create columns

@@ -21,7 +21,6 @@ class Anime(gtk.Notebook):
         gtk.Notebook.__init__(self)
 
         self.current_tab_id = 0
-        self.selected_path = None
         self.liststore, self.treeview, frame = {}, {}, {}
         self.al.shutdown_funcs.append('self.anime.save')
 
@@ -60,7 +59,6 @@ class Anime(gtk.Notebook):
 
             # Menu
             self.treeview[k].connect('button-press-event', self.__show_menu)
-            self.treeview[k].connect('button-release-event', self.__handle_selection)
             self.menu.move_to[k] = gtk.MenuItem(v.capitalize())
             self.menu.move_to[k].connect('activate', self.__menu_move_row, k)
             self.menu.move_submenu.append(self.menu.move_to[k])
@@ -91,8 +89,6 @@ class Anime(gtk.Notebook):
     #  Refresh lists
     #
     def refresh(self):
-
-        self.selected_path = None
         utils.sthread(self.__create_rows, (True,))
 
     #
@@ -170,7 +166,7 @@ class Anime(gtk.Notebook):
             }
 
         list_data = (params['id'], None, params['title'], params['type'], None, params['score'])
-        self.liststore[self.al.config.rstatus['plan to watch']].insert(0, list_data)
+        self.liststore[self.al.config.rstatus[params['watched_status']]].insert(0, list_data)
 
         self.al.statusbar.clear(1000)
 
@@ -265,26 +261,6 @@ class Anime(gtk.Notebook):
         unused, rows = selection.get_selected_rows()
 
         self.move(rows[0][0], self.current_tab_id, dest_list)
-
-    #
-    # Unselect row, if it's selected, onclick
-    #
-    def __handle_selection(self, treeview, event):
-
-        if event.button != 1:  # Only on left click
-            return False
-
-        pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
-
-        if pthinfo is not None:
-            path, col, cellx, celly = pthinfo
-            selection = treeview.get_selection()
-
-            if self.selected_path == path:
-                self.selected_path = None
-                selection.unselect_path(path)
-            else:
-                self.selected_path = path
 
     #
     #  Create rows
