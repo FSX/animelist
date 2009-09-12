@@ -107,7 +107,8 @@ class Search(gtk.VBox):
             return False
 
         selection = self.treeview.get_selection()
-        anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
+        path = selection.get_selected_rows()[1][0][0]
+        anime_id = int(self.liststore[path][0])
 
         # Disable "Add to" on anime that are already i the list. Or should it be hidden?
         if int(anime_id) in self.already_in_list:
@@ -136,6 +137,67 @@ class Search(gtk.VBox):
             'watched_episodes':   '0',
             'score':              '0'
             }
+
+        # Show a dialog when an anime id added to "wacthing", "on-hold", "dropped" or "completed"
+        if dest_list in (0, 1, 2, 3):
+
+            # Fields
+            episodes_entry = gtk.Entry()
+            score_entry = gtk.SpinButton(gtk.Adjustment(0, 0, 10, 1))
+
+            # Main table
+            table = gtk.Table(2, 2)
+            table.set_row_spacings(10)
+            table.set_col_spacings(10)
+
+            table.attach(gtk.Label('Episodes'), 0, 1, 0, 1)
+            table.attach(gtk.Label('Score'), 0, 1, 1, 2)
+            table.attach(episodes_entry, 1, 2, 0, 1)
+            table.attach(score_entry, 1, 2, 1, 2)
+
+            # Boxes for padding
+            hbox = gtk.HBox()
+            hbox.pack_start(table, False, True, 5)
+            hbox.show_all()
+
+            # Dialog flags and buttons
+            flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+            buttons = (
+                gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
+                )
+
+            if dest_list == 1:
+                episodes_entry.set_text(str(params['episodes']))
+                score_entry.grab_focus()
+
+            # Create dialog
+            dialog = gtk.Dialog('Add anime', self.al.window, flags, buttons)
+            dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+            dialog.vbox.pack_start(hbox, False, True, 5)
+
+            if dialog.run() == gtk.RESPONSE_ACCEPT:
+
+                my_episodes = episodes_entry.get_text()
+                my_score = score_entry.get_text()
+
+                try:
+                    params['watched_episodes'] = str(int(my_episodes))
+                except ValueError:
+                    pass
+
+                try:
+                    my_score = int(my_score)
+
+                    if my_score  >= 0 or my_score <= 10:
+                        params['score'] = str(my_score)
+                except ValueError:
+                    pass
+
+                dialog.destroy()
+            else:
+                dialog.destroy()
+                return None
 
         self.al.anime.add(params)
 

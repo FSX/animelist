@@ -104,12 +104,6 @@ class Anime(gtk.Notebook):
     #  Prepend a row to a list
     #
     def add(self, params):
-        #self.liststore[list_id].insert(0, data)
-
-        # Add to local cache
-        # Add to list
-        # Add to MAL list
-
         utils.sthread(self.__add, (params,))
 
     #

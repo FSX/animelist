@@ -13,7 +13,7 @@ import cPickle
 # Cache data with cPickle
 def cache_data(path, data):
     with open(path, 'wb') as f:
-        cPickle.dump(data, f)
+        cPickle.dump(data, f, cPickle.HIGHEST_PROTOCOL)
 
 # Get data from cache file with cPickle
 def get_cache(path):

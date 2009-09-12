@@ -92,8 +92,8 @@ class Anime():
         less_params = {
             'anime_id': params['id'],
             'status': params['watched_status'],
-            #'episodes': params['watched_episodes'],
-            #'score': params['score']
+            'episodes': params['watched_episodes'],
+            'score': params['score']
             }
 
         try:

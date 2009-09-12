@@ -5,11 +5,12 @@ TODO for AnimeList
 ~ = In process.
 
  * Search section:
-   - Right click menu (on a row) with a "Add" submenu.
+   * Right click menu (on a row) with a "Add" submenu.
      ~ Show a dialog that aks for the watched episodes when "watching",
        "on-hold" or "dropped" is selected.
    - Disable "Add" button when an anime is selected which is already in the user's list.
- - Code cleanup and doc strings! (first priority)
+ - Details dialog for anime.
+ - Code cleanup and add doc strings!
  - Windows support: AnimeList currently doesn't work on Windows
    (tested on Windows XP), because threads are used. I (Frank)
    only have Linux, so I can't fix this.
@@ -17,8 +18,9 @@ TODO for AnimeList
  - Manga section: will be done when the Unofficial API has support for manga.
  - Block application when no user details are entered and validated.
  - Save window size on exit.
- - Details dialog for anime.
  - Modularize sections for better extensibility.
+
+ - Replace threading with an alternative method (I think threading makes it a bit unstable).
 
 Maybe:
  - Media player detection.
