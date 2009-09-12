@@ -132,7 +132,6 @@ class Search(gtk.VBox):
             'type':               self.data[anime_id]['type'],             # TV, Movie, OVA, ONA, Special, Music
             'episodes':           self.data[anime_id]['episodes'],
             'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
-            #'watched_status':     'plan to watch',
             'watched_status':     self.al.config.status[dest_list],
             'watched_episodes':   '0',
             'score':              '0'
@@ -220,24 +219,31 @@ class Search(gtk.VBox):
     #
     def __process_search(self, query):
 
+        gtk.gdk.threads_enter()
         self.search_entry.set_sensitive(False)
         self.search_button.set_sensitive(False)
-
         self.al.statusbar.update('Searching...')
+        gtk.gdk.threads_leave()
+
         self.liststore.clear()
         self.data = {}
         self.already_in_list = []
 
         results = self.mal.search(query)
         if results == False:
+            gtk.gdk.threads_enter()
             self.al.statusbar.update('Search failed. Please try again later.')
             self.search_entry.set_sensitive(True)
             self.search_button.set_sensitive(True)
             self.search_entry.grab_focus()
+            gtk.gdk.threads_leave()
             return False
 
         # Fill lists
         self.data = results
+
+        gtk.gdk.threads_enter()
+
         for k, v in self.data.iteritems():
             self.liststore.append((
                 v['id'],           # Anime ID (hidden)
@@ -258,6 +264,8 @@ class Search(gtk.VBox):
         self.search_entry.set_sensitive(True)
         self.search_button.set_sensitive(True)
         self.search_entry.grab_focus()
+
+        gtk.gdk.threads_leave()
 
     #
     #  Set background for status column

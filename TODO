@@ -6,12 +6,12 @@ TODO for AnimeList
 
  * Search section:
    * Right click menu (on a row) with a "Add" submenu.
-     ~ Show a dialog that aks for the watched episodes when "watching",
+     * Show a dialog that aks for the watched episodes when "watching",
        "on-hold" or "dropped" is selected.
    - Disable "Add" button when an anime is selected which is already in the user's list.
  - Details dialog for anime.
  - Code cleanup and add doc strings!
- - Windows support: AnimeList currently doesn't work on Windows
+ ~ Windows support: AnimeList currently doesn't work on Windows
    (tested on Windows XP), because threads are used. I (Frank)
    only have Linux, so I can't fix this.
    http://faq.pygtk.org/index.py?req=show&file=faq21.003.htp
@@ -19,8 +19,6 @@ TODO for AnimeList
  - Block application when no user details are entered and validated.
  - Save window size on exit.
  - Modularize sections for better extensibility.
-
- - Replace threading with an alternative method (I think threading makes it a bit unstable).
 
 Maybe:
  - Media player detection.
