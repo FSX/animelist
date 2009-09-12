@@ -275,8 +275,6 @@ class Anime(gtk.Notebook):
 
         if refresh == True or invalid_cache == True:
 
-            gtk.gdk.threads_enter()
-
             if invalid_cache == True:
                 self.al.statusbar.update('Cache is not valid. Syncing with MyAnimeList...')
             else:
@@ -285,21 +283,15 @@ class Anime(gtk.Notebook):
                 for k, v in enumerate(self.al.config.status):
                     self.liststore[k].clear()
 
-            gtk.gdk.threads_leave()
-
             list_data = self.mal.list()
             if list_data == False:
-                gtk.gdk.threads_enter()
                 self.al.statusbar.update('Data could not be downloaded from MyAnimelist.')
-                gtk.gdk.threads_leave()
                 return False
 
             utils.cache_data(cache_filename, list_data)
 
         # Fill lists
         self.data = list_data
-
-        gtk.gdk.threads_enter()
         for k, v in self.data.iteritems():
             self.liststore[self.al.config.rstatus[v['watched_status']]].append((
                 v['id'],    # Anime ID (hidden)
@@ -311,7 +303,6 @@ class Anime(gtk.Notebook):
                 ))
 
         self.al.statusbar.clear(1000)
-        gtk.gdk.threads_leave()
 
     #
     #  Set background for status column

@@ -15,6 +15,7 @@ TODO for AnimeList
    (tested on Windows XP), because threads are used. I (Frank)
    only have Linux, so I can't fix this.
    http://faq.pygtk.org/index.py?req=show&file=faq21.003.htp
+   http://faq.pygtk.org/index.py?req=show&file=faq20.001.htp
  - Manga section: will be done when the Unofficial API has support for manga.
  - Block application when no user details are entered and validated.
  - Save window size on exit.
