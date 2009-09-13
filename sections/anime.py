@@ -12,6 +12,7 @@ import os
 import gtk
 
 from lib import myanimelist, utils
+from lib.pygtkhelpers import gthreads
 
 class Anime(gtk.Notebook):
 
@@ -81,8 +82,11 @@ class Anime(gtk.Notebook):
             ))
 
         if self.al.config.no_user_defined == False:
-            utils.sthread(self.__create_rows, (self.al.config.settings['startup_refresh'],))
+            #utils.sthread(self.__create_rows, (self.al.config.settings['startup_refresh'],))
             #self.__create_rows(self.al.config.settings['startup_refresh'])
+
+            t = gthreads.AsyncTask(self.__create_rows, self.__gui_test)
+            t.start(self.al.config.settings['startup_refresh'])
 
         self.menu.show_all()
 
@@ -90,8 +94,11 @@ class Anime(gtk.Notebook):
     #  Refresh lists
     #
     def refresh(self):
-        utils.sthread(self.__create_rows, (True,))
+        #utils.sthread(self.__create_rows, (True,))
         #self.__create_rows(True)
+
+        t = gthreads.AsyncTask(self.__create_rows, self.__gui_test)
+        t.start(True)
 
     #
     #  Save data to local cache
@@ -276,22 +283,28 @@ class Anime(gtk.Notebook):
         if refresh == True or invalid_cache == True:
 
             if invalid_cache == True:
-                self.al.statusbar.update('Cache is not valid. Syncing with MyAnimeList...')
+                #self.al.statusbar.update('Cache is not valid. Syncing with MyAnimeList...')
+                pass
             else:
-                self.al.statusbar.update('Syncing with MyAnimeList...')
+                #self.al.statusbar.update('Syncing with MyAnimeList...')
 
                 for k, v in enumerate(self.al.config.status):
                     self.liststore[k].clear()
 
             list_data = self.mal.list()
             if list_data == False:
-                self.al.statusbar.update('Data could not be downloaded from MyAnimelist.')
+                #self.al.statusbar.update('Data could not be downloaded from MyAnimelist.')
                 return False
 
             utils.cache_data(cache_filename, list_data)
 
         # Fill lists
         self.data = list_data
+
+
+        #self.al.statusbar.clear(1000)
+
+    def __gui_test(self):
         for k, v in self.data.iteritems():
             self.liststore[self.al.config.rstatus[v['watched_status']]].append((
                 v['id'],    # Anime ID (hidden)
@@ -301,8 +314,6 @@ class Anime(gtk.Notebook):
                 None,       # Progress (watched episodes/episodes)
                 v['score']  # Score
                 ))
-
-        self.al.statusbar.clear(1000)
 
     #
     #  Set background for status column

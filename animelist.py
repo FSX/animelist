@@ -18,7 +18,7 @@ import toolbar
 import systray
 from sections import anime, search
 
-gtk.gdk.threads_init()
+#gtk.gdk.threads_init()
 
 class AnimeList():
 
