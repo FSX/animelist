@@ -218,8 +218,6 @@ class Anime(gtk.Notebook):
     def fill_lists(self, refresh):
         "Starts __get_data in a thread and __add_rows when the thread is finished to fill the lists with data."
 
-        self.al.statusbar.update('Syncing with MyAnimeList...')
-
         def get_data(refresh):
             "Get data from cache or download it from MAL and save it to the local cache."
 
@@ -259,6 +257,8 @@ class Anime(gtk.Notebook):
 
             self.al.statusbar.clear(2000)
 
+        self.al.statusbar.update('Syncing with MyAnimeList...')
+
         t = gthreads.AsyncTask(get_data, add_rows)
         t.start(refresh)
 
@@ -276,7 +276,33 @@ class Anime(gtk.Notebook):
     def add(self, params):
         "Prepend a row to a list."
 
-        utils.sthread(self.__add, (params,))
+        self.al.statusbar.update('Sending changes to MyAnimeList...')
+
+        self.data[int(params['id'])] = {
+            'id':               params['id'],
+            'title':            params['title'],
+            'type':             params['type'],
+            'episodes':         params['episodes'],
+            'status':           params['status'],
+            'watched_status':   params['watched_status'],
+            'watched_episodes': params['watched_episodes'],
+            'score':            params['score']
+            }
+
+        list_data = (params['id'], None, params['title'], params['type'], None, params['score'])
+        self.liststore[self.al.config.rstatus[params['watched_status']]].insert(0, list_data)
+
+        add_params = {
+            'anime_id': params['id'],
+            'status':   params['watched_status'],
+            'score':    params['score']
+            }
+
+        if params['status'] != 'completed':
+            add_params['episodes'] = params['watched_episodes']
+
+        t = gthreads.AsyncTask(self.mal.add, self.__callback)
+        t.start(add_params)
 
     def delete(self):
         "Removes the selected row from the list."
@@ -366,37 +392,6 @@ class Anime(gtk.Notebook):
                 {'status': self.data[anime_id]['watched_status'],
                 'episodes': self.data[anime_id]['watched_episodes'],
                 'score': self.data[anime_id]['score']})
-
-    #
-    #  Add anime
-    #
-    def __add(self, params):
-
-        self.al.statusbar.update('Sending changes to MyAnimeList...')
-
-        response = self.mal.add(params)
-
-        if response == False:
-            self.al.statusbar.update('Could not send changes to MyAnimeList.')
-            self.al.statusbar.clear(5000)
-
-            return False
-
-        self.data[int(params['id'])] = {
-            'id':               params['id'],
-            'title':            params['title'],
-            'type':             params['type'],
-            'episodes':         params['episodes'],
-            'status':           params['status'],
-            'watched_status':   params['watched_status'],
-            'watched_episodes': params['watched_episodes'],
-            'score':            params['score']
-            }
-
-        list_data = (params['id'], None, params['title'], params['type'], None, params['score'])
-        self.liststore[self.al.config.rstatus[params['watched_status']]].insert(0, list_data)
-
-        self.al.statusbar.clear(1000)
 
     def __callback(self, result):
         if result == False:

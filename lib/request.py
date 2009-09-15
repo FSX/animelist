@@ -54,8 +54,9 @@ class Request():
         except:
             raise HttpRequestError()
 
+#
 #  Exceptions
-
+#
 class HttpRequestError(Exception):
     pass
 

@@ -56,9 +56,13 @@ class Config():
 
         # Color status
         self.cstatus = {
-            'finished airing':  gtk.gdk.Color('#50ce18'), # Green
-            'currently airing': gtk.gdk.Color('#1173e2'), # Bright/Light blue
-            'not yet aired':    gtk.gdk.Color('#e20d0d')  # Red
+            #'finished airing':  gtk.gdk.Color('#50ce18'), # Green
+            #'currently airing': gtk.gdk.Color('#1173e2'), # Bright/Light blue
+            #'not yet aired':    gtk.gdk.Color('#e20d0d')  # Red
+
+            'finished airing':  gtk.gdk.color_parse('#50ce18'), # Green
+            'currently airing': gtk.gdk.color_parse('#1173e2'), # Bright/Light blue
+            'not yet aired':    gtk.gdk.color_parse('#e20d0d')  # Red
             }
 
         # API settings

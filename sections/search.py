@@ -129,9 +129,9 @@ class Search(gtk.VBox):
         params = {
             'id':                 self.data[anime_id]['id'],
             'title':              self.data[anime_id]['title'],
-            'type':               self.data[anime_id]['type'],             # TV, Movie, OVA, ONA, Special, Music
+            'type':               self.data[anime_id]['type'],      # TV, Movie, OVA, ONA, Special, Music
             'episodes':           self.data[anime_id]['episodes'],
-            'status':             self.data[anime_id]['status'],           # finished airing, currently airing, not yet aired
+            'status':             self.data[anime_id]['status'],    # finished airing, currently airing, not yet aired
             'watched_status':     self.al.config.status[dest_list],
             'watched_episodes':   '0',
             'score':              '0'
@@ -166,8 +166,9 @@ class Search(gtk.VBox):
                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
                 )
 
-            if dest_list == 1:
+            if dest_list == 1: # If added to "completed"
                 episodes_entry.set_text(str(params['episodes']))
+                episodes_entry.set_sensitive(False)
                 score_entry.grab_focus()
 
             # Create dialog
@@ -208,18 +209,14 @@ class Search(gtk.VBox):
         if len(query) < 3:
             self.al.statusbar.update('Please enter a longer search query.')
             self.search_entry.grab_focus()
-            return False
-
-        #utils.sthread(self.__process_search, (query,))
+            return
 
         self.__process_search(query)
 
     # Functions for filling the list with search results ----------------------
 
-    #
-    #  Send request and fill the list
-    #
     def __process_search(self, query):
+        "Send search request and put the results in the list."
 
         def get_data(query):
             self.data = self.mal.search(query)

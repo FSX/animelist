@@ -79,15 +79,8 @@ class Anime():
     def add(self, params):
         "Add anime to list. params = (id, status, episodes, score)."
 
-        less_params = {
-            'anime_id': params['id'],
-            'status': params['watched_status'],
-            'episodes': params['watched_episodes'],
-            'score': params['score']
-            }
-
         try:
-            response = self.request.do(path='animelist/anime', params=less_params, method='POST', authenticate=True)
+            response = self.request.do(path='animelist/anime', params=params, method='POST', authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
 
