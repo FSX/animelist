@@ -82,49 +82,225 @@ class Anime(gtk.Notebook):
             ))
 
         if self.al.config.no_user_defined == False:
-            #utils.sthread(self.__create_rows, (self.al.config.settings['startup_refresh'],))
-            #self.__create_rows(self.al.config.settings['startup_refresh'])
-
-            t = gthreads.AsyncTask(self.__create_rows, self.__gui_test)
-            t.start(self.al.config.settings['startup_refresh'])
+            self.fill_lists(self.al.config.settings['startup_refresh'])
 
         self.menu.show_all()
 
-    #
-    #  Refresh lists
-    #
-    def refresh(self):
-        #utils.sthread(self.__create_rows, (True,))
-        #self.__create_rows(True)
+    # Misc functions ----------------------------------------------------------
 
-        t = gthreads.AsyncTask(self.__create_rows, self.__gui_test)
-        t.start(True)
-
-    #
-    #  Save data to local cache
-    #
     def save(self):
+        "Save anime data to local cache."
+
         utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
 
         self.al.statusbar.update('Saving data to local cache...')
         self.al.statusbar.clear(2000)
 
-    #
-    #  Prepend a row to a list
-    #
+    # Widget callbacks --------------------------------------------------------
+
+    def __set_current_tab_id(self, notebook, page, page_num):
+        """Update the current tab number and hide the corrent menu item in the
+           'Move to' menu. Note: this method is also called when the tabs are
+           created (at startup) (each time a tab is created)."""
+
+        self.menu.move_to[self.current_tab_id].show()
+        self.current_tab_id = page_num
+        self.menu.move_to[self.current_tab_id].hide()
+
+    def __show_menu(self, treeview, event):
+        """Displays the main popup menu on a button-press-event
+           with options for the selected row in the list."""
+
+        if event.button != 3: # Only on right click
+            return False
+
+        pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
+
+        if pthinfo is not None:
+            path, col, cellx, celly = pthinfo
+
+            treeview.grab_focus()
+            treeview.set_cursor(path, col, 0)
+
+            self.menu.popup(None, None, None, 3, event.time)
+
+    def __menu_delete(self, menuitem):
+        "Wrapper for detele()."
+
+        self.delete()
+
+    def __menu_move_row(self, menuitem, dest_list):
+        "Wrapper method for move()."
+
+        selection = self.treeview[self.current_tab_id].get_selection()
+        unused, rows = selection.get_selected_rows()
+
+        self.move(rows[0][0], self.current_tab_id, dest_list)
+
+    # List display functions --------------------------------------------------
+
+    def __cell_status_display(self, column, cell, model, iter):
+        "Set background for status column."
+
+        anime_id = int(model.get_value(iter, 0))
+        status = self.data[anime_id]['status']
+
+        cell.set_property('background-gdk', self.al.config.cstatus[status])
+
+    def __cell_progress_display(self, column, cell, model, iter):
+        "Put 'watched episodes/episodes' in column."
+
+        anime_id = int(model.get_value(iter, 0))
+        episodes = self.data[anime_id]['episodes']
+        if episodes == 0: episodes = '?'
+
+        cell.set_property('text', '%s/%s' % (self.data[anime_id]['watched_episodes'], episodes))
+
+    def __cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
+        "Split the episodes from the watched episodes."
+
+        editable.set_text(editable.get_text().split('/', 1)[0])
+
+    def __create_columns(self, treeview, list_id):
+        "Create columns."
+
+        # Anime ID
+        column = gtk.TreeViewColumn(None, None)
+        column.set_visible(False)
+        treeview.append_column(column)
+
+        # Status (color)
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(None, renderer, text=1)
+        column.set_resizable(False)
+        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+        column.set_fixed_width(8)
+        column.set_cell_data_func(renderer, self.__cell_status_display)
+        treeview.append_column(column)
+
+        # Title
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn('Title', renderer, text=2)
+        column.set_sort_column_id(2)
+        column.set_resizable(True)
+        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+        column.set_expand(True)
+        treeview.append_column(column)
+
+        # Type (TV, OVA ...)
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn('Type', renderer, text=3)
+        column.set_sort_column_id(3)
+        treeview.append_column(column)
+
+        # Progess
+        renderer = gtk.CellRendererText()
+        renderer.set_property('editable', True)
+        renderer.connect('editing-started', self.__cell_progress_start_edit, list_id)
+        renderer.connect('edited', self.__cell_progress_edited, list_id)
+        column = gtk.TreeViewColumn('Progress', renderer, text=4)
+        column.set_sort_column_id(4)
+        column.set_cell_data_func(renderer, self.__cell_progress_display)
+        treeview.append_column(column)
+
+        # Score
+        renderer = gtk.CellRendererSpin()
+        renderer.set_property('editable', True)
+        adjustment = gtk.Adjustment(0, 0, 10, 1)
+        renderer.set_property('adjustment', adjustment)
+        renderer.connect('edited', self.__cell_score_edited, list_id)
+        column = gtk.TreeViewColumn('Score', renderer, text=5)
+        column.set_sort_column_id(5)
+        treeview.append_column(column)
+
+    # Functions for refreshing the anime lists --------------------------------
+
+    def fill_lists(self, refresh):
+        "Starts __get_data in a thread and __add_rows when the thread is finished to fill the lists with data."
+
+        self.al.statusbar.update('Syncing with MyAnimeList...')
+
+        def get_data(refresh):
+            "Get data from cache or download it from MAL and save it to the local cache."
+
+            filename = '%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username'])
+
+            if refresh == False:
+                if os.path.exists(filename):
+                    self.data = utils.get_cache(filename)
+                    if self.data is None:
+                        refresh = True
+                else:
+                    refresh = True
+
+            if refresh == True :
+                self.data = self.mal.list()
+                utils.cache_data(filename, self.data)
+
+        def add_rows():
+            "Add all anime data to the lists."
+
+            for k, v in enumerate(self.al.config.status):
+                self.liststore[k].clear()
+
+            if self.data is None:
+                self.al.statusbar.update('Could not refresh/update the data.')
+                return
+
+            for k, v in self.data.iteritems():
+                self.liststore[self.al.config.rstatus[v['watched_status']]].append((
+                    v['id'],    # Anime ID (hidden)
+                    None,       # Status
+                    v['title'], # Title
+                    v['type'],  # Type
+                    None,       # Progress (watched episodes/episodes)
+                    v['score']  # Score
+                    ))
+
+            self.al.statusbar.clear(2000)
+
+        t = gthreads.AsyncTask(get_data, add_rows)
+        t.start(refresh)
+
+    def refresh(self):
+        "Wrapper for fill_lists."
+
+        self.fill_lists(True)
+
+    # Functions for adding, removing and updating anime -----------------------
+
+    # Note:
+    #  - all these functions are meant for internal use (usage in this class).
+    #    Except for 'add', which is used to add anime from the search section.
+
     def add(self, params):
+        "Prepend a row to a list."
+
         utils.sthread(self.__add, (params,))
 
-    #
-    #  Remove a row from a list (not used)
-    #
-    def remove(self, id):
-        utils.sthread(self.__delete, (id,))
+    def delete(self):
+        "Removes the selected row from the list."
 
-    #
-    #  Move a row to an other list by using add_row and remove_row
-    #
+        self.al.statusbar.update('Sending changes to MyAnimeList...')
+
+        # Get anime ID and list iter
+        selection = self.treeview[self.current_tab_id].get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        iter = selection.get_selected()[1]
+        anime_id = int(self.liststore[self.current_tab_id][row][0])
+
+        # Remove anime from list and cache
+        self.liststore[self.current_tab_id].remove(iter)
+        del self.data[anime_id]
+
+        # Start thread
+        t = gthreads.AsyncTask(self.mal.delete, self.__callback)
+        t.start(anime_id)
+
     def move(self, row, current_list, dest_list):
+        "Move a row to an other list."
+
+        self.al.statusbar.update('Sending changes to MyAnimeList...')
 
         anime_id = int(self.liststore[current_list][row][0])
 
@@ -135,12 +311,61 @@ class Anime(gtk.Notebook):
         iter = self.liststore[current_list].get_iter(row)
         self.liststore[current_list].remove(iter)
 
-        # Update MAL
-        utils.sthread(self.__update,
-            (anime_id,
-            (self.data[anime_id]['watched_status'],
-            self.data[anime_id]['watched_episodes'],
-            self.data[anime_id]['score'])))
+        # Start thread
+        t = gthreads.AsyncTask(self.mal.update, self.__callback)
+        t.start(
+            anime_id,
+            {'status': self.data[anime_id]['watched_status'],
+            'episodes': self.data[anime_id]['watched_episodes'],
+            'score': self.data[anime_id]['score']})
+
+    def __cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
+        "Validate given progress and update score cell, local cache and MAL."
+
+        anime_id = int(self.liststore[list_id][row][0])
+        old_progress = int(self.data[anime_id]['watched_episodes'])
+        new_progress = int(new_progress)
+
+        if new_progress != old_progress:
+
+            self.al.statusbar.update('Sending changes to MyAnimeList...')
+
+            episodes = self.data[anime_id]['episodes']
+            if episodes == '0': episodes = '?'
+
+            # This isn't needed because __cell_progress_display already does this
+            # self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
+            self.data[anime_id]['watched_episodes'] = unicode(new_progress)
+
+            # Update MAL
+            t = gthreads.AsyncTask(self.mal.update, self.__callback)
+            t.start(
+                anime_id,
+                {'status': self.data[anime_id]['watched_status'],
+                'episodes': self.data[anime_id]['watched_episodes'],
+                'score': self.data[anime_id]['score']})
+
+    def __cell_score_edited(self, cellrenderer, row, new_score, list_id):
+        "Validate given score and update score cell, local cache and MAL."
+
+        anime_id = int(self.liststore[list_id][row][0])
+        old_score = int(self.liststore[list_id][row][5])
+        new_score = int(new_score)
+
+        if new_score != old_score and new_score >= 0 and new_score <= 10:
+
+            self.al.statusbar.update('Sending changes to MyAnimeList...')
+
+            self.liststore[list_id][row][5] = new_score
+            self.data[anime_id]['score'] = unicode(new_score)
+
+            # Update MAL
+            t = gthreads.AsyncTask(self.mal.update, self.__callback)
+            t.start(
+                anime_id,
+                {'status': self.data[anime_id]['watched_status'],
+                'episodes': self.data[anime_id]['watched_episodes'],
+                'score': self.data[anime_id]['score']})
 
     #
     #  Add anime
@@ -173,280 +398,38 @@ class Anime(gtk.Notebook):
 
         self.al.statusbar.clear(1000)
 
-    #
-    #  Update anime. data = (status, episodes, score)
-    #
-    def __update(self, id, data):
-
-        self.al.statusbar.update('Sending changes to MyAnimeList...')
-
-        response = self.mal.update(id, (data[0], data[1], data[2]))
-
-        if response == False:
+    def __callback(self, result):
+        if result == False:
             self.al.statusbar.update('Could not send changes to MyAnimeList.')
             self.al.statusbar.clear(5000)
-
-            return False
-
-        self.al.statusbar.clear(1000)
-
-    #
-    #  Delete anime. data = (status, episodes, score)
-    #
-    def __delete(self, id):
-
-        self.al.statusbar.update('Sending changes to MyAnimeList...')
-
-        response = self.mal.delete(id)
-
-        if response == False:
-            self.al.statusbar.update('Could not send changes to MyAnimeList.')
-            self.al.statusbar.clear(5000)
-
-            return False
-
-        self.al.statusbar.clear(1000)
-
-    #
-    #  Update the current tab number and hide the corrent menu item in the
-    #  "Move to" menu. Note: this method is also called when the tabs are
-    #  created (at startup) (each time a tab is created).
-    #
-    def __set_current_tab_id(self, notebook, page, page_num):
-
-        self.menu.move_to[self.current_tab_id].show()
-        self.current_tab_id = page_num
-        self.menu.move_to[self.current_tab_id].hide()
-
-    #
-    #  Displays the main popup menu on a button-press-event
-    #  with options for the selected row in the list.
-    #
-    def __show_menu(self, treeview, event):
-
-        if event.button != 3:  # Only on right click
-            return False
-
-        pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
-
-        if pthinfo is not None:
-            self.selected_path, col, cellx, celly = pthinfo
-
-            treeview.grab_focus()
-            treeview.set_cursor(self.selected_path, col, 0)
-
-            self.menu.popup(None, None, None, 3, event.time)
-
-    #
-    #  Remove row/anime from list, cache and MAL
-    #
-    def __menu_delete(self, menuitem):
-
-        selection = self.treeview[self.current_tab_id].get_selection()
-        row = selection.get_selected_rows()[1][0][0]
-        iter = selection.get_selected()[1]
-
-        anime_id = int(self.liststore[self.current_tab_id][row][0])
-
-        self.liststore[self.current_tab_id].remove(iter)
-        del self.data[anime_id]
-
-        # Update MAL
-        utils.sthread(self.__delete, (anime_id,))
+        else:
+            self.al.statusbar.clear(1000)
 
 
-    #
-    #  Wrapper method for move()
-    #
-    def __menu_move_row(self, menuitem, dest_list):
-
-        selection = self.treeview[self.current_tab_id].get_selection()
-        unused, rows = selection.get_selected_rows()
-
-        self.move(rows[0][0], self.current_tab_id, dest_list)
-
-    #
-    #  Create rows
-    #
-    def __create_rows(self, refresh=False):
-
-        invalid_cache = False
-        cache_filename = '%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username'])
-
-        if refresh == False:
-            if os.path.exists(cache_filename):
-                list_data = utils.get_cache(cache_filename)
-                if list_data is None: invalid_cache = True
-            else:
-                refresh = True
-
-        if refresh == True or invalid_cache == True:
-
-            if invalid_cache == True:
-                #self.al.statusbar.update('Cache is not valid. Syncing with MyAnimeList...')
-                pass
-            else:
-                #self.al.statusbar.update('Syncing with MyAnimeList...')
-
-                for k, v in enumerate(self.al.config.status):
-                    self.liststore[k].clear()
-
-            list_data = self.mal.list()
-            if list_data == False:
-                #self.al.statusbar.update('Data could not be downloaded from MyAnimelist.')
-                return False
-
-            utils.cache_data(cache_filename, list_data)
-
-        # Fill lists
-        self.data = list_data
 
 
-        #self.al.statusbar.clear(1000)
 
-    def __gui_test(self):
-        for k, v in self.data.iteritems():
-            self.liststore[self.al.config.rstatus[v['watched_status']]].append((
-                v['id'],    # Anime ID (hidden)
-                None,       # Status
-                v['title'], # Title
-                v['type'],  # Type
-                None,       # Progress (watched episodes/episodes)
-                v['score']  # Score
-                ))
 
-    #
-    #  Set background for status column
-    #
-    def __cell_status_display(self, column, cell, model, iter):
 
-        anime_id = int(model.get_value(iter, 0))
-        status = self.data[anime_id]['status']
 
-        cell.set_property('background-gdk', self.al.config.cstatus[status])
 
-    #
-    #  Put "watched episodes/episodes" in column
-    #
-    def __cell_progress_display(self, column, cell, model, iter):
 
-        anime_id = int(model.get_value(iter, 0))
-        episodes = self.data[anime_id]['episodes']
-        if episodes == 0: episodes = '?'
 
-        cell.set_property('text', '%s/%s' % (self.data[anime_id]['watched_episodes'], episodes))
 
-    #
-    #  Split the episodes from the watched episodes
-    #
-    def __cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
 
-        self.selected_path = None # Don't unselect row when editing
-        editable.set_text(editable.get_text().split('/', 1)[0])
 
-    #
-    #  Validate given progress and update score cell, local cache and MAL
-    #
-    def __cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
 
-        anime_id = int(self.liststore[list_id][row][0])
-        old_progress = int(self.data[anime_id]['watched_episodes'])
-        new_progress = int(new_progress)
 
-        if new_progress != old_progress:
 
-            episodes = self.data[anime_id]['episodes']
-            if episodes == '0': episodes = '?'
 
-            # This isn't needed because __cell_progress_display already does this
-            # self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
-            self.data[anime_id]['watched_episodes'] = unicode(new_progress)
 
-            # Update MAL
-            utils.sthread(self.__update,
-                (anime_id,
-                (self.data[anime_id]['watched_status'],
-                self.data[anime_id]['watched_episodes'],
-                self.data[anime_id]['score'])))
 
-    #
-    #  Don't unselect row when editing
-    #
-    def __cell_score_start_edit(self, cellrenderer, editable, row):
-        self.selected_path = None
 
-    #
-    #  Validate given score and update score cell, local cache and MAL
-    #
-    def __cell_score_edited(self, cellrenderer, row, new_score, list_id):
 
-        anime_id = int(self.liststore[list_id][row][0])
-        old_score = self.liststore[list_id][row][5]
-        new_score = int(new_score)
 
-        if new_score != old_score and new_score >= 0 and new_score <= 10:
-            self.liststore[list_id][row][5] = new_score
-            self.data[anime_id]['score'] = unicode(new_score)
 
-            # Update MAL
-            utils.sthread(self.__update,
-                (anime_id,
-                (self.data[anime_id]['watched_status'],
-                self.data[anime_id]['watched_episodes'],
-                self.data[anime_id]['score'])))
 
-    #
-    #  Create columns
-    #
-    def __create_columns(self, treeview, list_id):
 
-        # Anime ID
-        column = gtk.TreeViewColumn(None, None)
-        column.set_visible(False)
-        treeview.append_column(column)
 
-        # Status (color)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(None, renderer, text=1)
-        column.set_resizable(False)
-        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-        column.set_fixed_width(8)
-        column.set_cell_data_func(renderer, self.__cell_status_display)
-        treeview.append_column(column)
 
-        # Title
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Title', renderer, text=2)
-        column.set_sort_column_id(2)
-        column.set_resizable(True)
-        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-        column.set_expand(True)
-        treeview.append_column(column)
 
-        # Type (TV, OVA ...)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Type', renderer, text=3)
-        column.set_sort_column_id(3)
-        #column.set_cell_data_func(renderer, self._cell_type_display)
-        treeview.append_column(column)
-
-        # Progess
-        renderer = gtk.CellRendererText()
-        renderer.set_property('editable', True)
-        renderer.connect('editing-started', self.__cell_progress_start_edit, list_id)
-        renderer.connect('edited', self.__cell_progress_edited, list_id)
-        column = gtk.TreeViewColumn('Progress', renderer, text=4)
-        column.set_sort_column_id(4)
-        column.set_cell_data_func(renderer, self.__cell_progress_display)
-        treeview.append_column(column)
-
-        # Score
-        renderer = gtk.CellRendererSpin()
-        renderer.set_property('editable', True)
-        adjustment = gtk.Adjustment(0, 0, 10, 1)
-        renderer.set_property('adjustment', adjustment)
-        renderer.connect('editing-started', self.__cell_score_start_edit)
-        renderer.connect('edited', self.__cell_score_edited, list_id)
-        column = gtk.TreeViewColumn('Score', renderer, text=5)
-        column.set_sort_column_id(5)
-        treeview.append_column(column)

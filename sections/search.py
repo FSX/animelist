@@ -11,6 +11,7 @@ import gtk
 import pango
 
 from lib import myanimelist, utils
+from lib.pygtkhelpers import gthreads
 
 class Search(gtk.VBox):
 
@@ -86,10 +87,10 @@ class Search(gtk.VBox):
             self.al.config.api['user_agent']
             ))
 
-    #
-    #  Handle key events
-    #
+    # Widget callbacks --------------------------------------------------------
+
     def __handle_key(self, widget, event):
+        "Handle key events of widgets."
 
         string, state = event.string, event.state
         keyname =  gtk.gdk.keyval_name(event.keyval)
@@ -97,20 +98,21 @@ class Search(gtk.VBox):
         if keyname == 'Return':
             self.__on_search(None)
 
-    #
-    #  Displays the main popup menu on a button-press-event
-    #  with options for the selected row in the list.
-    #
     def __show_menu(self, treeview, event):
+        """Displays the main popup menu on a button-press-event
+           with options for the selected row in the list."""
 
         if event.button != 3:  # Only on right click
             return False
 
-        selection = self.treeview.get_selection()
-        path = selection.get_selected_rows()[1][0][0]
-        anime_id = int(self.liststore[path][0])
+        try:
+            selection = self.treeview.get_selection()
+            row = selection.get_selected_rows()[1][0][0]
+            anime_id = int(self.liststore[row][0])
+        except IndexError:
+            return
 
-        # Disable "Add to" on anime that are already i the list. Or should it be hidden?
+        # Disable "Add to" on anime that are already in the list. Or should it be hidden?
         if int(anime_id) in self.already_in_list:
             self.menu.add.set_sensitive(False)
         else:
@@ -118,10 +120,8 @@ class Search(gtk.VBox):
 
         self.menu.popup(None, None, None, 3, event.time)
 
-    #
-    #  Wrapper method for move()
-    #
     def __menu_add_anime(self, menuitem, dest_list):
+        "Add anime to list."
 
         selection = self.treeview.get_selection()
         anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
@@ -196,14 +196,12 @@ class Search(gtk.VBox):
                 dialog.destroy()
             else:
                 dialog.destroy()
-                return None
+                return
 
         self.al.anime.add(params)
 
-    #
-    #  Get text from text field and search
-    #
     def __on_search(self, button):
+        "Get text from text field and search."
 
         query = self.search_entry.get_text().strip()
 
@@ -212,12 +210,47 @@ class Search(gtk.VBox):
             self.search_entry.grab_focus()
             return False
 
-        utils.sthread(self.__process_search, (query,))
+        #utils.sthread(self.__process_search, (query,))
+
+        self.__process_search(query)
+
+    # Functions for filling the list with search results ----------------------
 
     #
     #  Send request and fill the list
     #
     def __process_search(self, query):
+
+        def get_data(query):
+            self.data = self.mal.search(query)
+
+        def add_rows():
+            if self.data == False:
+                self.al.statusbar.update('Search failed. Please try again later.')
+                self.search_entry.set_sensitive(True)
+                self.search_button.set_sensitive(True)
+                self.search_entry.grab_focus()
+                return
+
+            for k, v in self.data.iteritems():
+                self.liststore.append((
+                    v['id'],           # Anime ID (hidden)
+                    None,              # Status
+                    v['title'],        # Title
+                    v['type'],         # Type
+                    v['episodes'],     # Episodes
+                    v['members_score'] # Score
+                    ))
+
+            num_results = len(self.data)
+            if num_results > 0:
+                self.al.statusbar.update('Found %d anime.' % num_results)
+            else:
+                self.al.statusbar.update('No anime with that name.')
+
+            self.search_entry.set_sensitive(True)
+            self.search_button.set_sensitive(True)
+            self.search_entry.grab_focus()
 
         self.search_entry.set_sensitive(False)
         self.search_button.set_sensitive(False)
@@ -227,51 +260,21 @@ class Search(gtk.VBox):
         self.data = {}
         self.already_in_list = []
 
-        results = self.mal.search(query)
-        if results == False:
-            self.al.statusbar.update('Search failed. Please try again later.')
-            self.search_entry.set_sensitive(True)
-            self.search_button.set_sensitive(True)
-            self.search_entry.grab_focus()
-            return False
+        t = gthreads.AsyncTask(get_data, add_rows)
+        t.start(query)
 
-        # Fill lists
-        self.data = results
-        for k, v in self.data.iteritems():
-            self.liststore.append((
-                v['id'],           # Anime ID (hidden)
-                None,              # Status
-                v['title'],        # Title
-                v['type'],         # Type
-                v['episodes'],     # Episodes
-                v['members_score'] # Score
-                ))
+    # List display functions --------------------------------------------------
 
-        num_results = len(results)
-
-        if num_results > 0:
-            self.al.statusbar.update('Found %d anime.' % num_results)
-        else:
-            self.al.statusbar.update('No anime with that name.')
-
-        self.search_entry.set_sensitive(True)
-        self.search_button.set_sensitive(True)
-        self.search_entry.grab_focus()
-
-    #
-    #  Set background for status column
-    #
     def __cell_status_display(self, column, cell, model, iter):
+        "Set background for status column."
 
         anime_id = int(model.get_value(iter, 0))
         status = self.data[anime_id]['status']
 
         cell.set_property('background-gdk', self.al.config.cstatus[status])
 
-    #
-    #  The the text bold in rows (animes) that are already in your list
-    #
     def __cell_title_display(self, column, cell, model, iter):
+        "Makes the text bold in rows (animes) that are already in your list."
 
         anime_id = int(model.get_value(iter, 0))
 
@@ -290,10 +293,8 @@ class Search(gtk.VBox):
             except ValueError:
                 pass
 
-    #
-    #  Create columns
-    #
     def __create_columns(self):
+        "Create columns."
 
         # Anime ID
         column = gtk.TreeViewColumn(None, None)
