@@ -56,10 +56,6 @@ class Config():
 
         # Color status
         self.cstatus = {
-            #'finished airing':  gtk.gdk.Color('#50ce18'), # Green
-            #'currently airing': gtk.gdk.Color('#1173e2'), # Bright/Light blue
-            #'not yet aired':    gtk.gdk.Color('#e20d0d')  # Red
-
             'finished airing':  gtk.gdk.color_parse('#50ce18'), # Green
             'currently airing': gtk.gdk.color_parse('#1173e2'), # Bright/Light blue
             'not yet aired':    gtk.gdk.color_parse('#e20d0d')  # Red
@@ -71,10 +67,8 @@ class Config():
             'user_agent': '%s:%s' % (self.al.name, self.al.version)
             }
 
-    #
-    #  Preferences dialog
-    #
     def preferences_dialog(self):
+        "Preferences dialog."
 
         # Field (entry, checknutton) objects are saved in this variable
         self.fields = {}
@@ -143,12 +137,9 @@ class Config():
 
         dialog.destroy()
 
-    #
-    #  Generates frames with fields in it
-    #  All field objects are saved in self.fields (dict)
-    #  Note: only support for gtk.Entry and gtk.CheckButton at this moment
-    #
     def __generate_box(self, name, fields):
+        """Generates frames with fields in it. All field objects are saved in self.fields (dict).
+           Note: only support for gtk.Entry and gtk.CheckButton at this moment."""
 
         frame = gtk.Frame(name)
         table = gtk.Table(2, 2)
@@ -190,18 +181,14 @@ class Config():
 
         return frame
 
-    #
-    #  Save a piclked, base64 encoded version of self.settings in settings.cfg
-    #
     def __save_settings(self):
+        "Save a pickled, base64 encoded version of self.settings in settings.cfg."
 
-        with open(self.al.HOME + '/settings.cfg', 'w') as f:
-            f.write(base64.b64encode(cPickle.dumps(self.settings)))
+        with open(self.al.HOME + '/settings.cfg', 'wb') as f:
+            f.write(base64.b64encode(cPickle.dumps(self.settings, cPickle.HIGHEST_PROTOCOL)))
 
-    #
-    #  Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings
-    #
     def __load_settings(self):
+        "Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings."
 
-        with open(self.al.HOME + '/settings.cfg', 'r') as f:
+        with open(self.al.HOME + '/settings.cfg', 'rb') as f:
             self.settings = cPickle.loads(base64.b64decode(f.read()))

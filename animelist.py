@@ -18,8 +18,6 @@ import toolbar
 import systray
 from sections import anime, search
 
-#gtk.gdk.threads_init()
-
 class AnimeList():
 
     def __init__(self):
@@ -75,10 +73,8 @@ class AnimeList():
         if not os.access(self.HOME, os.F_OK | os.W_OK):
             os.mkdir(self.HOME)
 
-    #
-    #  Returns a gtk.gdk.Pixbuf
-    #
     def switch_section(self, id):
+        "Hide current section and shows the new section."
 
         if id in (1, 2):
             if id == 1 and self.current_section == 2:
@@ -90,28 +86,23 @@ class AnimeList():
 
             self.current_section = id
 
-    #
-    #  Returns a gtk.gdk.Pixbuf
-    #
     def get_icon(self, icon):
+        "Returns a gtk.gdk.Pixbuf."
 
         if os.access(icon, os.F_OK):
             return gtk.gdk.pixbuf_new_from_file(icon)
 
-    #
-    #  Terminates the application cleanly.
-    #
     def quit(self, widget, data=None):
+        "Terminates the application cleanly."
 
         for f in self.shutdown_funcs:
             eval(f + '()')
 
         gtk.main_quit()
 
-    #
-    #  Store the position of the window when it's moved or resized
-    #
     def __store_position(self, event, position):
+        "Store the position of the window when it's moved or resized."
+
         self.window._position = (position.x, position.y)
 
 if __name__ == '__main__':

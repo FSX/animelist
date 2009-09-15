@@ -9,7 +9,7 @@ TODO for AnimeList
      * Show a dialog that aks for the watched episodes when "watching",
        "on-hold" or "dropped" is selected.
    * Disable "Add" button when an anime is selected which is already in the user's list.
- ~ Windows support (almost done).
+ * Windows support (almost done).
  ~ Code cleanup and add doc strings!
  - Details dialog for anime.
  - Block application when no user details are entered and validated.

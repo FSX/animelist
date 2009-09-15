@@ -16,9 +16,6 @@ class Request():
     def __init__(self, config):
         self.username, self.password, self.host, self.user_agent = config
 
-    #
-    #  Do a request
-    #
     def do(self, path, params=None, method='GET', authenticate=False, ssl=False):
 
         headers = {'User-Agent': self.user_agent}
@@ -54,9 +51,8 @@ class Request():
         except:
             raise HttpRequestError()
 
-#
 #  Exceptions
-#
+
 class HttpRequestError(Exception):
     pass
 
