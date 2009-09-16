@@ -4,19 +4,39 @@ TODO for AnimeList
 * = Done.
 ~ = In process.
 
- * Search section:
-   * Right click menu (on a row) with a "Add" submenu.
-     * Show a dialog that aks for the watched episodes when "watching",
-       "on-hold" or "dropped" is selected.
-   * Disable "Add" button when an anime is selected which is already in the user's list.
- * Windows support (almost done).
  ~ Code cleanup and add doc strings!
- - Details dialog for anime.
- - Block application when no user details are entered and validated.
- - Save window size on exit.
- - Modularize sections for better extensibility.
- - Manga section: will be done when the Unofficial API has support for manga.
 
-Maybe:
- - Media player detection.
- - Torrent section.
+ - Details dialog:
+   A details dialog for anime that appears after a user has double clicked on
+   a row in one of the lists (anime and search section.
+
+ - Verify user details:
+   Verify the user details one they're entered in the preferences dialog.
+   If they're not valid: block the access to the application (or it's functions).
+
+ - Save window size on exit:
+   Save these to the settings file on exit and apply them to the window on
+   startup (and maybe save the position too?).
+
+ - Proper sorting in lists:
+   Currently this work really good. Sorting by episode doesn't work and scores
+   aren't sorted properly.
+
+ - Modularize sections:
+   So section can be plugged in without having to modify any other files.
+
+ - Manga section:
+   Will be done when the Unofficial API has support for manga.
+
+ - Execuatbles for Windows.
+   http://www.py2exe.org/index.cgi/Py2Exe
+   http://unpythonic.blogspot.com/2007/07/pygtk-py2exe-and-inno-setup-for-single.html
+
+ - Media player detection
+   Detect a mediaplayer playing a file that's in your list and update it.
+
+ - Torrent section:
+   Read RSS feeds from certain websites and show the items that are in the users' list.
+
+ - Icons:
+   Maybe some cool, shiny icons. ^^
