@@ -74,15 +74,16 @@ class Anime(gtk.Notebook):
             self.append_page(frame[k], gtk.Label(v.capitalize()))
 
         self.set_api()
+        self.menu.show_all()
 
         # Events
         self.al.signal.connect('al-shutdown', self.save)
         self.al.signal.connect('al-pref-reset', self.set_api)
+        self.al.signal.connect('al-user-set', self.enable_anime)
+        self.al.signal.connect('al-no-user-set', self.disable_anime)
 
         if self.al.config.no_user_defined == False:
             self.fill_lists(self.al.config.settings['startup_refresh'])
-
-        self.menu.show_all()
 
     # Misc functions ----------------------------------------------------------
 
@@ -95,6 +96,16 @@ class Anime(gtk.Notebook):
             self.al.config.api['host'],
             self.al.config.api['user_agent']
             ))
+
+    def enable_anime(self, widget=None):
+        "Enable anime section when a user has been set."
+
+        self.set_sensitive(True)
+
+    def disable_anime(self, widget=None):
+        "Disable anime section when no user has been set."
+
+        self.set_sensitive(False)
 
     def save(self, widget=None):
         """Save anime data to local cache. This function is executed when

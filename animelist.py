@@ -31,6 +31,7 @@ class AnimeList():
         self.name = 'AnimeList'
         self.version = '0.1-dev'
         self.current_section = 1
+        self.handlers = []
 
         # Initiate modules
         self.signal = signals.Signals()
@@ -54,15 +55,20 @@ class AnimeList():
 
         self.window.add(vbox)
         self.window.show_all()
-        self.search.hide()
 
-        # Show preferences window when no user has been defined
-        if self.config.no_user_defined == True:
-            self.config.preferences_dialog()
+        # Emit signal when all the GUI stuff is ready
+        self.signal.emit('al-gui-done')
 
         # Create settings folder in home directory
         if not os.access(self.HOME, os.F_OK | os.W_OK):
             os.mkdir(self.HOME)
+
+        # Show preferences window when no user has been defined.
+        # This is called after everything else because the preferences
+        # dialog blocks.
+        if self.config.no_user_defined == True:
+            self.signal.emit('al-no-user-set')
+            self.config.preferences_dialog()
 
     def switch_section(self, id):
         "Hide current section and shows the new section."
@@ -81,7 +87,6 @@ class AnimeList():
         "Terminates the application cleanly."
 
         self.signal.emit('al-shutdown')
-
         gtk.main_quit()
 
 if __name__ == '__main__':
