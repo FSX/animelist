@@ -11,6 +11,8 @@ import thread
 
 import gtk
 
+from lib import utils
+
 class Toolbar(gtk.Toolbar):
 
     def __init__(self, al):
@@ -63,12 +65,16 @@ class Toolbar(gtk.Toolbar):
         self.al.config.preferences_dialog()
 
     def __on_anime(self, widget):
+        self.buttons['refresh'].set_sensitive(True)
+        self.buttons['save'].set_sensitive(True)
         self.buttons['search'].set_sensitive(True)
         self.buttons['anime'].set_sensitive(False)
         self.al.switch_section(1)
 
     def __on_search(self, widget):
         self.buttons['anime'].set_sensitive(True)
+        self.buttons['refresh'].set_sensitive(False)
+        self.buttons['save'].set_sensitive(False)
         self.buttons['search'].set_sensitive(False)
         self.al.switch_section(2)
 
@@ -79,7 +85,7 @@ class Toolbar(gtk.Toolbar):
         about.set_copyright('Copyright (c) 2009 Frank Smit')
         about.set_comments('MyAnimeList.net anime list manager + some extra stuff.')
         about.set_website('http://61924.nl')
-        about.set_logo(self.al.get_icon('./pixmaps/animelist_logo_256.png'))
+        about.set_logo(utils.get_icon('./pixmaps/animelist_logo_256.png'))
         about.run()
         about.destroy()
 

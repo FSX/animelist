@@ -32,8 +32,7 @@ class Config():
         if os.access(self.al.HOME + '/settings.cfg', os.F_OK | os.W_OK):
             self.__load_settings()
 
-        if not (('username' in self.settings and 'password' in self.settings) or\
-            (len(self.settings['username']) > 0 and len(self.settings['password'])) > 0):
+        if not (len(self.settings['username']) > 0 and len(self.settings['password']) > 0):
             self.no_user_defined = True
 
         # Tab number -> watched status
@@ -134,6 +133,9 @@ class Config():
             # Check if user details are entered
             if len(self.settings['username']) > 0 and len(self.settings['password']) > 0:
                 self.no_user_defined = False
+
+            # Emit signal
+            self.al.signal.emit('al-pref-reset')
 
         dialog.destroy()
 

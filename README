@@ -2,7 +2,7 @@ AnimeList is still under development and not everything works yet and stuff can 
 Only tested on Linux (Arch linux) and Windows XP Home. It has not been test on any other
 opererating systems.
 
-Before you can use AnimeList you jave to install GTK[1], Python[2] and PyGTK[3].
+Before you can use AnimeList you jave to install GTK[1], Python[2], PyGTK[3], PyCairo[3], PyGObject[3].
 For Python and PyGTK are Windows installers available. A Windows installer for GTK
 can be found at gtk-win.sourceforge.net[4].
 
@@ -14,5 +14,5 @@ Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
 
  [1]: http://www.gtk.org/
  [2]: http://www.python.org/
- [3]: http://www.pygtk.org/
+ [3]: http://www.pygtk.org/downloads.html
  [4]: http://gtk-win.sourceforge.net/

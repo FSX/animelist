@@ -12,6 +12,8 @@ import sys
 
 import gtk
 
+from lib import utils
+
 class Systray(gtk.StatusIcon):
 
     def __init__(self, al):
@@ -19,7 +21,7 @@ class Systray(gtk.StatusIcon):
         self.al = al
         gtk.StatusIcon.__init__(self)
 
-        self.set_from_pixbuf(self.al.get_icon('./pixmaps/animelist_logo_32.png'))
+        self.set_from_pixbuf(utils.get_icon('./pixmaps/animelist_logo_32.png'))
         self.connect('activate', self.__activate_icon)
         self.set_visible(True)
 

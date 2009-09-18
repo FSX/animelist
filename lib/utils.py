@@ -7,7 +7,10 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
+import os
 import cPickle
+
+import gtk
 
 def cache_data(path, data):
     "Cache data with cPickle."
@@ -27,3 +30,9 @@ def htmldecode(string):
     "Decode htmlentities."
 
     return string.replace('&apos;', '\'')
+
+def get_icon(icon):
+    "Returns a gtk.gdk.Pixbuf."
+
+    if os.access(icon, os.F_OK):
+        return gtk.gdk.pixbuf_new_from_file(icon)

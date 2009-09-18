@@ -22,8 +22,8 @@ class Anime(gtk.Notebook):
         gtk.Notebook.__init__(self)
 
         self.current_tab_id = 0
+        self.data = {}
         self.liststore, self.treeview, frame = {}, {}, {}
-        self.al.shutdown_funcs.append('self.anime.save')
 
         self.set_tab_pos(gtk.POS_TOP)
         self.connect('switch-page', self.__set_current_tab_id)
@@ -73,13 +73,11 @@ class Anime(gtk.Notebook):
             frame[k].add(self.treeview[k])
             self.append_page(frame[k], gtk.Label(v.capitalize()))
 
-        # Set setting for the MAL api
-        self.mal = myanimelist.Anime((
-            self.al.config.settings['username'],
-            self.al.config.settings['password'],
-            self.al.config.api['host'],
-            self.al.config.api['user_agent']
-            ))
+        self.set_api()
+
+        # Events
+        self.al.signal.connect('al-shutdown', self.save)
+        self.al.signal.connect('al-pref-reset', self.set_api)
 
         if self.al.config.no_user_defined == False:
             self.fill_lists(self.al.config.settings['startup_refresh'])
@@ -88,8 +86,19 @@ class Anime(gtk.Notebook):
 
     # Misc functions ----------------------------------------------------------
 
-    def save(self):
-        "Save anime data to local cache."
+    def set_api(self, widget=None):
+        "Set setting for the MAL api."
+
+        self.mal = myanimelist.Anime((
+            self.al.config.settings['username'],
+            self.al.config.settings['password'],
+            self.al.config.api['host'],
+            self.al.config.api['user_agent']
+            ))
+
+    def save(self, widget=None):
+        """Save anime data to local cache. This function is executed when
+           the 'save' button is pressed and when the application shuts down."""
 
         utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
 

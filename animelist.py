@@ -10,9 +10,13 @@
 import os
 import sys
 
+import pygtk
+pygtk.require('2.0')
 import gtk
 
+import signals
 import config
+import window
 import statusbar
 import toolbar
 import systray
@@ -27,19 +31,11 @@ class AnimeList():
         self.name = 'AnimeList'
         self.version = '0.1-dev'
         self.current_section = 1
-        self.shutdown_funcs = []
-
-        # Create window
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_default_size(800, 600)
-        self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.set_title(self.name)
-        self.window.set_icon(self.get_icon('./pixmaps/animelist_logo_32.png'))
-        self.window._position = (0, 0) # Stores the position of the window. Starts with an
-                                       # underscore, because 'position' is already taken.
 
         # Initiate modules
+        self.signal = signals.Signals()
         self.config = config.Config(self)
+        self.window = window.Window(self)
         self.statusbar = statusbar.Statusbar(self)
         self.toolbar = toolbar.Toolbar(self)
         self.anime = anime.Anime(self)
@@ -58,12 +54,7 @@ class AnimeList():
 
         self.window.add(vbox)
         self.window.show_all()
-
         self.search.hide()
-
-        # Events
-        self.window.connect('configure-event', self.__store_position)
-        self.window.connect('destroy', self.quit)
 
         # Show preferences window when no user has been defined
         if self.config.no_user_defined == True:
@@ -86,24 +77,12 @@ class AnimeList():
 
             self.current_section = id
 
-    def get_icon(self, icon):
-        "Returns a gtk.gdk.Pixbuf."
-
-        if os.access(icon, os.F_OK):
-            return gtk.gdk.pixbuf_new_from_file(icon)
-
     def quit(self, widget, data=None):
         "Terminates the application cleanly."
 
-        for f in self.shutdown_funcs:
-            eval(f + '()')
+        self.signal.emit('al-shutdown')
 
         gtk.main_quit()
-
-    def __store_position(self, event, position):
-        "Store the position of the window when it's moved or resized."
-
-        self.window._position = (position.x, position.y)
 
 if __name__ == '__main__':
     AnimeList()

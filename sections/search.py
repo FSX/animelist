@@ -72,11 +72,17 @@ class Search(gtk.VBox):
         frame.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         frame.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
+        # Details box
+        self.details = gtk.VBox()
+        self.details.set_size_request(-1, 200)
+
         # Pack it together
         frame.add(self.treeview)
-        self.pack_start(searchbar, expand=False, fill=False, padding=5)
-        self.pack_end(frame, expand=True, fill=True)
+        self.pack_start(searchbar, False, False, 5)
+        self.pack_start(frame, True, True)
+        self.pack_start(self.details, False, False)
 
+        self.details.hide() # IT DOES NOT HIDE!
         self.menu.show_all()
 
         # Set setting for the MAL api
