@@ -52,13 +52,13 @@ class Toolbar(gtk.Toolbar):
         self.buttons['about'].connect('clicked', self.__on_about)
         self.buttons['quit'].connect('clicked', self.al.quit)
 
-        self.al.signal.connect('al-user-set', self.enable_buttons)
-        self.al.signal.connect('al-no-user-set', self.disable_buttons)
-        self.al.signal.connect('al-gui-done', self.gui_done)
+        self.al.signal.connect('al-user-set', self.__enable_control)
+        self.al.signal.connect('al-no-user-set', self.__disable_control)
+        self.al.signal.connect('al-gui-done', self.__gui_done)
 
     # Misc functions ----------------------------------------------------------
 
-    def enable_buttons(self, widget=None):
+    def __enable_control(self, widget=None):
         "Enable buttons when a user has been set."
 
         self.buttons['refresh'].set_sensitive(True)
@@ -66,7 +66,7 @@ class Toolbar(gtk.Toolbar):
         self.buttons['anime'].set_sensitive(True)
         self.buttons['search'].set_sensitive(True)
 
-    def disable_buttons(self, widget=None):
+    def __disable_control(self, widget=None):
         "Disable buttons when no user has been set."
 
         self.buttons['refresh'].set_sensitive(False)
@@ -74,7 +74,7 @@ class Toolbar(gtk.Toolbar):
         self.buttons['anime'].set_sensitive(False)
         self.buttons['search'].set_sensitive(False)
 
-    def gui_done(self, widget=None):
+    def __gui_done(self, widget=None):
 
         # Disable anime button
         self.buttons['anime'].set_sensitive(False)

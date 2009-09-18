@@ -65,10 +65,10 @@ class Search(gtk.VBox):
         self.search_entry.connect('key-release-event', self.__handle_key)
         self.search_button.connect('clicked', self.__on_search)
         self.treeview.connect('button-press-event', self.__show_menu)
-        self.al.signal.connect('al-pref-reset', self.set_api)
-        self.al.signal.connect('al-user-set', self.enable_search)
-        self.al.signal.connect('al-no-user-set', self.disable_search)
-        self.al.signal.connect('al-gui-done', self.gui_done)
+        self.al.signal.connect('al-pref-reset', self.__set_api)
+        self.al.signal.connect('al-user-set', self.__enable_control)
+        self.al.signal.connect('al-no-user-set', self.__disable_control)
+        self.al.signal.connect('al-gui-done', self.__gui_done)
 
         # Create scrollbox
         frame = gtk.ScrolledWindow()
@@ -85,12 +85,12 @@ class Search(gtk.VBox):
         self.pack_start(frame, True, True)
         self.pack_start(self.details, False, False)
 
-        self.set_api()
+        self.__set_api()
         self.menu.show_all()
 
     # Misc functions ----------------------------------------------------------
 
-    def set_api(self, widget=None):
+    def __set_api(self, widget=None):
         "Set setting for the MAL api."
 
         self.mal = myanimelist.Anime((
@@ -100,17 +100,17 @@ class Search(gtk.VBox):
             self.al.config.api['user_agent']
             ))
 
-    def enable_search(self, widget=None):
+    def __enable_control(self, widget=None):
         "Enable search section when a user has been set."
 
         self.set_sensitive(True)
 
-    def disable_search(self, widget=None):
+    def __disable_control(self, widget=None):
         "Disable search section when no user has been set."
 
         self.set_sensitive(False)
 
-    def gui_done(self, widget=None):
+    def __gui_done(self, widget=None):
 
         self.hide()
         self.details.hide()

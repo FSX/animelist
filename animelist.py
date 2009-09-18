@@ -12,6 +12,7 @@ import sys
 
 import pygtk
 pygtk.require('2.0')
+import gobject
 import gtk
 
 import signals
@@ -21,6 +22,8 @@ import statusbar
 import toolbar
 import systray
 from sections import anime, search
+
+gobject.threads_init()
 
 class AnimeList():
 

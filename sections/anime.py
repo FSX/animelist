@@ -9,6 +9,7 @@
 
 import os
 
+import gobject
 import gtk
 
 from lib import myanimelist, utils
@@ -73,21 +74,22 @@ class Anime(gtk.Notebook):
             frame[k].add(self.treeview[k])
             self.append_page(frame[k], gtk.Label(v.capitalize()))
 
-        self.set_api()
+        self.__set_api()
         self.menu.show_all()
 
         # Events
         self.al.signal.connect('al-shutdown', self.save)
-        self.al.signal.connect('al-pref-reset', self.set_api)
-        self.al.signal.connect('al-user-set', self.enable_anime)
-        self.al.signal.connect('al-no-user-set', self.disable_anime)
+        self.al.signal.connect('al-pref-reset', self.__set_api)
+        self.al.signal.connect('al-pref-reset', self.__w_refresh)
+        self.al.signal.connect('al-user-set', self.__enable_control)
+        self.al.signal.connect('al-no-user-set', self.__disable_control)
 
         if self.al.config.no_user_defined == False:
             self.fill_lists(self.al.config.settings['startup_refresh'])
 
     # Misc functions ----------------------------------------------------------
 
-    def set_api(self, widget=None):
+    def __set_api(self, widget=None):
         "Set setting for the MAL api."
 
         self.mal = myanimelist.Anime((
@@ -97,15 +99,22 @@ class Anime(gtk.Notebook):
             self.al.config.api['user_agent']
             ))
 
-    def enable_anime(self, widget=None):
+    def __enable_control(self, widget=None):
         "Enable anime section when a user has been set."
 
         self.set_sensitive(True)
 
-    def disable_anime(self, widget=None):
+    def __disable_control(self, widget=None):
         "Disable anime section when no user has been set."
 
         self.set_sensitive(False)
+
+    def __w_refresh(self, widget=None):
+        "A wrapper for 'refresh' function."
+
+        # If self.refresh is executed with out 'gobject.idle_add' the
+        # application will get a 'Segmentation fault'.
+        gobject.idle_add(self.refresh)
 
     def save(self, widget=None):
         """Save anime data to local cache. This function is executed when
@@ -265,15 +274,16 @@ class Anime(gtk.Notebook):
                 self.al.statusbar.update('Could not refresh/update the data.')
                 return
 
-            for k, v in self.data.iteritems():
-                self.liststore[self.al.config.rstatus[v['watched_status']]].append((
-                    v['id'],    # Anime ID (hidden)
-                    None,       # Status
-                    v['title'], # Title
-                    v['type'],  # Type
-                    None,       # Progress (watched episodes/episodes)
-                    v['score']  # Score
-                    ))
+            if type(self.data) == type({}): # Temperary
+                for k, v in self.data.iteritems():
+                    self.liststore[self.al.config.rstatus[v['watched_status']]].append((
+                        v['id'],    # Anime ID (hidden)
+                        None,       # Status
+                        v['title'], # Title
+                        v['type'],  # Type
+                        None,       # Progress (watched episodes/episodes)
+                        v['score']  # Score
+                        ))
 
             self.al.statusbar.clear(2000)
 
