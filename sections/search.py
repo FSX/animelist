@@ -21,7 +21,6 @@ class Search(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.already_in_list = []
-        self.selected_row = None
         self.fonts = (pango.FontDescription('normal'), pango.FontDescription('bold'))
 
         # Search bar
