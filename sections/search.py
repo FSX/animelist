@@ -21,6 +21,7 @@ class Search(gtk.VBox):
         gtk.VBox.__init__(self)
 
         self.already_in_list = []
+        self.selected_row = None
         self.fonts = (pango.FontDescription('normal'), pango.FontDescription('bold'))
 
         # Search bar
@@ -64,6 +65,7 @@ class Search(gtk.VBox):
         # Events
         self.search_entry.connect('key-release-event', self.__handle_key)
         self.search_button.connect('clicked', self.__on_search)
+        self.menu.details.connect('activate', self.__show_details)
         self.treeview.connect('button-press-event', self.__show_menu)
         self.al.signal.connect('al-pref-reset', self.__set_api)
         self.al.signal.connect('al-user-set', self.__enable_control)
@@ -75,15 +77,10 @@ class Search(gtk.VBox):
         frame.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         frame.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        # Details box
-        self.details = gtk.VBox()
-        self.details.set_size_request(-1, 200)
-
         # Pack it together
         frame.add(self.treeview)
         self.pack_start(searchbar, False, False, 5)
         self.pack_start(frame, True, True)
-        self.pack_start(self.details, False, False)
 
         self.__set_api()
         self.menu.show_all()
@@ -113,7 +110,6 @@ class Search(gtk.VBox):
     def __gui_done(self, widget=None):
 
         self.hide()
-        self.details.hide()
 
     # Widget callbacks --------------------------------------------------------
 
@@ -240,6 +236,11 @@ class Search(gtk.VBox):
             return
 
         self.__process_search(query)
+
+    def __show_details(self, widget):
+        "Show details box when a row is activated."
+
+        pass
 
     # Functions for filling the list with search results ----------------------
 

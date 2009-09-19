@@ -22,36 +22,48 @@ class Toolbar(gtk.Toolbar):
         self.set_style(gtk.TOOLBAR_ICONS)
 
         # Buttons
-        self.buttons = {}
-        self.buttons['refresh'] = gtk.ToolButton(gtk.STOCK_REFRESH)
-        self.buttons['save'] = gtk.ToolButton(gtk.STOCK_SAVE)
-        self.buttons['anime'] = gtk.ToolButton(gtk.STOCK_INFO)
-        self.buttons['search'] = gtk.ToolButton(gtk.STOCK_FIND)
-        self.buttons['prefs'] = gtk.ToolButton(gtk.STOCK_PREFERENCES)
-        self.buttons['about'] = gtk.ToolButton(gtk.STOCK_ABOUT)
-        self.buttons['quit'] = gtk.ToolButton(gtk.STOCK_QUIT)
-
-        # Insert in toolbar
-        self.insert(self.buttons['refresh'], 0)
-        self.insert(self.buttons['save'], 1)
-        self.insert(gtk.SeparatorToolItem(), 2)
-        self.insert(self.buttons['anime'], 3)
-        self.insert(self.buttons['search'], 4)
-        self.insert(gtk.SeparatorToolItem(), 5)
-        self.insert(self.buttons['prefs'], 6)
-        self.insert(gtk.SeparatorToolItem(), 7)
-        self.insert(self.buttons['about'], 8)
-        self.insert(self.buttons['quit'], 9)
+        self.__generate_buttons([
+            ('refresh', {
+                'stock': gtk.STOCK_REFRESH,
+                'event': self.__on_refresh,
+                'tooltip': 'Refresh anime list'
+                }),
+            ('save', {
+                'stock': gtk.STOCK_SAVE,
+                'event': self.__on_save,
+                'tooltip': 'Save anime list to cache'
+                }),
+            ('separator', None),
+            ('anime', {
+                'stock': gtk.STOCK_INFO,
+                'event': self.__on_anime,
+                'tooltip': 'Go to your anime list'
+                }),
+            ('search', {
+                'stock': gtk.STOCK_FIND,
+                'event': self.__on_search,
+                'tooltip': 'Go to the search section'
+                }),
+            ('separator', None),
+            ('preferences', {
+                'stock': gtk.STOCK_PREFERENCES,
+                'event': self.__on_prefs,
+                'tooltip': 'Show the preferences dialog'
+                }),
+            ('separator', None),
+            ('about', {
+                'stock': gtk.STOCK_ABOUT,
+                'event': self.__on_about,
+                'tooltip': 'Show about dialog'
+                }),
+            ('quit', {
+                'stock': gtk.STOCK_QUIT,
+                'event': self.al.quit,
+                'tooltip': 'Quit'
+                })
+            ])
 
         # Events
-        self.buttons['refresh'].connect('clicked', self.__on_refresh)
-        self.buttons['save'].connect('clicked', self.__on_save)
-        self.buttons['anime'].connect('clicked', self.__on_anime)
-        self.buttons['search'].connect('clicked', self.__on_search)
-        self.buttons['prefs'].connect('clicked', self.__on_prefs)
-        self.buttons['about'].connect('clicked', self.__on_about)
-        self.buttons['quit'].connect('clicked', self.al.quit)
-
         self.al.signal.connect('al-user-set', self.__enable_control)
         self.al.signal.connect('al-no-user-set', self.__disable_control)
         self.al.signal.connect('al-gui-done', self.__gui_done)
@@ -78,6 +90,22 @@ class Toolbar(gtk.Toolbar):
 
         # Disable anime button
         self.buttons['anime'].set_sensitive(False)
+
+    def __generate_buttons(self, buttons):
+        "Generate the buttons for a toolbar."
+
+        self.buttons = {}
+
+        for i, v in enumerate(buttons):
+
+            if v[0] != 'separator':
+                self.buttons[v[0]] = gtk.ToolButton(v[1]['stock'])
+                self.buttons[v[0]].connect('clicked', v[1]['event'])
+                self.buttons[v[0]].set_tooltip_text(v[1]['tooltip'])
+
+                self.insert(self.buttons[v[0]], i)
+            else:
+                self.insert(gtk.SeparatorToolItem(), i)
 
     # Widget callbacks --------------------------------------------------------
 
