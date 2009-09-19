@@ -55,8 +55,8 @@ class Search(gtk.VBox):
 
         self.treeview = gtk.TreeView(self.liststore)
         self.treeview.set_rules_hint(True)
-        self.treeview.set_search_column(1)
-        self.treeview.set_tooltip_column(1)
+        self.treeview.set_search_column(2)
+        self.treeview.set_tooltip_column(2)
         self.treeview.columns_autosize()
 
         self.__create_columns()
