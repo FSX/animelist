@@ -69,7 +69,7 @@ class Search(gtk.VBox):
         self.al.signal.connect('al-pref-reset', self.__set_api)
         self.al.signal.connect('al-user-set', self.__enable_control)
         self.al.signal.connect('al-no-user-set', self.__disable_control)
-        self.al.signal.connect('al-gui-done', self.__gui_done)
+        self.al.signal.connect('al-init-done', self.__init_done)
 
         # Create scrollbox
         frame = gtk.ScrolledWindow()
@@ -106,7 +106,7 @@ class Search(gtk.VBox):
 
         self.set_sensitive(False)
 
-    def __gui_done(self, widget=None):
+    def __init_done(self, widget=None):
 
         self.hide()
 

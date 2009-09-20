@@ -60,7 +60,7 @@ class AnimeList():
         self.window.show_all()
 
         # Emit signal when all the GUI stuff is ready
-        self.signal.emit('al-gui-done')
+        self.signal.emit('al-init-done')
 
         # Create settings folder in home directory
         if not os.access(self.HOME, os.F_OK | os.W_OK):

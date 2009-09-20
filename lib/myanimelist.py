@@ -107,3 +107,13 @@ class Anime():
         # Note: Do 'return response' to return the details of the removed anime.
         # The returned details could be used to make an undo function.
         return True
+
+    def details(self, id):
+        "Get information about an anime."
+
+        try:
+            response = self.request.do(path='anime/%s' % id, authenticate=True)
+        except (request.HttpRequestError, request.HttpStatusError):
+            return False
+
+        return json.loads(response)

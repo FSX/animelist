@@ -13,7 +13,7 @@ class Signals(gobject.GObject):
     __gsignals__ = {
         'al-startup' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-shutdown' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-gui-done' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+        'al-init-done' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-pref-reset' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-no-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())

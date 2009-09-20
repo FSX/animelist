@@ -45,3 +45,7 @@ TODO for AnimeList
 
  - Icons:
    Maybe some cool, shiny icons. ^^
+
+ - Internationalization (maybe):
+   Make the application available in multiple languages.
+   http://faq.pygtk.org/index.py?req=show&file=faq22.002.htp

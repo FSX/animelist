@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # =============================================================================
 # sections/anime.py
@@ -78,6 +79,7 @@ class Anime(gtk.Notebook):
         self.menu.show_all()
 
         # Events
+        self.menu.details.connect('activate', self.__show_details)
         self.al.signal.connect('al-shutdown', self.save)
         self.al.signal.connect('al-pref-reset', self.__set_api)
         self.al.signal.connect('al-pref-reset', self.__w_refresh)
@@ -165,6 +167,93 @@ class Anime(gtk.Notebook):
         unused, rows = selection.get_selected_rows()
 
         self.move(rows[0][0], self.current_tab_id, dest_list)
+
+    def __show_details(self, widget):
+        "Show details box when a row is activated."
+
+        def get_data(id):
+            return self.mal.details(id)
+            #return True
+
+        def get_image(url):
+            pass
+
+        def set_data(details):
+            #print details
+
+            title.set_markup('<span size="x-large" font_weight="bold">%s</span>' % details['title'])
+            description.set_label(details['synopsis'].replace('<br>', '\n'))
+
+            self.al.statusbar.clear(1000)
+            window.show_all()
+
+        def set_image():
+            pass
+
+        self.al.statusbar.update('Fetching information from MyAnimeList...')
+
+        # Window
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_default_size(600, 300)
+        window.set_title('Details')
+
+        # Boxes
+        lbox = gtk.VBox(spacing=10)
+        rbox = gtk.VBox(spacing=10)
+        lhalign = gtk.Alignment(0, 0, 0, 0)
+        rhalign = gtk.Alignment(0, 0, 0, 0)
+        lhalign.add(lbox)
+        rhalign.add(rbox)
+
+        image = gtk.Viewport()
+        image.set_size_request(200, 300) # Width, height
+        image.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+        image.add(gtk.Label('Image'))
+        lbox.add(image)
+
+        title = gtk.Label()
+        #title.set_markup('<span size="x-large" font_weight="bold">Title</span>')
+        title.set_line_wrap(True)
+        title_align = gtk.Alignment(0, 0, 0, 0)
+        title_align.add(title)
+        rbox.add(title_align)
+
+        rbox.add(gtk.HSeparator())
+
+        description = gtk.Label()
+        description.set_line_wrap(True)
+        box = gtk.Viewport()
+        box.set_shadow_type(gtk.SHADOW_NONE)
+        box.add(description)
+        description_vp = gtk.ScrolledWindow()
+        description_vp.set_size_request(-1, 150)
+        description_vp.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        description_vp.add(box)
+        rbox.pack_start(description_vp, True, True)
+
+        # Table
+        table = gtk.Table(1, 2)
+        table.set_row_spacings(10)
+        table.set_col_spacings(10)
+
+        table.attach(lhalign, 0, 1, 0, 1)
+        table.attach(rhalign, 1, 2, 0, 1)
+
+        # Boxes for padding
+        vbox = gtk.VBox()
+        hbox = gtk.HBox()
+        vbox.pack_start(table, True, True, 10)
+        hbox.pack_start(vbox, True, True, 10)
+
+        window.add(hbox)
+
+        # Get anime ID
+        selection = self.treeview[self.current_tab_id].get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        anime_id = int(self.liststore[self.current_tab_id][row][0])
+
+        t = gthreads.AsyncTask(get_data, set_data)
+        t.start(anime_id)
 
     # List display functions --------------------------------------------------
 
@@ -300,7 +389,7 @@ class Anime(gtk.Notebook):
     # Functions for adding, removing and updating anime -----------------------
 
     # Note:
-    #  - all these functions are meant for internal use (usage in this class).
+    #  - All these functions are meant for internal use (usage in this class).
     #    Except for 'add', which is used to add anime from the search section.
 
     def add(self, params):

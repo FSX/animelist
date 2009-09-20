@@ -67,7 +67,7 @@ class Toolbar(gtk.Toolbar):
         # Events
         self.al.signal.connect('al-user-set', self.__enable_control)
         self.al.signal.connect('al-no-user-set', self.__disable_control)
-        self.al.signal.connect('al-gui-done', self.__gui_done)
+        self.al.signal.connect('al-init-done', self.__init_done)
 
     # Misc functions ----------------------------------------------------------
 
@@ -87,7 +87,7 @@ class Toolbar(gtk.Toolbar):
         self.buttons['anime'].set_sensitive(False)
         self.buttons['search'].set_sensitive(False)
 
-    def __gui_done(self, widget=None):
+    def __init_done(self, widget=None):
 
         # Disable anime button
         self.buttons['anime'].set_sensitive(False)
