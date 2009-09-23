@@ -175,85 +175,55 @@ class Anime(gtk.Notebook):
             return self.mal.details(id)
             #return True
 
-        def get_image(url):
-            pass
-
         def set_data(details):
-            #print details
 
             title.set_markup('<span size="x-large" font_weight="bold">%s</span>' % details['title'])
-            description.set_label(details['synopsis'].replace('<br>', '\n'))
+            synopsis.set_label(details['synopsis'].replace('<br>', '\n'))
 
             self.al.statusbar.clear(1000)
             window.show_all()
 
-        def set_image():
-            pass
+        def get_image(url):
+
+            import urllib
+
+            path = self.al.HOME + '/cache/'
+            filename = os.path.basename(url)
+
+            if not os.access(path, os.F_OK | os.W_OK):
+                os.mkdir(path)
+
+            urllib.urlretrieve(url, path + filename)
+
+            return gtk.gdk.pixbuf_new_from_file(path + filename)
+
+        def set_image(gdk_image):
+
+            image.clear()
+            image.set_from_pixbuf(gdk_image)
 
         self.al.statusbar.update('Fetching information from MyAnimeList...')
 
-        # Window
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_default_size(600, 300)
-        window.set_title('Details')
+        # GUI
+        self.widgets = gtk.Builder()
+        self.widgets.add_from_file('ui/details.ui')
 
-        # Boxes
-        lbox = gtk.VBox(spacing=10)
-        rbox = gtk.VBox(spacing=10)
-        lhalign = gtk.Alignment(0, 0, 0, 0)
-        rhalign = gtk.Alignment(0, 0, 0, 0)
-        lhalign.add(lbox)
-        rhalign.add(rbox)
-
-        image = gtk.Viewport()
-        image.set_size_request(200, 300) # Width, height
-        image.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-        image.add(gtk.Label('Image'))
-        lbox.add(image)
-
-        title = gtk.Label()
-        #title.set_markup('<span size="x-large" font_weight="bold">Title</span>')
-        title.set_line_wrap(True)
-        title_align = gtk.Alignment(0, 0, 0, 0)
-        title_align.add(title)
-        rbox.add(title_align)
-
-        rbox.add(gtk.HSeparator())
-
-        description = gtk.Label()
-        description.set_line_wrap(True)
-        box = gtk.Viewport()
-        box.set_shadow_type(gtk.SHADOW_NONE)
-        box.add(description)
-        description_vp = gtk.ScrolledWindow()
-        description_vp.set_size_request(-1, 150)
-        description_vp.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        description_vp.add(box)
-        rbox.pack_start(description_vp, True, True)
-
-        # Table
-        table = gtk.Table(1, 2)
-        table.set_row_spacings(10)
-        table.set_col_spacings(10)
-
-        table.attach(lhalign, 0, 1, 0, 1)
-        table.attach(rhalign, 1, 2, 0, 1)
-
-        # Boxes for padding
-        vbox = gtk.VBox()
-        hbox = gtk.HBox()
-        vbox.pack_start(table, True, True, 10)
-        hbox.pack_start(vbox, True, True, 10)
-
-        window.add(hbox)
+        window = self.widgets.get_object('window')
+        image = self.widgets.get_object('image')
+        title = self.widgets.get_object('title')
+        synopsis = self.widgets.get_object('synopsis')
 
         # Get anime ID
         selection = self.treeview[self.current_tab_id].get_selection()
         row = selection.get_selected_rows()[1][0][0]
         anime_id = int(self.liststore[self.current_tab_id][row][0])
+        image_url = self.data[anime_id]['image']
 
-        t = gthreads.AsyncTask(get_data, set_data)
-        t.start(anime_id)
+        t1 = gthreads.AsyncTask(get_data, set_data)
+        t1.start(anime_id)
+
+        t2 = gthreads.AsyncTask(get_image, set_image)
+        t2.start(image_url)
 
     # List display functions --------------------------------------------------
 

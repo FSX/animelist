@@ -44,7 +44,8 @@ class Anime():
                     'status':           e['status'],           # finished airing, currently airing, not yet aired
                     'watched_status':   e['watched_status'],   # watching, completed, on-hold, dropped, plan to watch
                     'watched_episodes': e['watched_episodes'],
-                    'score':            e['score']
+                    'score':            e['score'],
+                    'image':            e['image_url']
                     }
 
         response_data = None
