@@ -177,11 +177,71 @@ class Anime(gtk.Notebook):
 
         def set_data(details):
 
+            window.show_all()
+
             title.set_markup('<span size="x-large" font_weight="bold">%s</span>' % details['title'])
             synopsis.set_label(details['synopsis'].replace('<br>', '\n'))
 
-            self.al.statusbar.clear(1000)
-            window.show_all()
+            # Related
+            markup = []
+
+            for s in details['prequels']:
+                markup.append('<b>Prequel:</b> %s' % s['title'])
+
+            for s in details['sequels']:
+                markup.append('<b>Sequel:</b> %s' % s['title'])
+
+            for s in details['side_stories']:
+                markup.append('<b>Side story:</b> %s' % s['title'])
+
+            for s in details['manga_adaptations']:
+                markup.append('<b>Manga:</b> %s' % s['title'])
+
+            if len(markup) > 0:
+                related.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            else:
+                related.hide()
+                self.widgets.get_object('l_related').hide()
+                self.widgets.get_object('hseparator5').hide()
+
+            #for e in details['other_titles']:
+            #    other_titles.add(gtk.Label(e))
+
+            #print details['other_titles']
+            markup = []
+
+            for k, v in details['other_titles'].iteritems():
+                for s in v:
+                    markup.append('<b>%s:</b> %s' % (k.capitalize(), s))
+
+            if len(markup) > 0:
+                other_titles.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            else:
+                other_titles.hide()
+                self.widgets.get_object('l_other_titles').hide()
+                self.widgets.get_object('hseparatort4').hide()
+
+            # Information
+            markup = (
+                '<b>Type:</b> %s' % details['type'],
+                '<b>Episodes:</b> %s' % details['episodes'],
+                '<b>Status:</b> %s' % details['status'].capitalize(),
+                '<b>Genres:</b> %s' % ', '.join(details['genres']),
+                '<b>Classification:</b> %s' % details['classification'].replace('&', '&amp;')
+                )
+            information.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+            # Statistics
+            markup = (
+                '<b>Score:</b> %s' % details['members_score'],
+                '<b>Ranked:</b> #%s' % details['rank'],
+                '<b>Popularity:</b> #%s' % details['popularity_rank'],
+                '<b>Members:</b> %s' % details['members_count'],
+                '<b>Favorites:</b> %s' % details['favorited_count']
+                )
+            statistics.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+            self.al.statusbar.clear()
 
         def get_image(url):
 
@@ -212,6 +272,11 @@ class Anime(gtk.Notebook):
         image = self.widgets.get_object('image')
         title = self.widgets.get_object('title')
         synopsis = self.widgets.get_object('synopsis')
+        information = self.widgets.get_object('information')
+        statistics = self.widgets.get_object('statistics')
+
+        other_titles = self.widgets.get_object('other_titles')
+        related = self.widgets.get_object('related')
 
         # Get anime ID
         selection = self.treeview[self.current_tab_id].get_selection()
