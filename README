@@ -1,5 +1,7 @@
+=== Introduction ===
+
 AnimeList is still under development and not everything works yet and stuff can be bugged.
-Only tested on Linux (Arch linux) and Windows XP Home. It has not been test on any other
+Only tested on Linux (Arch linux) and Windows. It has not been test on any other
 opererating systems.
 
 Before you can use AnimeList you jave to install GTK[1], Python[2], PyGTK[3], PyCairo[3], PyGObject[3].
@@ -16,3 +18,26 @@ Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
  [2]: http://www.python.org/
  [3]: http://www.pygtk.org/downloads.html
  [4]: http://gtk-win.sourceforge.net/
+
+=== Features ===
+
+ * Manage your anime list from MyAnimeList.net.
+ * The GUI does not freeze when adjustments are made to your list.
+ * Search anime and add them via the search section.
+ * Show details (more information) of anime.
+ * Works on Linux, Windows and maybe Mac OS X (not tested).
+ * Login details are encoded before they're saved (your username and password
+   are not saved as plain text).
+
+=== Development ===
+
+The source code can be at Bitbucket[5] and planned features in the TODO file.
+Any help with testing, especially on other OS than Windows, is really appreciated.
+
+Notes:
+
+ - The *.ui files in the 'ui' directory are used to build the GUIs of certain
+   dialogs/windows with gtk.Builder. The *.glade files are used to design the GUI
+   with Glade or Gazpacho.
+
+ [5]: http://bitbucket.org/fsx/animelist/

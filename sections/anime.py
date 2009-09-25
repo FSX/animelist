@@ -204,10 +204,6 @@ class Anime(gtk.Notebook):
                 self.widgets.get_object('l_related').hide()
                 self.widgets.get_object('hseparator5').hide()
 
-            #for e in details['other_titles']:
-            #    other_titles.add(gtk.Label(e))
-
-            #print details['other_titles']
             markup = []
 
             for k, v in details['other_titles'].iteritems():
@@ -219,7 +215,7 @@ class Anime(gtk.Notebook):
             else:
                 other_titles.hide()
                 self.widgets.get_object('l_other_titles').hide()
-                self.widgets.get_object('hseparatort4').hide()
+                self.widgets.get_object('hseparator4').hide()
 
             # Information
             markup = (

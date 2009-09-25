@@ -8,7 +8,7 @@ TODO for AnimeList
 
  - Only refresh list when user details are changed.
 
- - Details dialog:
+ ~ Details dialog:
    A details dialog for anime that appears after a user has double clicked on
    a row in one of the lists (anime and search section.
 
@@ -37,6 +37,9 @@ TODO for AnimeList
    http://www.py2exe.org/index.cgi/Py2Exe
    http://unpythonic.blogspot.com/2007/07/pygtk-py2exe-and-inno-setup-for-single.html
 
+ - Executables for Mac OS X:
+   http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html
+
  - Media player detection
    Detect a mediaplayer playing a file that's in your list and update it.
 
@@ -49,3 +52,6 @@ TODO for AnimeList
  - Internationalization (maybe):
    Make the application available in multiple languages.
    http://faq.pygtk.org/index.py?req=show&file=faq22.002.htp
+
+ - Manual:
+   A manual with images that explains how to do certain tasks in the application.
