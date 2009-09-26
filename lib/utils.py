@@ -9,8 +9,11 @@
 
 import os
 import cPickle
+import re
 
 import gtk
+
+REGEX_HTML_TAG = re.compile(r'<[^<]*?/?>')
 
 def cache_data(path, data):
     "Cache data with cPickle."
@@ -36,3 +39,9 @@ def get_image(image):
 
     if os.access(image, os.F_OK):
         return gtk.gdk.pixbuf_new_from_file(image)
+
+# http://love-python.blogspot.com/2008/07/strip-html-tags-using-python.html
+def strip_html_tags(string):
+    "Strip HTML tags from a string."
+
+    return REGEX_HTML_TAG.sub('', string)

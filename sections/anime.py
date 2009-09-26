@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 # =============================================================================
 # sections/anime.py
@@ -14,6 +13,7 @@ import gobject
 import gtk
 
 from lib import myanimelist, utils
+from lib.dialogs import DetailsDialog
 from lib.pygtkhelpers import gthreads
 
 class Anime(gtk.Notebook):
@@ -22,13 +22,11 @@ class Anime(gtk.Notebook):
 
         self.al = al
         gtk.Notebook.__init__(self)
-
-        self.current_tab_id = 0
-        self.data = {}
-        self.liststore, self.treeview, frame = {}, {}, {}
-
         self.set_tab_pos(gtk.POS_TOP)
         self.connect('switch-page', self.__set_current_tab_id)
+
+        self.current_tab_id = 0
+        self.data, self.liststore, self.treeview, frame = {}, {}, {}, {}
 
         # Menu
         self.menu = gtk.Menu()
@@ -44,8 +42,6 @@ class Anime(gtk.Notebook):
         self.menu.append(self.menu.delete)
         self.menu.append(gtk.SeparatorMenuItem())
         self.menu.append(self.menu.move)
-
-        self.menu.delete.connect('activate', self.__menu_delete)
 
         # Create tabs, lists and related stuff
         for k, v in enumerate(self.al.config.status):
@@ -80,6 +76,7 @@ class Anime(gtk.Notebook):
 
         # Events
         self.menu.details.connect('activate', self.__show_details)
+        self.menu.delete.connect('activate', self.__menu_delete)
         self.al.signal.connect('al-shutdown', self.save)
         self.al.signal.connect('al-pref-reset', self.__set_api)
         self.al.signal.connect('al-pref-reset', self.__w_refresh)
@@ -175,67 +172,65 @@ class Anime(gtk.Notebook):
             return self.mal.details(id)
             #return True
 
-        def set_data(details):
+        def set_data(data):
 
-            window.show_all()
+            details.widgets['window'].show_all()
+            details.widgets['title'].set_markup('<span size="x-large" font_weight="bold">%s</span>' % data['title'])
 
-            title.set_markup('<span size="x-large" font_weight="bold">%s</span>' % details['title'])
-            synopsis.set_label(details['synopsis'].replace('<br>', '\n'))
+            data['synopsis'] = utils.strip_html_tags(data['synopsis'].replace('<br>', '\n'))
+            details.widgets['synopsis'].set_label(data['synopsis'])
 
             # Related
             markup = []
 
-            for s in details['prequels']:
+            for s in data['prequels']:
                 markup.append('<b>Prequel:</b> %s' % s['title'])
 
-            for s in details['sequels']:
+            for s in data['sequels']:
                 markup.append('<b>Sequel:</b> %s' % s['title'])
 
-            for s in details['side_stories']:
+            for s in data['side_stories']:
                 markup.append('<b>Side story:</b> %s' % s['title'])
 
-            for s in details['manga_adaptations']:
+            for s in data['manga_adaptations']:
                 markup.append('<b>Manga:</b> %s' % s['title'])
 
             if len(markup) > 0:
-                related.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+                details.widgets['related'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
             else:
-                related.hide()
-                self.widgets.get_object('l_related').hide()
-                self.widgets.get_object('hseparator5').hide()
+                details.widgets['box_related'].hide()
 
+            # Other titles
             markup = []
 
-            for k, v in details['other_titles'].iteritems():
+            for k, v in data['other_titles'].iteritems():
                 for s in v:
                     markup.append('<b>%s:</b> %s' % (k.capitalize(), s))
 
             if len(markup) > 0:
-                other_titles.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+                details.widgets['other_titles'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
             else:
-                other_titles.hide()
-                self.widgets.get_object('l_other_titles').hide()
-                self.widgets.get_object('hseparator4').hide()
+                details.widgets['box_other_titles'].hide()
 
             # Information
             markup = (
-                '<b>Type:</b> %s' % details['type'],
-                '<b>Episodes:</b> %s' % details['episodes'],
-                '<b>Status:</b> %s' % details['status'].capitalize(),
-                '<b>Genres:</b> %s' % ', '.join(details['genres']),
-                '<b>Classification:</b> %s' % details['classification'].replace('&', '&amp;')
+                '<b>Type:</b> %s' % data['type'],
+                '<b>Episodes:</b> %s' % data['episodes'],
+                '<b>Status:</b> %s' % data['status'].capitalize(),
+                '<b>Genres:</b> %s' % ', '.join(data['genres']),
+                '<b>Classification:</b> %s' % data['classification'].replace('&', '&amp;')
                 )
-            information.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            details.widgets['information'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
 
             # Statistics
             markup = (
-                '<b>Score:</b> %s' % details['members_score'],
-                '<b>Ranked:</b> #%s' % details['rank'],
-                '<b>Popularity:</b> #%s' % details['popularity_rank'],
-                '<b>Members:</b> %s' % details['members_count'],
-                '<b>Favorites:</b> %s' % details['favorited_count']
+                '<b>Score:</b> %s' % data['members_score'],
+                '<b>Ranked:</b> #%s' % data['rank'],
+                '<b>Popularity:</b> #%s' % data['popularity_rank'],
+                '<b>Members:</b> %s' % data['members_count'],
+                '<b>Favorites:</b> %s' % data['favorited_count']
                 )
-            statistics.set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            details.widgets['statistics'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
 
             self.al.statusbar.clear()
 
@@ -255,24 +250,13 @@ class Anime(gtk.Notebook):
 
         def set_image(gdk_image):
 
-            image.clear()
-            image.set_from_pixbuf(gdk_image)
+            details.widgets['image'].clear()
+            details.widgets['image'].set_from_pixbuf(gdk_image)
 
         self.al.statusbar.update('Fetching information from MyAnimeList...')
 
         # GUI
-        self.widgets = gtk.Builder()
-        self.widgets.add_from_file('ui/details.ui')
-
-        window = self.widgets.get_object('window')
-        image = self.widgets.get_object('image')
-        title = self.widgets.get_object('title')
-        synopsis = self.widgets.get_object('synopsis')
-        information = self.widgets.get_object('information')
-        statistics = self.widgets.get_object('statistics')
-
-        other_titles = self.widgets.get_object('other_titles')
-        related = self.widgets.get_object('related')
+        details = DetailsDialog() # Create details dialog
 
         # Get anime ID
         selection = self.treeview[self.current_tab_id].get_selection()
@@ -549,32 +533,3 @@ class Anime(gtk.Notebook):
             self.al.statusbar.clear(5000)
         else:
             self.al.statusbar.clear(1000)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

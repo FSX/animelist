@@ -8,6 +8,9 @@ Before you can use AnimeList you jave to install GTK[1], Python[2], PyGTK[3], Py
 For Python and PyGTK are Windows installers available. A Windows installer for GTK
 can be found at gtk-win.sourceforge.net[4].
 
+If you have Python 2.5 or lower you need to install Simplejson[5]. The JSON module is
+bundled with Python 2.6.
+
 To startup AnimeList you need 'cd' to the AnimeList directory and make "animelist.py" executable
 (if needed) and do "./animelist.py". A dialog will popup and ask about your login details.
 After you've done that it will load your list.
@@ -18,6 +21,7 @@ Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
  [2]: http://www.python.org/
  [3]: http://www.pygtk.org/downloads.html
  [4]: http://gtk-win.sourceforge.net/
+ [5]: http://code.google.com/p/simplejson/
 
 === Features ===
 
@@ -31,8 +35,9 @@ Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
 
 === Development ===
 
-The source code can be at Bitbucket[5] and planned features in the TODO file.
-Any help with testing, especially on other OS than Windows, is really appreciated.
+The source code can be at Bitbucket[6] and planned features in the TODO file.
+Any help with testing, especially on other OS than Linux and Windows, is really
+appreciated.
 
 Notes:
 
@@ -40,7 +45,7 @@ Notes:
    dialogs/windows with gtk.Builder. The *.glade files are used to design the GUI
    with Glade or Gazpacho.
  - Pygtkhelpers is a library from PIDA and is licensed under the LGPL 2 or later.
-   The source code can be found at Bitbucket[6].
+   The source code can be found at Bitbucket[7].
 
- [5]: http://bitbucket.org/fsx/animelist/
- [6]: http://bitbucket.org/aafshar/pygtkhelpers-main/overview/
+ [6]: http://bitbucket.org/fsx/animelist/
+ [7]: http://bitbucket.org/aafshar/pygtkhelpers-main/overview/

@@ -7,10 +7,13 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
+import os
+
 import gtk
 import pango
 
 from lib import myanimelist, utils
+from lib.dialogs import DetailsDialog
 from lib.pygtkhelpers import gthreads
 
 class Search(gtk.VBox):
@@ -239,7 +242,107 @@ class Search(gtk.VBox):
     def __show_details(self, widget):
         "Show details box when a row is activated."
 
-        pass
+        def get_data(id):
+            return self.mal.details(id)
+            #return True
+
+        def set_data(data):
+
+            details.widgets['window'].show_all()
+            details.widgets['title'].set_markup('<span size="x-large" font_weight="bold">%s</span>' % data['title'])
+
+            data['synopsis'] = utils.strip_html_tags(data['synopsis'].replace('<br>', '\n'))
+            details.widgets['synopsis'].set_label(data['synopsis'])
+
+            # Related
+            markup = []
+
+            for s in data['prequels']:
+                markup.append('<b>Prequel:</b> %s' % s['title'])
+
+            for s in data['sequels']:
+                markup.append('<b>Sequel:</b> %s' % s['title'])
+
+            for s in data['side_stories']:
+                markup.append('<b>Side story:</b> %s' % s['title'])
+
+            for s in data['manga_adaptations']:
+                markup.append('<b>Manga:</b> %s' % s['title'])
+
+            if len(markup) > 0:
+                details.widgets['related'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            else:
+                details.widgets['box_related'].hide()
+
+            # Other titles
+            markup = []
+
+            for k, v in data['other_titles'].iteritems():
+                for s in v:
+                    markup.append('<b>%s:</b> %s' % (k.capitalize(), s))
+
+            if len(markup) > 0:
+                details.widgets['other_titles'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+            else:
+                details.widgets['box_other_titles'].hide()
+
+            # Information
+            markup = (
+                '<b>Type:</b> %s' % data['type'],
+                '<b>Episodes:</b> %s' % data['episodes'],
+                '<b>Status:</b> %s' % data['status'].capitalize(),
+                '<b>Genres:</b> %s' % ', '.join(data['genres']),
+                '<b>Classification:</b> %s' % data['classification'].replace('&', '&amp;')
+                )
+            details.widgets['information'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+            # Statistics
+            markup = (
+                '<b>Score:</b> %s' % data['members_score'],
+                '<b>Ranked:</b> #%s' % data['rank'],
+                '<b>Popularity:</b> #%s' % data['popularity_rank'],
+                '<b>Members:</b> %s' % data['members_count'],
+                '<b>Favorites:</b> %s' % data['favorited_count']
+                )
+            details.widgets['statistics'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+            self.al.statusbar.clear()
+
+        def get_image(url):
+
+            import urllib
+
+            path = self.al.HOME + '/cache/'
+            filename = os.path.basename(url)
+
+            if not os.access(path, os.F_OK | os.W_OK):
+                os.mkdir(path)
+
+            urllib.urlretrieve(url, path + filename)
+
+            return gtk.gdk.pixbuf_new_from_file(path + filename)
+
+        def set_image(gdk_image):
+
+            details.widgets['image'].clear()
+            details.widgets['image'].set_from_pixbuf(gdk_image)
+
+        self.al.statusbar.update('Fetching information from MyAnimeList...')
+
+        # GUI
+        details = DetailsDialog() # Create details dialog
+
+        # Get anime ID
+        selection = self.treeview.get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        anime_id = int(self.liststore[row][0])
+        image_url = self.data[anime_id]['image']
+
+        t1 = gthreads.AsyncTask(get_data, set_data)
+        t1.start(anime_id)
+
+        t2 = gthreads.AsyncTask(get_image, set_image)
+        t2.start(image_url)
 
     # Functions for filling the list with search results ----------------------
 

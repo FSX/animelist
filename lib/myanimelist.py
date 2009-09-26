@@ -11,7 +11,11 @@
 import os
 import sys
 import urllib
-import json
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 import utils
 import request
@@ -72,7 +76,8 @@ class Anime():
                     'type':             e['type'],             # TV, Movie, OVA, ONA, Special, Music
                     'episodes':         e['episodes'],
                     'status':           e['status'],           # finished airing, currently airing, not yet aired
-                    'members_score':    e['members_score']
+                    'members_score':    e['members_score'],
+                    'image':            e['image_url']
                     }
 
         return data

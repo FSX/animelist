@@ -11,7 +11,7 @@ import thread
 
 import gtk
 
-from lib.dialogs import about
+from lib.dialogs import about_dialog
 from lib import utils
 
 class Toolbar(gtk.Toolbar):
@@ -135,7 +135,7 @@ class Toolbar(gtk.Toolbar):
         self.al.switch_section(2)
 
     def __on_about(self, widget):
-        about(
+        about_dialog(
             self.al.name,
             self.al.version,
             'Copyright (c) 2009 Frank Smit',

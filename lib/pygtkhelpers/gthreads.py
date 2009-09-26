@@ -35,7 +35,7 @@ class AsyncTask(object):
     """
     def __init__(self, work_callback=None, loop_callback=None, daemon=True):
         self.counter = 0
-        gobject.threads_init() #the glib mainloop doesn't love us else
+        gobject.threads_init() # The glib mainloop doesn't love us else
         self.daemon = daemon
 
         if work_callback is not None:
@@ -64,7 +64,7 @@ class AsyncTask(object):
 
     def _work_callback(self, counter, *args, **kwargs):
         ret = self.work_callback(*args, **kwargs)
-        #tuple necessary cause idle_add wont allow more args
+        # Tuple necessary cause idle_add wont allow more args
         gobject.idle_add(self._loop_callback, (counter, ret))
 
     def _loop_callback(self, vargs):
