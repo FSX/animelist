@@ -39,5 +39,8 @@ Notes:
  - The *.ui files in the 'ui' directory are used to build the GUIs of certain
    dialogs/windows with gtk.Builder. The *.glade files are used to design the GUI
    with Glade or Gazpacho.
+ - Pygtkhelpers is a library from PIDA and is licensed under the LGPL 2 or later.
+   The source code can be found at Bitbucket[6].
 
  [5]: http://bitbucket.org/fsx/animelist/
+ [6]: http://bitbucket.org/aafshar/pygtkhelpers-main/overview/

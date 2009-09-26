@@ -31,8 +31,8 @@ def htmldecode(string):
 
     return string.replace('&apos;', '\'')
 
-def get_icon(icon):
+def get_image(image):
     "Returns a gtk.gdk.Pixbuf."
 
-    if os.access(icon, os.F_OK):
-        return gtk.gdk.pixbuf_new_from_file(icon)
+    if os.access(image, os.F_OK):
+        return gtk.gdk.pixbuf_new_from_file(image)

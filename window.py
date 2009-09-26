@@ -22,7 +22,7 @@ class Window(gtk.Window):
         self.set_default_size(800, 600)
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_title(self.al.name)
-        self.set_icon(utils.get_icon('./pixmaps/animelist_logo_32.png'))
+        self.set_icon(utils.get_image('./pixmaps/animelist_logo_32.png'))
         self._position = (0, 0) # Stores the position of the window. Starts with an
                                 # underscore, because 'position' is already taken.
 

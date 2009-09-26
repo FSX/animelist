@@ -1,16 +1,17 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 """
     :copyright: 2005-2008 by The PIDA Project
     :license: LGPL 2 or later (see README/COPYING/LICENSE)
 """
 
+# Note: This module/file has been modified and is not the same as the original
+#       module/file from the pygtkhelpers library. Go to
+#       http://bitbucket.org/aafshar/pygtkhelpers-main/ for the original file.
 
-import os
-import threading, thread
-import Queue as queue
-import subprocess
+import threading
 import gobject
-import time
 
 class AsyncTask(object):
     """
@@ -77,101 +78,3 @@ class AsyncTask(object):
             ret = (ret,)
 
         self.loop_callback(*ret)
-
-
-class GeneratorTask(AsyncTask):
-    """
-    The diference between this task and AsyncTask
-    is that the `work` callback returns a generator.
-    For each value the generator yields
-    the `loop` callback is called inside Gtk+'s main loop.
-
-    :param work: callback that returns results
-    :param loop: callback inside the gtk thread
-    :keyword priority: gtk priority the loop callback will have
-    :keyword pass_generator:
-        will pass the generator instance
-        as `generator_task` to the worker callback
-
-    A simple example::
-
-        def work():
-            for i in range(10000):
-                yield i
-
-        def loop(val):
-            print val
-
-        gt = GeneratorTask(work, loop)
-        gt.start()
-        import gtk
-        gtk.main()
-    """
-    def __init__(self, work_callback, loop_callback, complete_callback=None,
-                 priority=gobject.PRIORITY_DEFAULT_IDLE,
-                 pass_generator=False):
-        AsyncTask.__init__(self, work_callback, loop_callback)
-        self.priority = priority
-        self._complete_callback = complete_callback
-        self._pass_generator = pass_generator
-
-    def _work_callback(self, counter, *args, **kwargs):
-        self._stopped = False
-        if self._pass_generator:
-            kwargs = kwargs.copy()
-            kwargs['generator_task'] = self
-        for ret in self.work_callback(*args, **kwargs):
-            #XXX: what about checking self.counter?
-            if self._stopped:
-                thread.exit()
-            gobject.idle_add(self._loop_callback, (counter, ret),
-                             priority=self.priority)
-        if self._complete_callback is not None:
-            gobject.idle_add(self._complete_callback,
-                             priority=self.priority)
-
-    def stop(self):
-        self._stopped = True
-
-    @property
-    def is_stopped(self):
-        return self._stopped
-
-
-def gcall(func, *args, **kwargs):
-    """
-    Calls a function, with the given arguments inside Gtk's main loop.
-    Example::
-        gcall(lbl.set_text, "foo")
-
-    If this call would be made in a thread there could be problems, using
-    it inside Gtk's main loop makes it thread safe.
-    """
-    return gobject.idle_add(lambda: (func(*args, **kwargs) or False))
-
-
-def invoke_in_mainloop(func, *args, **kwargs):
-    """
-    invoke a function in the mainloop, pass the data back
-    """
-    results = queue.Queue()
-
-    def run():
-        try:
-            data = func(*args, **kwargs)
-            results.put(data)
-            results.put(None)
-        except BaseException, e: #XXX: handle
-            results.put(None)
-            results.put(e)
-            raise
-
-    gcall(run)
-
-    data = results.get()
-    exception = results.get()
-
-    if exception is None:
-        return data
-    else:
-        raise exception

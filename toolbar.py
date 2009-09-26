@@ -11,6 +11,7 @@ import thread
 
 import gtk
 
+from lib.dialogs import about
 from lib import utils
 
 class Toolbar(gtk.Toolbar):
@@ -134,13 +135,11 @@ class Toolbar(gtk.Toolbar):
         self.al.switch_section(2)
 
     def __on_about(self, widget):
-        about = gtk.AboutDialog()
-        about.set_program_name(self.al.name)
-        about.set_version(self.al.version)
-        about.set_copyright('Copyright (c) 2009 Frank Smit')
-        about.set_comments('MyAnimeList.net anime list manager + some extra stuff.')
-        about.set_website('http://61924.nl')
-        about.set_logo(utils.get_icon('./pixmaps/animelist_logo_256.png'))
-        about.run()
-        about.destroy()
-
+        about(
+            self.al.name,
+            self.al.version,
+            'Copyright (c) 2009 Frank Smit',
+            'MyAnimeList.net anime list manager + some extra stuff.',
+            'http://61924.nl',
+            utils.get_image('./pixmaps/animelist_logo_256.png')
+            )

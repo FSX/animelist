@@ -26,6 +26,7 @@ TODO for AnimeList
 
  - Modularize sections:
    So section can be plugged in without having to modify any other files.
+   http://lucumr.pocoo.org/2006/7/3/python-plugin-system
 
  - Preferences dialog:
    Make an API for the preferences dialog so it's easy to extend.
