@@ -16,7 +16,8 @@ class Signals(gobject.GObject):
         'al-init-done' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-pref-reset' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-no-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
+        'al-no-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+        'al-user-details-changed' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
         }
 
     def __init__(self):

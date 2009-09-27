@@ -75,10 +75,13 @@ class Toolbar(gtk.Toolbar):
     def __enable_control(self, widget=None):
         "Enable buttons when a user has been set."
 
-        self.buttons['refresh'].set_sensitive(True)
-        self.buttons['save'].set_sensitive(True)
-        self.buttons['anime'].set_sensitive(True)
-        self.buttons['search'].set_sensitive(True)
+        if self.al.current_section == 1:
+            self.buttons['refresh'].set_sensitive(True)
+            self.buttons['save'].set_sensitive(True)
+            self.buttons['anime'].set_sensitive(False)
+
+        if self.al.current_section == 2:
+            self.buttons['search'].set_sensitive(False)
 
     def __disable_control(self, widget=None):
         "Disable buttons when no user has been set."

@@ -4,13 +4,15 @@ TODO for AnimeList
 * = Done.
 ~ = In process.
 
- ~ Code cleanup and add doc strings!
-
- - Only refresh list when user details are changed.
+=== Version 0.1 ===
 
  * Details dialog:
    A details dialog for anime that appears after a user has double clicked on
    a row in one of the lists (anime and search section).
+
+ ~ Code cleanup and add doc strings!
+
+ * Only refresh list when user details are changed.
 
  - Verify user details:
    Verify the user details one they're entered in the preferences dialog.
@@ -24,12 +26,27 @@ TODO for AnimeList
    Currently this work really good. Sorting by episode doesn't work and scores
    aren't sorted properly.
 
- - Modularize sections:
+ - Manual:
+   A manual with images that explains how to do certain tasks in the application.
+
+
+=== Version 0.2 ===
+
+ - Modularize sections (plugin system):
    So section can be plugged in without having to modify any other files.
    http://lucumr.pocoo.org/2006/7/3/python-plugin-system
 
  - Preferences dialog:
    Make an API for the preferences dialog so it's easy to extend.
+
+ - Media player detection
+   Detect a mediaplayer playing a file that's in your list and update it.
+
+ - Torrent section:
+   Read RSS feeds from certain websites and show the items that are in the users' list.
+
+
+=== Unplanned ===
 
  - Manga section:
    Will be done when the Unofficial API has support for manga.
@@ -41,18 +58,9 @@ TODO for AnimeList
  - Executables for Mac OS X:
    http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html
 
- - Media player detection
-   Detect a mediaplayer playing a file that's in your list and update it.
-
- - Torrent section:
-   Read RSS feeds from certain websites and show the items that are in the users' list.
-
  - Icons:
    Maybe some cool, shiny icons. ^^
 
  - Internationalization (maybe):
    Make the application available in multiple languages.
    http://faq.pygtk.org/index.py?req=show&file=faq22.002.htp
-
- - Manual:
-   A manual with images that explains how to do certain tasks in the application.

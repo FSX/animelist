@@ -79,7 +79,7 @@ class Anime(gtk.Notebook):
         self.menu.delete.connect('activate', self.__menu_delete)
         self.al.signal.connect('al-shutdown', self.save)
         self.al.signal.connect('al-pref-reset', self.__set_api)
-        self.al.signal.connect('al-pref-reset', self.__w_refresh)
+        self.al.signal.connect('al-user-details-changed', self.__w_refresh)
         self.al.signal.connect('al-user-set', self.__enable_control)
         self.al.signal.connect('al-no-user-set', self.__disable_control)
 
@@ -111,8 +111,8 @@ class Anime(gtk.Notebook):
     def __w_refresh(self, widget=None):
         "A wrapper for 'refresh' function."
 
-        # If self.refresh is executed with out 'gobject.idle_add' the
-        # application will get a 'Segmentation fault'.
+        # If self.refresh is executed without 'gobject.idle_add' the application
+        # will get a 'Segmentation fault'. I'm not sure why this happens.
         gobject.idle_add(self.refresh)
 
     def save(self, widget=None):

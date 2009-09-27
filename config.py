@@ -13,6 +13,8 @@ import cPickle
 
 import gtk
 
+from lib.dialogs import PreferencesDialog
+
 class Config():
 
     def __init__(self, al):
@@ -72,13 +74,6 @@ class Config():
         # Field (entry, checknutton) objects are saved in this variable
         self.fields = {}
 
-        # Dialog flags and buttons
-        flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
-        buttons = (
-            gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-            gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
-            )
-
         # Objects (fields, text, frames) that are displayed in the prefs dialog
         objects = (
             gtk.Label('Settings marked with a * will take effect after\nthe application has been restarted.'),
@@ -97,25 +92,11 @@ class Config():
                         })
             )
 
-        # Main table
-        table = gtk.Table(len(objects), 1)
-        table.set_row_spacings(10)
-        table.set_col_spacings(10)
+        self.prefsdialog = PreferencesDialog(self.al.window, objects)
 
-        for i, obj in enumerate(objects):
-            table.attach(obj, 0, 1, i, i+1)
+        if self.prefsdialog.run() == gtk.RESPONSE_ACCEPT:
 
-        # Boxes for padding
-        hbox = gtk.HBox()
-        hbox.pack_start(table, False, True, 5)
-        hbox.show_all()
-
-        # Create dialog
-        dialog = gtk.Dialog('Preferences', self.al.window, flags, buttons)
-        dialog.set_default_response(gtk.RESPONSE_ACCEPT)
-        dialog.vbox.pack_start(hbox, False, True, 5)
-
-        if dialog.run() == gtk.RESPONSE_ACCEPT:
+            tmp_settings = {}
 
             # Update settings in self.settings
             for field_id, widget in self.fields.iteritems():
@@ -123,24 +104,30 @@ class Config():
                 widget_type = widget.get_name()
 
                 if widget_type == 'GtkEntry':
-                    self.settings[field_id] = widget.get_text()
+                    tmp_settings[field_id] = widget.get_text()
                 elif widget_type == 'GtkCheckButton':
-                    self.settings[field_id] = widget.get_active()
+                    tmp_settings[field_id] = widget.get_active()
+
+            # Check if user details are entered
+            if len(tmp_settings['username']) > 0 and len(tmp_settings['password']) > 0:
+                self.no_user_defined = False
+                self.al.signal.emit('al-user-set')
+
+                # Only send a signal when the user details have been changed
+                if tmp_settings['username'] != self.settings['username'] and tmp_settings['password'] != self.settings['password']:
+                    self.al.signal.emit('al-user-details-changed')
+            else:
+                self.al.signal.emit('al-no-user-set')
+
+            self.settings = tmp_settings
 
             # Save settings to settings file
             self.__save_settings()
 
-            # Check if user details are entered
-            if len(self.settings['username']) > 0 and len(self.settings['password']) > 0:
-                self.no_user_defined = False
-                self.al.signal.emit('al-user-set')
-            else:
-                self.al.signal.emit('al-no-user-set')
-
             # Emit signal
             self.al.signal.emit('al-pref-reset')
 
-        dialog.destroy()
+        self.prefsdialog.destroy()
 
     def __generate_box(self, name, fields):
         """Generates frames with fields in it. All field objects are saved in self.fields (dict).

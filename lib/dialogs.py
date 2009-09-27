@@ -24,12 +24,38 @@ def about_dialog(name, version, copyright, comments, website, icon):
     about.run()
     about.destroy()
 
+class PreferencesDialog(gtk.Dialog):
+
+    def __init__(self, window, objects):
+
+        # Dialog flags and buttons
+        flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+        buttons = (
+            gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+            gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
+            )
+
+        gtk.Dialog.__init__(self, 'Preferences', window, flags, buttons)
+        self.set_default_response(gtk.RESPONSE_ACCEPT)
+
+        # Table
+        table = gtk.Table(len(objects), 1)
+        table.set_border_width(5)
+        table.set_row_spacings(10)
+
+        for i, obj in enumerate(objects):
+            table.attach(obj, 0, 1, i, i+1)
+
+        table.show_all()
+
+        self.vbox.pack_start(table, False, True, 0)
+
 class DetailsDialog(gtk.Builder):
 
     def __init__(self):
 
         gtk.Builder.__init__(self)
-        self.add_from_file('ui/details.ui')
+        self.add_from_file('./ui/details.ui')
 
         self.mal_url = None
         self.widgets = {
