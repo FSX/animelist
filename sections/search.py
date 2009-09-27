@@ -54,7 +54,7 @@ class Search(gtk.VBox):
             self.menu.add_submenu.append(self.menu.add_to[k])
 
         # Search results list
-        self.liststore = gtk.ListStore(str, str, str, str, str, str)
+        self.liststore = gtk.ListStore(int, str, str, str, int, str)
 
         self.treeview = gtk.TreeView(self.liststore)
         self.treeview.set_rules_hint(True)
@@ -208,15 +208,15 @@ class Search(gtk.VBox):
                 my_score = score_entry.get_text()
 
                 try:
-                    params['watched_episodes'] = str(int(my_episodes))
+                    params['watched_episodes'] = int(my_episodes)
                 except ValueError:
                     pass
 
                 try:
                     my_score = int(my_score)
 
-                    if my_score  >= 0 or my_score <= 10:
-                        params['score'] = str(my_score)
+                    if my_score >= 0 or my_score <= 10:
+                        params['score'] = my_score
                 except ValueError:
                     pass
 

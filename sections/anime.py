@@ -47,12 +47,12 @@ class Anime(gtk.Notebook):
         for k, v in enumerate(self.al.config.status):
 
             # Create lists
-            self.liststore[k] = gtk.ListStore(str, str, str, str, str, str)
+            self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
             #ls_sort = gtk.TreeModelSort(self.liststore[k])
             #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
 
             self.liststore[k].set_sort_func(4, self.__sort_progess)
-            self.liststore[k].set_sort_func(5, self.__sort_score)
+            #self.liststore[k].set_sort_func(5, self.__sort_score)
 
             self.treeview[k] = gtk.TreeView(self.liststore[k])
             self.treeview[k].set_rules_hint(True)
@@ -282,7 +282,7 @@ class Anime(gtk.Notebook):
     def __cell_status_display(self, column, cell, model, iter):
         "Set background for status column."
 
-        anime_id = int(model.get_value(iter, 0))
+        anime_id = model.get_value(iter, 0)
         status = self.data[anime_id]['status']
 
         cell.set_property('background-gdk', self.al.config.cstatus[status])
@@ -290,7 +290,7 @@ class Anime(gtk.Notebook):
     def __cell_progress_display(self, column, cell, model, iter):
         "Put 'watched episodes/episodes' in column."
 
-        anime_id = int(model.get_value(iter, 0))
+        anime_id = model.get_value(iter, 0)
         episodes = self.data[anime_id]['episodes']
         if episodes == 0: episodes = '?'
 
@@ -435,7 +435,7 @@ class Anime(gtk.Notebook):
                         v['score']  # Score
                         ))
 
-            self.al.statusbar.clear(2000)
+            self.al.statusbar.clear(1000)
 
         self.al.statusbar.update('Syncing with MyAnimeList...')
 
@@ -493,7 +493,7 @@ class Anime(gtk.Notebook):
         selection = self.treeview[self.current_tab_id].get_selection()
         row = selection.get_selected_rows()[1][0][0]
         iter = selection.get_selected()[1]
-        anime_id = int(self.liststore[self.current_tab_id][row][0])
+        anime_id = self.liststore[self.current_tab_id][row][0]
 
         # Remove anime from list and cache
         self.liststore[self.current_tab_id].remove(iter)
@@ -508,7 +508,7 @@ class Anime(gtk.Notebook):
 
         self.al.statusbar.update('Sending changes to MyAnimeList...')
 
-        anime_id = int(self.liststore[current_list][row][0])
+        anime_id = self.liststore[current_list][row][0]
 
         # Update local cache
         self.data[anime_id]['watched_status'] = self.al.config.status[dest_list]
@@ -529,7 +529,7 @@ class Anime(gtk.Notebook):
         "Validate given progress and update score cell, local cache and MAL."
 
         anime_id = int(self.liststore[list_id][row][0])
-        old_progress = int(self.data[anime_id]['watched_episodes'])
+        old_progress = self.data[anime_id]['watched_episodes']
         new_progress = int(new_progress)
 
         if new_progress != old_progress:
@@ -537,11 +537,11 @@ class Anime(gtk.Notebook):
             self.al.statusbar.update('Sending changes to MyAnimeList...')
 
             episodes = self.data[anime_id]['episodes']
-            if episodes == '0': episodes = '?'
+            if episodes == 0: episodes = '?'
 
             # This isn't needed because __cell_progress_display already does this
             # self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
-            self.data[anime_id]['watched_episodes'] = unicode(new_progress)
+            self.data[anime_id]['watched_episodes'] = new_progress
 
             # Update MAL
             t = gthreads.AsyncTask(self.mal.update, self.__callback)
@@ -554,8 +554,8 @@ class Anime(gtk.Notebook):
     def __cell_score_edited(self, cellrenderer, row, new_score, list_id):
         "Validate given score and update score cell, local cache and MAL."
 
-        anime_id = int(self.liststore[list_id][row][0])
-        old_score = int(self.liststore[list_id][row][5])
+        anime_id = self.liststore[list_id][row][0]
+        old_score = self.liststore[list_id][row][5]
         new_score = int(new_score)
 
         if new_score != old_score and new_score >= 0 and new_score <= 10:
@@ -563,7 +563,7 @@ class Anime(gtk.Notebook):
             self.al.statusbar.update('Sending changes to MyAnimeList...')
 
             self.liststore[list_id][row][5] = new_score
-            self.data[anime_id]['score'] = unicode(new_score)
+            self.data[anime_id]['score'] = new_score
 
             # Update MAL
             t = gthreads.AsyncTask(self.mal.update, self.__callback)

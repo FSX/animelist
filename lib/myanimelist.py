@@ -41,14 +41,14 @@ class Anime():
 
         for e in response_data:
                 data[int(e['id'])] = {
-                    'id':               e['id'],
+                    'id':               int(e['id']),
                     'title':            utils.htmldecode(e['title']),
                     'type':             e['type'],             # TV, Movie, OVA, ONA, Special, Music
-                    'episodes':         e['episodes'],
+                    'episodes':         int(e['episodes']),
                     'status':           e['status'],           # finished airing, currently airing, not yet aired
                     'watched_status':   e['watched_status'],   # watching, completed, on-hold, dropped, plan to watch
-                    'watched_episodes': e['watched_episodes'],
-                    'score':            e['score'],
+                    'watched_episodes': int(e['watched_episodes']),
+                    'score':            int(e['score']),
                     'image':            e['image_url']
                     }
 
@@ -71,12 +71,12 @@ class Anime():
 
         for e in response_data:
                 data[int(e['id'])] = {
-                    'id':               e['id'],
+                    'id':               int(e['id']),
                     'title':            utils.htmldecode(e['title']),
                     'type':             e['type'],             # TV, Movie, OVA, ONA, Special, Music
-                    'episodes':         e['episodes'],
+                    'episodes':         int(e['episodes']),
                     'status':           e['status'],           # finished airing, currently airing, not yet aired
-                    'members_score':    e['members_score'],
+                    'members_score':    float(e['members_score']),
                     'image':            e['image_url']
                     }
 
