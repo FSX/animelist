@@ -37,7 +37,7 @@ class Toolbar(gtk.Toolbar):
                 }),
             'separator',
             ('anime', {
-                'stock': gtk.STOCK_INFO,
+                'icon': './pixmaps/monitor.png',
                 'event': ('clicked', self.__on_anime),
                 'tooltip': 'Go to your anime list'
                 }),
@@ -102,7 +102,16 @@ class Toolbar(gtk.Toolbar):
                 toolbar.insert(gtk.SeparatorToolItem(), i)
                 continue
 
-            toolbar.buttons[v[0]] = gtk.ToolButton(v[1]['stock'])
+            if 'stock' in v[1]:
+                toolbar.buttons[v[0]] = gtk.ToolButton(v[1]['stock'])
+            else:
+                toolbar.buttons[v[0]] = gtk.ToolButton()
+
+            if 'icon' in v[1]:
+                image = gtk.Image()
+                image.set_from_icon_set(gtk.IconSet(gtk.gdk.pixbuf_new_from_file(v[1]['icon'])), gtk.ICON_SIZE_SMALL_TOOLBAR)
+                toolbar.buttons[v[0]].set_icon_widget(image)
+
             toolbar.buttons[v[0]].connect(v[1]['event'][0], v[1]['event'][1])
             toolbar.buttons[v[0]].set_tooltip_text(v[1]['tooltip'])
 

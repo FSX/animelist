@@ -322,12 +322,12 @@ class Search(gtk.VBox):
 
             urllib.urlretrieve(url, path + filename)
 
-            return gtk.gdk.pixbuf_new_from_file(path + filename)
+            return path + filename
 
-        def set_image(gdk_image):
+        def set_image(image):
 
             details.widgets['image'].clear()
-            details.widgets['image'].set_from_pixbuf(gdk_image)
+            details.widgets['image'].set_from_file(image)
 
         self.al.statusbar.update('Fetching information from MyAnimeList...')
 
