@@ -79,8 +79,10 @@ class Toolbar(gtk.Toolbar):
             self.buttons['refresh'].set_sensitive(True)
             self.buttons['save'].set_sensitive(True)
             self.buttons['anime'].set_sensitive(False)
+            self.buttons['search'].set_sensitive(True)
 
         if self.al.current_section == 2:
+            self.buttons['anime'].set_sensitive(True)
             self.buttons['search'].set_sensitive(False)
 
     def __disable_control(self, widget=None):

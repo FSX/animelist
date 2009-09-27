@@ -8,6 +8,7 @@
 # =============================================================================
 
 import os
+import urllib
 
 import gobject
 import gtk
@@ -23,7 +24,6 @@ class Anime(gtk.Notebook):
         self.al = al
         gtk.Notebook.__init__(self)
         self.set_tab_pos(gtk.POS_TOP)
-        self.connect('switch-page', self.__set_current_tab_id)
 
         self.current_tab_id = 0
         self.data, self.liststore, self.treeview, frame = {}, {}, {}, {}
@@ -48,6 +48,12 @@ class Anime(gtk.Notebook):
 
             # Create lists
             self.liststore[k] = gtk.ListStore(str, str, str, str, str, str)
+            #ls_sort = gtk.TreeModelSort(self.liststore[k])
+            #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
+
+            self.liststore[k].set_sort_func(4, self.__sort_progess)
+            self.liststore[k].set_sort_func(5, self.__sort_score)
+
             self.treeview[k] = gtk.TreeView(self.liststore[k])
             self.treeview[k].set_rules_hint(True)
             self.treeview[k].set_search_column(2)
@@ -75,6 +81,7 @@ class Anime(gtk.Notebook):
         self.menu.show_all()
 
         # Events
+        self.connect('switch-page', self.__set_current_tab_id)
         self.menu.details.connect('activate', self.__show_details)
         self.menu.delete.connect('activate', self.__menu_delete)
         self.al.signal.connect('al-shutdown', self.save)
@@ -238,8 +245,6 @@ class Anime(gtk.Notebook):
 
         def get_image(url):
 
-            import urllib
-
             path = self.al.HOME + '/cache/'
             filename = os.path.basename(url)
 
@@ -347,6 +352,45 @@ class Anime(gtk.Notebook):
         column = gtk.TreeViewColumn('Score', renderer, text=5)
         column.set_sort_column_id(5)
         treeview.append_column(column)
+
+    # List sorting functions --------------------------------------------------
+
+    def __sort_progess(self, model, iter1, iter2, data=None):
+
+        (c, order) = model.get_sort_column_id()
+
+        if c < 0:
+            return 0
+
+        id1 = model.get_value(iter1, 0)
+        id2 = model.get_value(iter2, 0)
+
+        x = self.data[int(id1)]['episodes']
+        y = self.data[int(id2)]['episodes']
+
+        if x < y:
+            return -1
+        if x == y:
+            return 0
+
+        return 1
+
+    def __sort_score(self, model, iter1, iter2, data=None):
+
+        (c, order) = model.get_sort_column_id()
+
+        if c < 0:
+            return 0
+
+        x = int(model.get_value(iter1, c))
+        y = int(model.get_value(iter2, c))
+
+        if x < y:
+            return -1
+        if x == y:
+            return 0
+
+        return 1
 
     # Functions for refreshing the anime lists --------------------------------
 
