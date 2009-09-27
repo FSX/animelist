@@ -249,10 +249,12 @@ class Search(gtk.VBox):
         def set_data(data):
 
             details.widgets['window'].show_all()
+            details.widgets['window'].set_title(data['title'])
+            details.widgets['window'].set_icon(utils.get_image('./pixmaps/animelist_logo_32.png'))
             details.widgets['title'].set_markup('<span size="x-large" font_weight="bold">%s</span>' % data['title'])
-
             data['synopsis'] = utils.strip_html_tags(data['synopsis'].replace('<br>', '\n'))
             details.widgets['synopsis'].set_label(data['synopsis'])
+            details.mal_url = 'http://myanimelist.net/anime/%d' % data['id']
 
             # Related
             markup = []

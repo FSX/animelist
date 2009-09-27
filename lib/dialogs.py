@@ -7,9 +7,9 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import gtk
+import webbrowser
 
-from lib import utils
+import gtk
 
 def about_dialog(name, version, copyright, comments, website, icon):
     "Shows an about dialog."
@@ -31,6 +31,7 @@ class DetailsDialog(gtk.Builder):
         gtk.Builder.__init__(self)
         self.add_from_file('ui/details.ui')
 
+        self.mal_url = None
         self.widgets = {
             'window': self.get_object('window'),
             'image': self.get_object('image'),
@@ -43,5 +44,25 @@ class DetailsDialog(gtk.Builder):
             'other_titles': self.get_object('other_titles'),
 
             'box_related': self.get_object('vbox6'),
-            'related': self.get_object('related')
+            'related': self.get_object('related'),
+
+            'mal_button': self.get_object('mal_button')
             }
+
+        self.widgets['window'].connect('key-release-event', self.__handle_key)
+        self.widgets['mal_button'].connect('clicked', self.__on_click)
+
+    def __handle_key(self, widget, event):
+
+        string, state = event.string, event.state
+        keyname =  gtk.gdk.keyval_name(event.keyval)
+
+        if keyname == 'Escape':
+            self.widgets['window'].destroy()
+
+    def __on_click(self, button):
+
+        if self.mal_url is None:
+            return
+
+        webbrowser.open(self.mal_url)

@@ -4,7 +4,6 @@
     <widget class="GtkWindow" id="window">
         <property name="default_width">500</property>
         <property name="gravity">north-east</property>
-        <property name="skip_taskbar_hint">True</property>
         <property name="title" context="yes" translatable="yes">Details</property>
         <property name="window_position">center</property>
         <child>

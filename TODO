@@ -8,9 +8,9 @@ TODO for AnimeList
 
  - Only refresh list when user details are changed.
 
- ~ Details dialog:
+ * Details dialog:
    A details dialog for anime that appears after a user has double clicked on
-   a row in one of the lists (anime and search section.
+   a row in one of the lists (anime and search section).
 
  - Verify user details:
    Verify the user details one they're entered in the preferences dialog.
