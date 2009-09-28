@@ -12,7 +12,13 @@ import gobject
 class Signals(gobject.GObject):
     __gsignals__ = {
         'al-startup' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-shutdown' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+
+        # Connect to this signal if you have to set configuration variables
+        'al-shutdown-lvl1' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+
+        # Connect to this signal if you have to save the settings/configuration
+        'al-shutdown-lvl2' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+
         'al-init-done' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-pref-reset' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),

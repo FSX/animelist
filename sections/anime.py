@@ -81,7 +81,7 @@ class Anime(gtk.Notebook):
         self.connect('switch-page', self.__set_current_tab_id)
         self.menu.details.connect('activate', self.__show_details)
         self.menu.delete.connect('activate', self.__menu_delete)
-        self.al.signal.connect('al-shutdown', self.save)
+        self.al.signal.connect('al-shutdown-lvl2', self.save)
         self.al.signal.connect('al-pref-reset', self.__set_api)
         self.al.signal.connect('al-user-details-changed', self.__w_refresh)
         self.al.signal.connect('al-user-set', self.__enable_control)

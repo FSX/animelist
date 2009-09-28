@@ -28,7 +28,13 @@ class Config():
             'password': '',
             'startup_refresh': True,
             'systray': True,
-            'position': {'x': 10, 'y': 10, 'width': 800, 'height': 600}
+            'position': {
+                'x': None,
+                'y': None,
+                'width': 800,
+                'height': 600,
+                'maximized': False
+                }
             }
 
         # Load settings
@@ -70,7 +76,7 @@ class Config():
             }
 
         # Events
-        self.al.signal.connect('al-shutdown', self.__save_settings)
+        self.al.signal.connect('al-shutdown-lvl2', self.__save_settings)
 
     def preferences_dialog(self):
         "Preferences dialog."

@@ -89,7 +89,8 @@ class AnimeList():
     def quit(self, widget, data=None):
         "Terminates the application cleanly."
 
-        self.signal.emit('al-shutdown')
+        self.signal.emit('al-shutdown-lvl1')
+        self.signal.emit('al-shutdown-lvl2')
         gtk.main_quit()
 
 if __name__ == '__main__':
