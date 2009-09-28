@@ -16,6 +16,15 @@ class Request():
     def __init__(self, config):
         self.username, self.password, self.host, self.user_agent = config
 
+    def retrieve(self, url):
+
+        try:
+            filename, unused = urllib.urlretrieve(url)
+        except urllib.ContentTooShortError:
+            return False
+
+        return filename
+
     def do(self, path, params=None, method='GET', authenticate=False, ssl=False):
 
         headers = {'User-Agent': self.user_agent}

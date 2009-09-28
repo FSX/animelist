@@ -22,7 +22,7 @@ TODO for AnimeList
    Save these to the settings file on exit and apply them to the window on
    startup (and maybe save the position too?).
 
- ~ Proper sorting in lists:
+ * Proper sorting in lists:
    Currently this work really good. Sorting by episode doesn't work and scores
    aren't sorted properly.
 

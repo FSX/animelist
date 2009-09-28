@@ -8,7 +8,6 @@
 # =============================================================================
 
 import os
-import urllib
 
 import gobject
 import gtk
@@ -48,11 +47,9 @@ class Anime(gtk.Notebook):
 
             # Create lists
             self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
+            self.liststore[k].set_sort_func(4, self.__sort_progess)
             #ls_sort = gtk.TreeModelSort(self.liststore[k])
             #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
-
-            self.liststore[k].set_sort_func(4, self.__sort_progess)
-            #self.liststore[k].set_sort_func(5, self.__sort_score)
 
             self.treeview[k] = gtk.TreeView(self.liststore[k])
             self.treeview[k].set_rules_hint(True)
@@ -243,19 +240,10 @@ class Anime(gtk.Notebook):
 
             self.al.statusbar.clear()
 
-        def get_image(url):
-
-            path = self.al.HOME + '/cache/'
-            filename = os.path.basename(url)
-
-            if not os.access(path, os.F_OK | os.W_OK):
-                os.mkdir(path)
-
-            urllib.urlretrieve(url, path + filename)
-
-            return path + filename
-
         def set_image(image):
+
+            if image == False:
+                return
 
             details.widgets['image'].clear()
             details.widgets['image'].set_from_file(image)
@@ -274,7 +262,7 @@ class Anime(gtk.Notebook):
         t1 = gthreads.AsyncTask(get_data, set_data)
         t1.start(anime_id)
 
-        t2 = gthreads.AsyncTask(get_image, set_image)
+        t2 = gthreads.AsyncTask(self.mal.image, set_image)
         t2.start(image_url)
 
     # List display functions --------------------------------------------------
@@ -367,23 +355,6 @@ class Anime(gtk.Notebook):
 
         x = self.data[int(id1)]['episodes']
         y = self.data[int(id2)]['episodes']
-
-        if x < y:
-            return -1
-        if x == y:
-            return 0
-
-        return 1
-
-    def __sort_score(self, model, iter1, iter2, data=None):
-
-        (c, order) = model.get_sort_column_id()
-
-        if c < 0:
-            return 0
-
-        x = int(model.get_value(iter1, c))
-        y = int(model.get_value(iter2, c))
 
         if x < y:
             return -1

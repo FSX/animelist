@@ -123,3 +123,8 @@ class Anime():
             return False
 
         return json.loads(response)
+
+    def image(self, url):
+        "Get the image of the anime."
+
+        return self.request.retrieve(url)

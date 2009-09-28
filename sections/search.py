@@ -310,21 +310,10 @@ class Search(gtk.VBox):
 
             self.al.statusbar.clear()
 
-        def get_image(url):
-
-            import urllib
-
-            path = self.al.HOME + '/cache/'
-            filename = os.path.basename(url)
-
-            if not os.access(path, os.F_OK | os.W_OK):
-                os.mkdir(path)
-
-            urllib.urlretrieve(url, path + filename)
-
-            return path + filename
-
         def set_image(image):
+
+            if image == False:
+                return
 
             details.widgets['image'].clear()
             details.widgets['image'].set_from_file(image)
@@ -343,7 +332,7 @@ class Search(gtk.VBox):
         t1 = gthreads.AsyncTask(get_data, set_data)
         t1.start(anime_id)
 
-        t2 = gthreads.AsyncTask(get_image, set_image)
+        t2 = gthreads.AsyncTask(self.mal.image, set_image)
         t2.start(image_url)
 
     # Functions for filling the list with search results ----------------------
