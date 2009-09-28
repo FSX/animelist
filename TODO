@@ -18,7 +18,7 @@ TODO for AnimeList
    Verify the user details one they're entered in the preferences dialog.
    If they're not valid: block the access to the application (or it's functions).
 
- - Save window size on exit:
+ ~ Save window size on exit:
    Save these to the settings file on exit and apply them to the window on
    startup (and maybe save the position too?).
 

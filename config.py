@@ -27,7 +27,8 @@ class Config():
             'username': '',
             'password': '',
             'startup_refresh': True,
-            'systray': True
+            'systray': True,
+            'position': {'x': 10, 'y': 10, 'width': 800, 'height': 600}
             }
 
         # Load settings
@@ -67,6 +68,9 @@ class Config():
             'host': 'mal-api.com',
             'user_agent': '%s:%s' % (self.al.name, self.al.version)
             }
+
+        # Events
+        self.al.signal.connect('al-shutdown', self.__save_settings)
 
     def preferences_dialog(self):
         "Preferences dialog."
@@ -119,7 +123,8 @@ class Config():
             else:
                 self.al.signal.emit('al-no-user-set')
 
-            self.settings = tmp_settings
+            for k in tmp_settings:
+                self.settings[k] = tmp_settings[k]
 
             # Save settings to settings file
             self.__save_settings()
@@ -173,7 +178,7 @@ class Config():
 
         return frame
 
-    def __save_settings(self):
+    def __save_settings(self, widget=None):
         "Save a pickled, base64 encoded version of self.settings in settings.cfg."
 
         with open(self.al.HOME + '/settings.cfg', 'wb') as f:
