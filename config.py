@@ -146,6 +146,7 @@ class Config():
 
         frame = gtk.Frame(name)
         table = gtk.Table(2, 2)
+        table.set_border_width(10)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
 
@@ -174,13 +175,7 @@ class Config():
 
             count += 1
 
-        # Boxes for padding
-        vbox = gtk.VBox()
-        hbox = gtk.HBox()
-        vbox.pack_start(table, False, True, 10)
-        hbox.pack_start(vbox, False, True, 10)
-
-        frame.add(hbox)
+        frame.add(table)
 
         return frame
 

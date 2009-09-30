@@ -48,7 +48,7 @@ class PreferencesDialog(gtk.Dialog):
 
         table.show_all()
 
-        self.vbox.pack_start(table, False, True, 0)
+        self.vbox.pack_start(table, False, True)
 
 class DetailsDialog(gtk.Builder):
 

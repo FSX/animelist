@@ -17,10 +17,6 @@ import gtk
 
 import signals
 import config
-#import window
-#import statusbar
-#import toolbar
-#import systray
 import gui
 from sections import anime, search
 
@@ -52,10 +48,10 @@ class AnimeList():
 
         # Put everything together
         vbox = gtk.VBox(False, 0)
-        vbox.pack_start(self.toolbar, False, False, 0)
-        vbox.pack_start(self.search, True, True, 0)
-        vbox.pack_start(self.anime, True, True, 0)
-        vbox.pack_end(self.statusbar, False, False, 0)
+        vbox.pack_start(self.toolbar, False, False)
+        vbox.pack_start(self.search)
+        vbox.pack_start(self.anime)
+        vbox.pack_end(self.statusbar, False, False)
 
         self.window.add(vbox)
         self.window.show_all()

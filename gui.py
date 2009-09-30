@@ -219,20 +219,16 @@ class Statusbar(gtk.Statusbar):
         gtk.Statusbar.__init__(self)
         self.statusbar_message_id = None
 
-    #
-    #  Set/Update/Change statusbar text
-    #
     def update(self, text):
+        "Set/Update/Change statusbar text."
 
         if not self.statusbar_message_id is None:
             self.remove(0, self.statusbar_message_id)
 
         self.statusbar_message_id = self.push(0, text)
 
-    #
-    #  Clear statusbar
-    #
     def clear(self, remove_timeout=None):
+        "Clear statusbar."
 
         if not self.statusbar_message_id is None:
             if not remove_timeout is None:
@@ -252,10 +248,8 @@ class Systray(gtk.StatusIcon):
         self.connect('activate', self.__activate_icon)
         self.set_visible(True)
 
-    #
-    #  System tray icon actions
-    #
     def __activate_icon(self, widget, data=None):
+        "Hide and show the main window."
 
         if self.al.window.get_property('visible'):
             self.al.window.hide()

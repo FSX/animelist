@@ -31,9 +31,10 @@ class Search(gtk.VBox):
         self.search_button = gtk.Button('Search')
         self.search_button.set_size_request(120, -1)
 
-        searchbar = gtk.HBox(False, 0)
-        searchbar.pack_start(self.search_entry, expand=True, fill=True, padding=5)
-        searchbar.pack_start(self.search_button, expand=False, fill=False, padding=5)
+        searchbar = gtk.HBox(False, 8)
+        searchbar.set_border_width(5)
+        searchbar.pack_start(self.search_entry)
+        searchbar.pack_start(self.search_button, False, False)
 
         # Menu
         self.menu = gtk.Menu()
@@ -81,8 +82,8 @@ class Search(gtk.VBox):
 
         # Pack it together
         frame.add(self.treeview)
-        self.pack_start(searchbar, False, False, 5)
-        self.pack_start(frame, True, True)
+        self.pack_start(searchbar, False, False)
+        self.pack_start(frame)
 
         self.__set_api()
         self.menu.show_all()
@@ -172,6 +173,7 @@ class Search(gtk.VBox):
 
             # Main table
             table = gtk.Table(2, 2)
+            table.set_border_width(5)
             table.set_row_spacings(10)
             table.set_col_spacings(10)
 
@@ -180,10 +182,7 @@ class Search(gtk.VBox):
             table.attach(episodes_entry, 1, 2, 0, 1)
             table.attach(score_entry, 1, 2, 1, 2)
 
-            # Boxes for padding
-            hbox = gtk.HBox()
-            hbox.pack_start(table, False, True, 5)
-            hbox.show_all()
+            table.show_all()
 
             # Dialog flags and buttons
             flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
@@ -200,7 +199,7 @@ class Search(gtk.VBox):
             # Create dialog
             dialog = gtk.Dialog('Add anime', self.al.window, flags, buttons)
             dialog.set_default_response(gtk.RESPONSE_ACCEPT)
-            dialog.vbox.pack_start(hbox, False, True, 5)
+            dialog.vbox.pack_start(table, False, True, 5)
 
             if dialog.run() == gtk.RESPONSE_ACCEPT:
 
