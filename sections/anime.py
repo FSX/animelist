@@ -123,10 +123,11 @@ class Anime(gtk.Notebook):
         """Save anime data to local cache. This function is executed when
            the 'save' button is pressed and when the application shuts down."""
 
-        utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
+        if self.al.config.no_user_defined == False:
+            utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
 
-        self.al.statusbar.update('Saving data to local cache...')
-        self.al.statusbar.clear(2000)
+            self.al.statusbar.update('Saving data to local cache...')
+            self.al.statusbar.clear(1000)
 
     # Widget callbacks --------------------------------------------------------
 
@@ -391,7 +392,7 @@ class Anime(gtk.Notebook):
             for k, v in enumerate(self.al.config.status):
                 self.liststore[k].clear()
 
-            if self.data is None:
+            if self.data is None or self.data == False:
                 self.al.statusbar.update('Could not refresh/update the data.')
                 return
 

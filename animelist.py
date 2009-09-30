@@ -17,10 +17,11 @@ import gtk
 
 import signals
 import config
-import window
-import statusbar
-import toolbar
-import systray
+#import window
+#import statusbar
+#import toolbar
+#import systray
+import gui
 from sections import anime, search
 
 gobject.threads_init()
@@ -39,15 +40,15 @@ class AnimeList():
         # Initiate modules
         self.signal = signals.Signals()
         self.config = config.Config(self)
-        self.window = window.Window(self)
-        self.statusbar = statusbar.Statusbar(self)
-        self.toolbar = toolbar.Toolbar(self)
+        self.window = gui.Window(self)
+        self.statusbar = gui.Statusbar(self)
+        self.toolbar = gui.Toolbar(self)
         self.anime = anime.Anime(self)
         self.search = search.Search(self)
 
         # Only load systray module when the system is enabled
         if 'systray' in self.config.settings and self.config.settings['systray'] == True:
-            self.systray = systray.Systray(self)
+            self.systray = gui.Systray(self)
 
         # Put everything together
         vbox = gtk.VBox(False, 0)
