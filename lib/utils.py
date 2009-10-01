@@ -9,17 +9,50 @@
 
 import os
 import cPickle
+from pickletools import genops
 import re
 
 import gtk
 
 REGEX_HTML_TAG = re.compile(r'<[^<]*?/?>')
 
+# http://code.activestate.com/recipes/545418/
+def optimize_pickle(p):
+    "Optimize a pickle string by removing unused PUT opcodes."
+
+    gets = set()      # set of args used by a GET opcode
+    puts = []         # (arg, startpos, stoppos) for the PUT opcodes
+    prevpos = None    # set to pos if previous opcode was a PUT
+
+    for opcode, arg, pos in genops(p):
+        if prevpos is not None:
+            puts.append((prevarg, prevpos, pos))
+            prevpos = None
+        if 'PUT' in opcode.name:
+            prevarg, prevpos = arg, pos
+        elif 'GET' in opcode.name:
+            gets.add(arg)
+
+    # Copy the pickle string except for PUTS without a corresponding GET
+    s = []
+    i = 0
+
+    for arg, start, stop in puts:
+        j = stop if (arg in gets) else start
+        s.append(p[i:j])
+        i = stop
+
+    s.append(p[i:])
+    return ''.join(s)
+
 def cache_data(path, data):
     "Cache data with cPickle."
 
     with open(path, 'wb') as f:
-        cPickle.dump(data, f, cPickle.HIGHEST_PROTOCOL)
+        pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
+        f.write(pickle)
+
+        #cPickle.dump(data, f, cPickle.HIGHEST_PROTOCOL)
 
 def get_cache(path):
     "Get data from cache file with cPickle."
