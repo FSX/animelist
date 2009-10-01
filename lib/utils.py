@@ -17,6 +17,7 @@ import gtk
 REGEX_HTML_TAG = re.compile(r'<[^<]*?/?>')
 
 # http://code.activestate.com/recipes/545418/
+# A cache file goes from ~49.8KB to ~42.2KB
 def optimize_pickle(p):
     "Optimize a pickle string by removing unused PUT opcodes."
 
@@ -51,8 +52,6 @@ def cache_data(path, data):
     with open(path, 'wb') as f:
         pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
         f.write(pickle)
-
-        #cPickle.dump(data, f, cPickle.HIGHEST_PROTOCOL)
 
 def get_cache(path):
     "Get data from cache file with cPickle."
