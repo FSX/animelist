@@ -18,7 +18,7 @@ import gtk
 import signals
 import config
 import gui
-from sections import anime, search
+from plugins import anime, search
 
 gobject.threads_init()
 
