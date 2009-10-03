@@ -29,7 +29,7 @@ class AnimeList():
         # Set some variables
         self.HOME = os.path.expanduser('~/.animelist')
         self.name = 'AnimeList'
-        self.version = '0.1-dev'
+        self.version = '0.1-b1'
         self.current_section = 1
         self.handlers = []
 
