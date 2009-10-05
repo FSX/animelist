@@ -7,8 +7,6 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import thread
-
 import gtk
 import gobject
 
@@ -124,7 +122,7 @@ class Toolbar(gtk.Toolbar):
         self.al.signal.connect('al-no-user-set', self.__disable_control)
         self.al.signal.connect('al-init-done', self.__init_done)
 
-    # Misc functions ----------------------------------------------------------
+    # Misc functions
 
     def __enable_control(self, widget=None):
         "Enable buttons when a user has been set."
@@ -176,7 +174,7 @@ class Toolbar(gtk.Toolbar):
 
             toolbar.insert(toolbar.buttons[v[0]], i)
 
-    # Widget callbacks --------------------------------------------------------
+    # Widget callbacks
 
     def __on_refresh(self, widget):
         self.al.anime.refresh()
@@ -185,7 +183,7 @@ class Toolbar(gtk.Toolbar):
         self.al.anime.save()
 
     def __on_prefs(self, widget):
-        self.al.config.preferences_dialog()
+        Preferences(self.al)
 
     def __on_anime(self, widget):
         self.buttons['refresh'].set_sensitive(True)
@@ -257,3 +255,126 @@ class Systray(gtk.StatusIcon):
             self.al.window.move(self.al.window._position[0], self.al.window._position[1])
             self.al.window.show()
             self.al.window.present()
+
+class Preferences(gtk.Dialog):
+    """Preferences dialog, saves al settings when OK is pressed and discards all
+       changes when Cancel is pressed."""
+
+    def __init__(self, al):
+
+        self.al = al
+
+        # Field (entry, checknutton) objects are saved in this variable
+        self.fields = {}
+
+        # Objects (fields, text, frames) that are displayed in the prefs dialog
+        objects = (
+            self.__generate_box(
+                'User details', {
+                    'username': ('Username', 'entry'),
+                    'password': ('Password', 'secret_entry')}),
+            self.__generate_box(
+                'Options', {
+                    'startup_refresh': (
+                        'Sync list with MyAnimeList on startup',
+                        'checkbox'),
+                    'systray': (
+                        'Enable system tray icon *',
+                        'checkbox'),
+                        })
+            )
+
+        # Dialog
+        flags = gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+        buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT)
+
+        gtk.Dialog.__init__(self, 'Preferences', self.al.window, flags, buttons)
+        self.set_default_response(gtk.RESPONSE_ACCEPT)
+
+        # Table
+        table = gtk.Table(len(objects), 1)
+        table.set_border_width(5)
+        table.set_row_spacings(10)
+
+        for i, obj in enumerate(objects):
+            table.attach(obj, 0, 1, i, i+1)
+
+        table.show_all()
+        self.vbox.pack_start(table, False, True)
+
+        # Check and save all preferences/settings
+        # All preferences are first stored in a temperary variable to check if the
+        # preferences have been changed.
+        if self.run() == gtk.RESPONSE_ACCEPT:
+
+            tmp_settings = {}
+
+            # Get data from all entries/checkboxes and store it in `tmp_settings`
+            for field_id, widget in self.fields.iteritems():
+
+                widget_type = widget.get_name()
+
+                if widget_type == 'GtkEntry':
+                    tmp_settings[field_id] = widget.get_text()
+                elif widget_type == 'GtkCheckButton':
+                    tmp_settings[field_id] = widget.get_active()
+
+            # Check if user details are entered
+            if len(tmp_settings['username']) > 0 and len(tmp_settings['password']) > 0:
+                self.al.signal.emit('al-user-set')
+
+                # Only send a signal when the user details have been changed
+                if tmp_settings['username'] != self.al.config.settings['username'] and \
+                   tmp_settings['password'] != self.al.config.settings['password']:
+                    self.al.signal.emit('al-user-details-changed')
+            else:
+                self.al.signal.emit('al-no-user-set')
+
+            # Save settings
+            for k in tmp_settings:
+                self.al.config.settings[k] = tmp_settings[k]
+
+            #self.al.config.__save_settings()
+
+        self.destroy()
+
+    def __generate_box(self, name, fields):
+        """Generates frames with fields in it. All field objects are saved in self.fields (dict).
+           Note: only support for gtk.Entry and gtk.CheckButton at this moment."""
+
+        count = 0
+        frame = gtk.Frame(name)
+        table = gtk.Table(2, 2)
+        table.set_border_width(10)
+        table.set_row_spacings(5)
+        table.set_col_spacings(5)
+
+        for field_id, field in fields.iteritems():
+
+            # Text entry
+            if field[1] == 'entry' or field[1] == 'secret_entry':
+                self.fields[field_id] = gtk.Entry()
+
+                if field[1] == 'secret_entry':
+                    self.fields[field_id].set_visibility(False)
+
+                if field_id in self.al.config.settings:
+                    self.fields[field_id].set_text(self.al.config.settings[field_id])
+
+                table.attach(gtk.Label(field[0]), 0, 1, count, count+1)
+                table.attach(self.fields[field_id], 1, 2, count, count+1)
+
+            # Checkbox
+            elif field[1] == 'checkbox':
+                self.fields[field_id] = gtk.CheckButton(field[0])
+
+                if field_id in self.al.config.settings and self.al.config.settings[field_id] == True:
+                    self.fields[field_id].set_active(True)
+
+                table.attach(self.fields[field_id], 0, 1, count, count+1)
+
+            count += 1
+
+        frame.add(table)
+
+        return frame
