@@ -35,19 +35,14 @@ Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
 
 === Development ===
 
-The source code can be at Bitbucket[6] and planned features in the TODO file.
+The source code can be at hg.61924.nl[6] and planned features in the TODO file.
 Any help with testing, especially on other OS than Linux and Windows, is really
 appreciated.
 
 Notes:
 
- - The *.ui files in the 'ui' directory are used to build the GUIs of certain
-   dialogs/windows with gtk.Builder. The *.glade files are used to design the GUI
-   with Glade or Gazpacho.
  - Pygtkhelpers is a library from PIDA and is licensed under the LGPL 2 or later.
    The source code can be found at Bitbucket[7].
- - pixmaps/monitor.png is a modified version of the "Book on Monitor"[8] from Openclipart.org.
 
- [6]: http://bitbucket.org/fsx/animelist/
+ [6]: http://hg.61924.nl/animelist/
  [7]: http://bitbucket.org/aafshar/pygtkhelpers-main/overview/
- [8]: http://openclipart.org/media/files/Rfc1394/13211

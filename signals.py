@@ -21,9 +21,12 @@ class Signals(gobject.GObject):
 
         'al-init-done' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
         'al-pref-reset' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-no-user-set' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
-        'al-user-details-changed' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
+        'al-block-acess' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+        'al-unblock-access' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+        'al-user-changed' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+        'al-user-verified' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+
+        'al-switch-section' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (gobject.TYPE_STRING,))
         }
 
     def __init__(self):

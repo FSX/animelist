@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # =============================================================================
-# plugins/search.py
+# plugins/torrent.py
 #
 # Copyright (c) 2009 Frank Smit (FSX)
 # License: GPL v3, see the COPYING file for details
@@ -14,10 +14,11 @@ from plugin import BasePlugin
 class Plugin(BasePlugin):
 
     plugin_data = {
-        'name': 'search',
-        'fancyname': 'Search',
+        'name': 'torrents',
+        'fancyname': 'Torrents',
         'version': '0.1',
-        'description': 'Adds a anime/manga search section.'
+        'description': '''Adds a torrent section, which downloads RSS/Atom
+feeds from certain websites and shows the items that are in the watching list.'''
         }
 
     def __init__(self, al):
@@ -28,10 +29,10 @@ class Plugin(BasePlugin):
     def _load_plugin(self):
 
         # Toolbar button
-        self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 1)
+        self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 3)
 
         # GUI
-        self.label = gtk.Label('Search section')
+        self.label = gtk.Label('Torrents section')
         self.al.gui['box'].pack_start(self.label)
 
         # Events
@@ -40,7 +41,7 @@ class Plugin(BasePlugin):
     def _unload_plugin(self):
         pass
 
-    def __switch_section(self, widget, section_name):
+    def __switch_section(self, signal, section_name):
 
         if section_name == self.plugin_data['fancyname']:
             self.label.show()

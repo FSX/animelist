@@ -18,15 +18,16 @@ class Config():
     def __init__(self, al):
 
         self.al = al
-        self.no_user_defined = False
+        self.block_access = False
+        self.user_verified = True
 
         # Set default settings
         self.settings = {
-            'username': '',
-            'password': '',
+            'username': None,
+            'password': None,
             'startup_refresh': True,
             'systray': True,
-            'position': {
+            'window': {
                 'x': None,
                 'y': None,
                 'width': 800,
@@ -39,32 +40,34 @@ class Config():
         if os.access(self.al.HOME + '/settings.cfg', os.F_OK | os.W_OK):
             self.__load_settings()
 
-        if len(self.settings['username']) < 1 and len(self.settings['password']) < 1:
-            self.no_user_defined = True
+        if self.settings['username'] is None or self.settings['password'] is None:
+            self.user_verified, self.block_access = True, False
 
-        # Tab number -> watched status
-        self.status = (
-            'watching',
-            'completed',
-            'on-hold',
-            'dropped',
-            'plan to watch'
-            )
+        self.anime = {
+            # Tab number -> watched status
+            'status': (
+                'watching',
+                'completed',
+                'on-hold',
+                'dropped',
+                'plan to watch'
+                ),
 
-        # Watched status -> tab number
-        self.rstatus = {
-            'watching':      0,
-            'completed':     1,
-            'on-hold':       2,
-            'dropped':       3,
-            'plan to watch': 4
-            }
+            # Watched status -> tab number
+            'rstatus': {
+                'watching':      0,
+                'completed':     1,
+                'on-hold':       2,
+                'dropped':       3,
+                'plan to watch': 4
+                },
 
-        # Color status
-        self.cstatus = {
-            'finished airing':  gtk.gdk.color_parse('#50ce18'), # Green
-            'currently airing': gtk.gdk.color_parse('#1173e2'), # Bright/Light blue
-            'not yet aired':    gtk.gdk.color_parse('#e20d0d')  # Red
+            # Color status
+            'cstatus': {
+                'finished airing':  gtk.gdk.color_parse('#50ce18'), # Green
+                'currently airing': gtk.gdk.color_parse('#1173e2'), # Bright/Light blue
+                'not yet aired':    gtk.gdk.color_parse('#e20d0d')  # Red
+                }
             }
 
         # API settings
