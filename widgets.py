@@ -147,11 +147,11 @@ class SettingsDialog():
         user_changed = False
 
         tmp1 = fields['username'].get_text()
-        if tmp1 != self.al.config.settings['username'] and len(tmp1) > 0:
+        if tmp1 != self.al.config.settings['username']:
             user_changed = True
 
         tmp2 = fields['password'].get_text()
-        if tmp2 != self.al.config.settings['password'] and len(tmp2) > 0:
+        if tmp2 != self.al.config.settings['password']:
             user_changed = True
 
         # Update settings dict and emit signal when the user details have been changed

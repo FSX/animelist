@@ -179,7 +179,6 @@ class AnimeList():
                 self.config.user_verified = False
                 self.gui['statusbar'].update('User details are invalid. Please check your user details')
 
-
         self.block_access()
         self.gui['statusbar'].update('Verifying user details...')
 
