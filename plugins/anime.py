@@ -113,8 +113,8 @@ class Plugin(BasePlugin):
         self.menu.show_all()
         self.al.mal.init_anime()
 
-        #if self.al.config.no_user_defined == False:
-        self.fill_lists(self.al.config.settings['startup_refresh'])
+        if self.al.config.user_verified == True:
+            self.fill_lists(self.al.config.settings['startup_refresh'])
 
     def _unload_plugin(self):
         pass

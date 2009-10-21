@@ -106,6 +106,11 @@ class AnimeList():
         self.gui['window'].connect('destroy', self.quit)
         self.gui['systray'].connect('activate', self.__st_activate_icon)
 
+        # Check
+        if self.config.user_verified == False:
+            self.block_access()
+            widgets.SettingsDialog(self)
+
         # Emit signal when all the stuff is ready
         self.signal.emit('al-init-done')
 

@@ -41,7 +41,7 @@ class Config():
             self.__load_settings()
 
         if self.settings['username'] is None or self.settings['password'] is None:
-            self.user_verified, self.block_access = True, False
+            self.user_verified, self.block_access = False, True
 
         self.anime = {
             # Tab number -> watched status
@@ -83,10 +83,10 @@ class Config():
         "Save a pickled, base64 encoded version of self.settings in settings.cfg."
 
         with open(self.al.HOME + '/settings.cfg', 'wb') as f:
-            f.write(base64.b64encode(cPickle.dumps(self.settings, cPickle.HIGHEST_PROTOCOL)))
+            f.write(base64.b64encode(cPickle.dumps((self.user_verified, self.settings), cPickle.HIGHEST_PROTOCOL)))
 
     def __load_settings(self):
         "Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings."
 
         with open(self.al.HOME + '/settings.cfg', 'rb') as f:
-            self.settings = cPickle.loads(base64.b64decode(f.read()))
+            self.user_verified, self.settings = cPickle.loads(base64.b64decode(f.read()))
