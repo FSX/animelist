@@ -33,6 +33,7 @@ class AnimeList():
         self.name = 'AnimeList'
         self.version = '0.2-dev'
         self._position = (0, 0)
+        self.path = sys.path[0]
 
         # Initiate modules
         self.signal = signals.Signals()
@@ -47,7 +48,7 @@ class AnimeList():
 
         # Load GUI
         self.builder = gtk.Builder()
-        self.builder.add_from_file('animelist.ui')
+        self.builder.add_from_file('%s/animelist.ui' % self.path)
 
         # Main window widgets
         self.gui = {
@@ -65,7 +66,7 @@ class AnimeList():
             }
 
         # Load plugins
-        self.pluginsys = PluginSys(self, {'plugin_path': './plugins/',
+        self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
             'plugins': ['anime', 'search', 'media', 'torrents']})
         self.plugins = self.pluginsys._instances
 

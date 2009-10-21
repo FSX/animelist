@@ -103,7 +103,7 @@ class Plugin(BasePlugin):
 
         # Events
         self.notebook.connect('switch-page', self.__set_current_tab_id)
-        #self.menu.info.connect('activate', self.__show_information)
+        self.menu.info.connect('activate', self.__show_information)
         self.menu.delete.connect('activate', self.__menu_delete)
         self.menu.refresh.connect('activate', self.refresh)
         self.menu.save.connect('activate', self.save)
@@ -190,18 +190,51 @@ class Plugin(BasePlugin):
 
         self.menu.popup(None, None, None, 3, event.time)
 
-    def __menu_delete(self, menuitem):
+    def __menu_delete(self, widget):
         "Wrapper for detele()."
 
         self.delete()
 
-    def __menu_move_row(self, menuitem, dest_list):
+    def __menu_move_row(self, widget, dest_list):
         "Wrapper method for move()."
 
         selection = self.treeview[self.current_tab_id].get_selection()
         unused, rows = selection.get_selected_rows()
 
         self.move(rows[0][0], self.current_tab_id, dest_list)
+
+    def __show_information(self, widget):
+        "Show anime information window."
+
+        def request_data(aid):
+            return self.al.mal.anime.details(aid)
+
+        def cb_set_info(data):
+
+            window.set_info(data)
+            self.al.gui['statusbar'].clear()
+
+        def cb_set_image(image):
+
+            if image == False:
+                return
+
+            window.set_image(image)
+
+        self.al.gui['statusbar'].update('Fetching information from MyAnimeList...')
+        window = InfoWindow('%s/plugins/anime.ui' % self.al.path)
+
+        # Get anime ID
+        selection = self.treeview[self.current_tab_id].get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        anime_id = int(self.liststore[self.current_tab_id][row][0])
+        image_url = self.data[anime_id]['image']
+
+        t1 = gthreads.AsyncTask(request_data, cb_set_info)
+        t1.start(anime_id)
+
+        t2 = gthreads.AsyncTask(self.al.mal.anime.image, cb_set_image)
+        t2.start(image_url)
 
     # List display/edit functions
 
@@ -479,17 +512,103 @@ class Plugin(BasePlugin):
             'episodes': self.data[anime_id]['watched_episodes'],
             'score': self.data[anime_id]['score']})
 
+class InfoWindow(gtk.Builder):
 
+    def __init__(self, ui_file):
 
+        gtk.Builder.__init__(self)
+        self.add_from_file(ui_file)
 
+        self.gui = {
+            'window': self.get_object('info_window'),
+            'image': self.get_object('iw_image'),
+            'mal_button': self.get_object('iw_mal_button'),
+            'title': self.get_object('iw_title'),
+            'synopsis': self.get_object('iw_synopsis'),
+            'other_titles_box': self.get_object('iw_other_titles_box'),
+            'other_titles_content': self.get_object('iw_other_titles_content'),
+            'related_box': self.get_object('iw_related_box'),
+            'related_content': self.get_object('iw_related_content'),
+            'info_content': self.get_object('iw_info_content'),
+            'stats_content': self.get_object('iw_stats_content')
+            }
 
+        self.gui['window'].connect('key-release-event', self.__handle_key)
 
+    def set_info(self, data):
+        "Format all the data and add it to all the labels."
 
+        self.gui['window'].show_all()
 
+        self.gui['window'].set_title(data['title'])
+        self.gui['title'].set_markup('<span size="x-large" font_weight="bold">%s</span>' % data['title'])
+        data['synopsis'] = utils.strip_html_tags(data['synopsis'].replace('<br>', '\n'))
+        self.gui['synopsis'].set_label(data['synopsis'])
+        mal_url = 'http://myanimelist.net/anime/%d' % data['id']
 
+        # Related
+        markup = []
 
+        for s in data['prequels']:
+            markup.append('<b>Prequel:</b> %s' % s['title'])
 
+        for s in data['sequels']:
+            markup.append('<b>Sequel:</b> %s' % s['title'])
 
+        for s in data['side_stories']:
+            markup.append('<b>Side story:</b> %s' % s['title'])
 
+        for s in data['manga_adaptations']:
+            markup.append('<b>Manga:</b> %s' % s['title'])
 
+        if len(markup) > 0:
+            self.gui['related_content'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+        else:
+            self.gui['related_box'].hide()
 
+        # Other titles
+        markup = []
+
+        for k, v in data['other_titles'].iteritems():
+            for s in v:
+                markup.append('<b>%s:</b> %s' % (k.capitalize(), s))
+
+        if len(markup) > 0:
+            self.gui['other_titles_content'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+        else:
+            self.gui['other_titles_box'].hide()
+
+        # Information
+        markup = (
+            '<b>Type:</b> %s' % data['type'],
+            '<b>Episodes:</b> %s' % data['episodes'],
+            '<b>Status:</b> %s' % data['status'].capitalize(),
+            '<b>Genres:</b> %s' % ', '.join(data['genres']),
+            '<b>Classification:</b> %s' % data['classification'].replace('&', '&amp;')
+            )
+        self.gui['info_content'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+        # Statistics
+        markup = (
+            '<b>Score:</b> %s' % data['members_score'],
+            '<b>Ranked:</b> #%s' % data['rank'],
+            '<b>Popularity:</b> #%s' % data['popularity_rank'],
+            '<b>Members:</b> %s' % data['members_count'],
+            '<b>Favorites:</b> %s' % data['favorited_count']
+            )
+        self.gui['stats_content'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
+
+    def set_image(self, image):
+        "Set the image."
+
+        self.gui['image'].clear()
+        self.gui['image'].set_from_file(image)
+
+    def __handle_key(self, widget, event):
+        "Handle key events of widgets."
+
+        string, state = event.string, event.state
+        keyname =  gtk.gdk.keyval_name(event.keyval)
+
+        if keyname == 'Escape':
+            self.gui['window'].destroy()
