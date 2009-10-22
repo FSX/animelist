@@ -15,6 +15,8 @@ from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
+    """The search plugin. Search results can be added to the anime list (if the
+       anime list plugin is enabled ofcourse."""
 
     plugin_data = {
         'name': 'search',

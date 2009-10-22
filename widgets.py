@@ -8,6 +8,7 @@
 # =============================================================================
 
 import webbrowser
+import subprocess
 
 import gtk
 import gobject
@@ -186,10 +187,11 @@ class AboutDialog(gtk.AboutDialog):
     def __init__(self, al):
         """A GTK+ about dialog that displays a description, a link to the website etc."""
 
-        gtk.about_dialog_set_url_hook(self.open_url)
         gtk.AboutDialog.__init__(self)
+        gtk.about_dialog_set_email_hook(self.open_email)
+        gtk.link_button_set_uri_hook(self.open_url)
 
-        self.set_logo(utils.get_image('./pixmaps/animelist_logo_256.png'))
+        self.set_logo(utils.get_image('%s/pixmaps/animelist_logo_256.png' % al.path))
         self.set_name(al.name)
         self.set_version(al.version)
         self.set_comments('MyAnimeList.net anime list manager + some extra stuff.')
@@ -201,4 +203,7 @@ class AboutDialog(gtk.AboutDialog):
         self.destroy()
 
     def open_url(self, dialog, link, data=None):
-        webbrowser.open(link, 2, 1)
+        webbrowser.open(link)
+
+    def open_email(self, dialog, link, data=None):
+        subprocess.call(['xdg-open', 'mailto:%s' % link])
