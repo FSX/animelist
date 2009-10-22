@@ -21,6 +21,9 @@ class ToolBar():
         self.al = al
         self.__toolbar = toolbar
         self.buttons = {}
+        self.qeue = []
+
+        self.al.signal.connect('al-init-done', self.__insert_buttons)
 
     def set_section(self, bid=None, label=None):
         """Emit a 'al-switch-section' signal when a button on the sections
@@ -41,13 +44,9 @@ class ToolBar():
         self.al.signal.emit('al-switch-section', label)
 
     def insert(self, label, position=0):
-        "Inserts a button in the toolbar."
+        "Inserts a button in the qeue."
 
-        self.buttons[label] = gtk.ToolButton(label=label)
-        self.buttons[label].set_border_width(2)
-        self.buttons[label].connect('clicked', self.__on_click, label)
-
-        self.__toolbar.insert(self.buttons[label], position)
+        self.qeue.append((position, label))
 
     def set_sensitive(self, sensitive=True):
         "Disable or enable the toolbar."
@@ -63,6 +62,24 @@ class ToolBar():
                 self.buttons[k].set_sensitive(True)
 
         self.set_section(label=label)
+
+    def __insert_buttons(self, widget):
+        "Insert all buttons from the qeue in the toolbar."
+
+        self.qeue.sort()
+
+        for position, label in enumerate(self.qeue):
+
+            label = label[1]
+
+            self.buttons[label] = gtk.ToolButton(label=label)
+            self.buttons[label].set_border_width(2)
+            self.buttons[label].connect('clicked', self.__on_click, label)
+
+            self.__toolbar.insert(self.buttons[label], position)
+
+        self.set_section(0)
+        self.__toolbar.show_all()
 
 class Statusbar():
 

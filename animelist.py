@@ -67,7 +67,7 @@ class AnimeList():
 
         # Load plugins
         self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
-            'plugins': ['anime', 'search', 'media', 'torrents']})
+            'plugins': ['anime', 'search', 'torrents']})
         self.plugins = self.pluginsys._instances
         self.signal.emit('al-plugin-init-done')
 
@@ -87,9 +87,6 @@ class AnimeList():
             self.config.settings['window']['height'])
 
         self.gui['window'].show_all()
-
-        # Set up toolbar
-        self.gui['toolbar'].set_section(0)
 
         # Create settings folder in home directory
         if not os.access(self.HOME, os.F_OK | os.W_OK):
