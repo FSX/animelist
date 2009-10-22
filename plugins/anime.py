@@ -8,6 +8,7 @@
 # =============================================================================
 
 import os
+import webbrowser
 
 import gtk
 import gobject
