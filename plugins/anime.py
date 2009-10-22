@@ -539,7 +539,9 @@ class InfoWindow(gtk.Builder):
             'stats_content': self.get_object('iw_stats_content')
             }
 
+        self.mal_url = None
         self.gui['window'].connect('key-release-event', self.__handle_key)
+        self.gui['mal_button'].connect('clicked', self.__on_click)
 
     def set_info(self, data):
         "Format all the data and add it to all the labels."
@@ -550,7 +552,7 @@ class InfoWindow(gtk.Builder):
         self.gui['title'].set_markup('<span size="x-large" font_weight="bold">%s</span>' % data['title'])
         data['synopsis'] = utils.strip_html_tags(data['synopsis'].replace('<br>', '\n'))
         self.gui['synopsis'].set_label(data['synopsis'])
-        mal_url = 'http://myanimelist.net/anime/%d' % data['id']
+        self.mal_url = 'http://myanimelist.net/anime/%d' % data['id']
 
         # Related
         markup = []
@@ -618,3 +620,10 @@ class InfoWindow(gtk.Builder):
 
         if keyname == 'Escape':
             self.gui['window'].destroy()
+
+    def __on_click(self, button):
+
+        if self.mal_url is None:
+            return
+
+        webbrowser.open(self.mal_url)
