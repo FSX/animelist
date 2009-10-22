@@ -26,7 +26,7 @@ class Plugin(BasePlugin):
     def __init__(self, al):
 
         self.al = al
-        self.plugin_init_done = False
+        self.anime_plugin_loaded = False
         self._load_plugin()
 
     def _load_plugin(self, widget=None):
@@ -117,7 +117,10 @@ class Plugin(BasePlugin):
             self.box.hide()
 
     def __plugin_init_done(self, widget=None):
-        self.plugin_init_done = True
+        "Check if anime plugin has been loaded."
+
+        if 'anime' in self.al.plugins:
+            self.anime_plugin_loaded = True
 
     # Misc functions
 
@@ -139,7 +142,7 @@ class Plugin(BasePlugin):
         """Displays the main popup menu on a button-press-event
            with options for the selected row in the list."""
 
-        if event.button != 3:  # Only on right click
+        if event.button != 3 or self.anime_plugin_loaded == False:  # Only on right click
             return False
 
         pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
@@ -257,10 +260,6 @@ class Plugin(BasePlugin):
     def __show_information(self, widget):
         "Show anime information window."
 
-        # Temperary
-        if self.plugin_init_done == False:
-            return
-
         # Get anime ID
         selection = self.treeview.get_selection()
         row = selection.get_selected_rows()[1][0][0]
@@ -329,7 +328,7 @@ class Plugin(BasePlugin):
     def __cell_title_display(self, column, cell, model, iter):
         "Makes the text bold in rows (animes) that are already in your list."
 
-        if self.plugin_init_done == False:
+        if self.anime_plugin_loaded == False:
             return
 
         anime_id = int(model.get_value(iter, 0))
