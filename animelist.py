@@ -69,6 +69,7 @@ class AnimeList():
         self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
             'plugins': ['anime', 'search', 'media', 'torrents']})
         self.plugins = self.pluginsys._instances
+        self.signal.emit('al-plugin-init-done')
 
         # Set window dimensions and position
         if self.config.settings['window']['maximized'] == True:

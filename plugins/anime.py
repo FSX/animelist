@@ -13,7 +13,7 @@ import gtk
 import gobject
 
 from plugin import BasePlugin
-from lib import myanimelist, utils
+from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
@@ -30,9 +30,7 @@ class Plugin(BasePlugin):
         self.al = al
         self._load_plugin()
 
-    # Plugin functions
-
-    def _load_plugin(self):
+    def _load_plugin(self, widget=None):
 
         # Toolbar button
         self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 0)
@@ -111,7 +109,9 @@ class Plugin(BasePlugin):
         self.al.signal.connect('al-user-verified', self.__w_refresh)
 
         self.menu.show_all()
-        self.al.mal.init_anime()
+
+        if self.al.mal.anime is None:
+            self.al.mal.init_anime()
 
         if self.al.config.user_verified == True:
             self.fill_lists(self.al.config.settings['startup_refresh'])
@@ -153,6 +153,34 @@ class Plugin(BasePlugin):
 
         self.al.gui['statusbar'].update('Saving data to local cache...')
         self.al.gui['statusbar'].clear(1000)
+
+    def show_information_window(self, anime_id, image_url):
+        """Fetch all the information (and image) and how the information window.
+           This is just a wrapper for the InfoWindow class."""
+
+        def request_data(aid):
+            return self.al.mal.anime.details(aid)
+
+        def cb_set_info(data):
+
+            window.set_info(data)
+            self.al.gui['statusbar'].clear()
+
+        def cb_set_image(image):
+
+            if image == False:
+                return
+
+            window.set_image(image)
+
+        self.al.gui['statusbar'].update('Fetching information from MyAnimeList...')
+        window = InfoWindow('%s/plugins/anime.ui' % self.al.path)
+
+        t1 = gthreads.AsyncTask(request_data, cb_set_info)
+        t1.start(anime_id)
+
+        t2 = gthreads.AsyncTask(self.al.mal.anime.image, cb_set_image)
+        t2.start(image_url)
 
     # Widget callbacks
 
@@ -204,37 +232,14 @@ class Plugin(BasePlugin):
         self.move(rows[0][0], self.current_tab_id, dest_list)
 
     def __show_information(self, widget):
-        "Show anime information window."
+        "Get the ID and image of the anime and show the information window."
 
-        def request_data(aid):
-            return self.al.mal.anime.details(aid)
-
-        def cb_set_info(data):
-
-            window.set_info(data)
-            self.al.gui['statusbar'].clear()
-
-        def cb_set_image(image):
-
-            if image == False:
-                return
-
-            window.set_image(image)
-
-        self.al.gui['statusbar'].update('Fetching information from MyAnimeList...')
-        window = InfoWindow('%s/plugins/anime.ui' % self.al.path)
-
-        # Get anime ID
         selection = self.treeview[self.current_tab_id].get_selection()
         row = selection.get_selected_rows()[1][0][0]
         anime_id = int(self.liststore[self.current_tab_id][row][0])
         image_url = self.data[anime_id]['image']
 
-        t1 = gthreads.AsyncTask(request_data, cb_set_info)
-        t1.start(anime_id)
-
-        t2 = gthreads.AsyncTask(self.al.mal.anime.image, cb_set_image)
-        t2.start(image_url)
+        self.show_information_window(anime_id, image_url)
 
     # List display/edit functions
 
@@ -279,6 +284,7 @@ class Plugin(BasePlugin):
                         v['score']  # Score
                         ))
 
+            self.al.signal.emit('al-plugin-signal-1')
             self.al.gui['statusbar'].clear(1000)
 
         self.al.gui['statusbar'].update('Loading data...')
@@ -465,7 +471,7 @@ class Plugin(BasePlugin):
             'score':    params['score']
             }
 
-        if params['status'] != 'completed':
+        if params['watched_status'] == 'completed':
             add_params['episodes'] = params['watched_episodes']
 
         t = gthreads.AsyncTask(self.al.mal.anime.add, self.__callback)
