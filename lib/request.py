@@ -25,7 +25,7 @@ class Request():
 
         return filename
 
-    def do(self, path, params=None, method='GET', authenticate=False, ssl=False):
+    def execute(self, path, params=None, method='GET', authenticate=False, ssl=False):
 
         headers = {'User-Agent': self.user_agent}
 
@@ -47,20 +47,25 @@ class Request():
         try:
             request = connection.request(method.upper(), '/' + path, params, headers)
             response = connection.getresponse()
+            response_content = response.read()
 
             # Raise an exception if the status code is something else then 200
+            # and print the status code and response.
             if response.status != httplib.OK:
+
+                print response.status
+                print response_content
+
                 connection.close()
                 raise HttpStatusError()
 
-            response_read = response.read()
             connection.close()
 
-            return response_read
+            return response_content
         except:
             raise HttpRequestError()
 
-#  Exceptions
+# Request Exceptions
 
 class HttpRequestError(Exception):
     pass

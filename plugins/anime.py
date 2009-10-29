@@ -44,7 +44,7 @@ class Plugin(BasePlugin):
         self.notebook.set_tab_pos(gtk.POS_TOP)
 
         self.current_tab_id = 0
-        self.data, self.liststore, self.treeview, frame = {}, {}, {}, {}
+        self.data, self.liststore, self.treeview, self.tab_label, self.frame = {}, {}, {}, {}, {}
 
         # Menu
         self.menu = gtk.Menu()
@@ -92,13 +92,14 @@ class Plugin(BasePlugin):
             self.menu.move_submenu.append(self.menu.move_to[k])
 
             # Create scrollbox
-            frame[k] = gtk.ScrolledWindow()
-            frame[k].set_shadow_type(gtk.SHADOW_ETCHED_IN)
-            frame[k].set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            self.frame[k] = gtk.ScrolledWindow()
+            self.frame[k].set_shadow_type(gtk.SHADOW_ETCHED_IN)
+            self.frame[k].set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
             # Paste it together
-            frame[k].add(self.treeview[k])
-            self.notebook.append_page(frame[k], gtk.Label(v.capitalize()))
+            self.frame[k].add(self.treeview[k])
+            self.tab_label[k] = gtk.Label(v.capitalize())
+            self.notebook.append_page(self.frame[k], self.tab_label[k])
 
         # Pack
         self.al.gui['box'].pack_start(self.notebook)
@@ -141,7 +142,9 @@ class Plugin(BasePlugin):
         # will get a 'Segmentation fault'. I'm not sure why this happens.
         gobject.idle_add(self.refresh)
 
-    def __callback(self, result):
+    def __clear_message(self, result):
+        "THis function is called by some funtions when a request has been finished."
+
         if result == False:
             self.al.gui['statusbar'].update('Could not send changes to MyAnimeList')
             self.al.gui['statusbar'].clear(5000)
@@ -185,6 +188,12 @@ class Plugin(BasePlugin):
 
         t2 = gthreads.AsyncTask(self.al.mal.anime.image, cb_set_image)
         t2.start(image_url)
+
+    def __update_item_count(self):
+        "Display the amount of item/rows of the lists in the tabs."
+
+        for k, v in enumerate(self.al.config.anime['status']):
+            self.notebook.set_tab_label(self.frame[k], gtk.Label('%s (%d)' % (v.capitalize(), len(self.liststore[k]))))
 
     # Widget callbacks
 
@@ -287,6 +296,8 @@ class Plugin(BasePlugin):
                         None,       # Progress (watched episodes/episodes)
                         v['score']  # Score
                         ))
+
+            self.__update_item_count()
 
             self.al.signal.emit('al-plugin-signal-1')
             self.al.gui['statusbar'].clear(1000)
@@ -415,7 +426,7 @@ class Plugin(BasePlugin):
             self.data[anime_id]['watched_episodes'] = new_progress
 
             # Update MAL
-            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__callback)
+            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__clear_message)
             t.start(
                 anime_id,
                 {'status': self.data[anime_id]['watched_status'],
@@ -437,7 +448,7 @@ class Plugin(BasePlugin):
             self.data[anime_id]['score'] = new_score
 
             # Update MAL
-            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__callback)
+            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__clear_message)
             t.start(
                 anime_id,
                 {'status': self.data[anime_id]['watched_status'],
@@ -452,6 +463,10 @@ class Plugin(BasePlugin):
 
     def add(self, params):
         "Prepend a row to a list."
+
+        def callback(result):
+            self.__clear_message(result)
+            self.__update_item_count()
 
         self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
 
@@ -479,11 +494,15 @@ class Plugin(BasePlugin):
         if params['watched_status'] == 'completed':
             add_params['episodes'] = params['watched_episodes']
 
-        t = gthreads.AsyncTask(self.al.mal.anime.add, self.__callback)
+        t = gthreads.AsyncTask(self.al.mal.anime.add, callback)
         t.start(add_params)
 
     def delete(self):
         "Removes the selected row from the list."
+
+        def callback(result):
+            self.__clear_message(result)
+            self.__update_item_count()
 
         self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
 
@@ -498,11 +517,15 @@ class Plugin(BasePlugin):
         del self.data[anime_id]
 
         # Start thread
-        t = gthreads.AsyncTask(self.al.mal.anime.delete, self.__callback)
+        t = gthreads.AsyncTask(self.al.mal.anime.delete, callback)
         t.start(anime_id)
 
     def move(self, row, current_list, dest_list):
         "Move a row to an other list."
+
+        def callback(result):
+            self.__clear_message(result)
+            self.__update_item_count()
 
         self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
 
@@ -516,7 +539,7 @@ class Plugin(BasePlugin):
         self.liststore[current_list].remove(iter)
 
         # Start thread
-        t = gthreads.AsyncTask(self.al.mal.anime.update, self.__callback)
+        t = gthreads.AsyncTask(self.al.mal.anime.update, callback)
         t.start(
             anime_id,
             {'status': self.data[anime_id]['watched_status'],

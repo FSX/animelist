@@ -47,3 +47,30 @@ feeds from certain websites and shows the items that are in the watching list.''
             self.label.show()
         else:
             self.label.hide()
+
+class TokyoToshokanRssParser():
+    """RSS feed parser for Tokyo Toshokan.
+
+       Url: http://www.tokyotosho.info/
+       """
+
+    def __init__(self):
+        pass
+
+class AnimeSukiRssParser():
+    """RSS feed parser for AnimeSuki.
+
+       Url: http://animesuki.com/
+       """
+
+    def __init__(self):
+        pass
+
+class BakaBtRssParser():
+    """RSS feed parser for BakaBT.
+
+       Url: http://animesuki.com/
+       """
+
+    def __init__(self):
+        pass
