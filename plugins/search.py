@@ -182,7 +182,8 @@ class Plugin(BasePlugin):
             'status':             self.data[anime_id]['status'],    # finished airing, currently airing, not yet aired
             'watched_status':     self.al.config.anime['status'][dest_list],
             'watched_episodes':   0,
-            'score':              0
+            'score':              0,
+            'image':              self.data[anime_id]['image']
             }
 
         # Show a dialog when an anime id added to "wacthing", "on-hold", "dropped" or "completed"

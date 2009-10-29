@@ -463,7 +463,8 @@ class Plugin(BasePlugin):
             'status':           params['status'],
             'watched_status':   params['watched_status'],
             'watched_episodes': params['watched_episodes'],
-            'score':            params['score']
+            'score':            params['score'],
+            'image':            params['image']
             }
 
         list_data = (params['id'], None, params['title'], params['type'], None, params['score'])
