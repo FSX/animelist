@@ -98,8 +98,7 @@ class Plugin(BasePlugin):
 
             # Paste it together
             self.frame[k].add(self.treeview[k])
-            self.tab_label[k] = gtk.Label(v.capitalize())
-            self.notebook.append_page(self.frame[k], self.tab_label[k])
+            self.notebook.append_page(self.frame[k], gtk.Label(v.capitalize()))
 
         # Pack
         self.al.gui['box'].pack_start(self.notebook)
@@ -110,6 +109,7 @@ class Plugin(BasePlugin):
         self.menu.delete.connect('activate', self.__menu_delete)
         self.menu.refresh.connect('activate', self.refresh)
         self.menu.save.connect('activate', self.save)
+        self.al.signal.connect('al-shutdown-lvl2', self.save)
         self.al.signal.connect('al-switch-section', self.__switch_section)
         self.al.signal.connect('al-user-verified', self.__w_refresh)
 
