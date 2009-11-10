@@ -19,11 +19,11 @@ class Request():
     def retrieve(self, url):
 
         try:
-            filename, unused = urllib.urlretrieve(url)
+            filename, headers = urllib.urlretrieve(url)
         except urllib.ContentTooShortError:
             return False
 
-        return filename
+        return (filename, headers)
 
     def execute(self, path, params=None, method='GET', authenticate=False, ssl=False):
 

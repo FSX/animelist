@@ -9,6 +9,7 @@
 # =============================================================================
 
 import os
+import re
 import sys
 import urllib
 
@@ -152,4 +153,10 @@ class Anime():
     def image(self, url):
         "Get the image of the anime."
 
-        return self.request.retrieve(url)
+        filename, headers = self.request.retrieve(url)
+
+        # Check mimetype of image (only Jpeg at the moment)
+        if re.match('.*(Content-Type: image/jpeg).*', str(headers), re.DOTALL) is None:
+            return False
+
+        return filename

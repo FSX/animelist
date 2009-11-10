@@ -5,7 +5,7 @@
   <object class="GtkWindow" id="info_window">
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">../pixmaps/animelist_logo_32.png</property>
+    <property name="icon">../../pixmaps/animelist_logo_32.png</property>
     <child>
       <object class="GtkTable" id="table3">
         <property name="visible">True</property>
@@ -26,7 +26,7 @@
                 <child>
                   <object class="GtkImage" id="iw_image">
                     <property name="visible">True</property>
-                    <property name="pixbuf">../pixmaps/question_mark.png</property>
+                    <property name="pixbuf">../../pixmaps/question_mark.png</property>
                   </object>
                   <packing>
                     <property name="position">0</property>
