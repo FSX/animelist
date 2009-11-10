@@ -135,7 +135,7 @@ class Plugin(BasePlugin):
         "Handle key events of widgets."
 
         string, state = event.string, event.state
-        keyname =  gtk.gdk.keyval_name(event.keyval)
+        keyname = gtk.gdk.keyval_name(event.keyval)
 
         if keyname == 'Return':
             self.__on_search(None)

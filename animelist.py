@@ -58,6 +58,7 @@ class AnimeList():
 
             'menu_quit': self.builder.get_object('mw_imsi_quit'),
             'menu_settings': self.builder.get_object('mw_ismi_settings'),
+            'menu_get_help': self.builder.get_object('mw_ismi_get_help'),
             'menu_about': self.builder.get_object('mw_ismi_about'),
 
             'box': self.builder.get_object('mw_box'),
@@ -88,14 +89,22 @@ class AnimeList():
 
         self.gui['window'].show_all()
 
+        # Accelerators
+        accel_group = gtk.AccelGroup()
+        self.gui['window'].add_accel_group(accel_group)
+
+        self.gui['menu_quit'].add_accelerator('activate', accel_group, ord('Q'), gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+        self.gui['menu_get_help'].add_accelerator('activate', accel_group, gtk.gdk.keyval_from_name('F1'), 0, gtk.ACCEL_VISIBLE)
+
         # Create settings folder in home directory
         if not os.access(self.HOME, os.F_OK | os.W_OK):
             os.mkdir(self.HOME)
 
         # Events
-        self.gui['menu_settings'].connect('activate', self.__menu_settings)
-        self.gui['menu_about'].connect('activate', self.__menu_about)
         self.gui['menu_quit'].connect('activate', self.quit)
+        self.gui['menu_settings'].connect('activate', self.__menu_settings)
+        self.gui['menu_get_help'].connect('activate', self.__menu_get_help)
+        self.gui['menu_about'].connect('activate', self.__menu_about)
 
         self.signal.connect('al-shutdown-lvl1', self.__mw_set_position_settings)
         self.signal.connect('al-user-changed', self.verify_user)
@@ -111,6 +120,9 @@ class AnimeList():
 
         # Emit signal when all the stuff is ready
         self.signal.emit('al-init-done')
+
+    def __menu_get_help(self, widget):
+        print widget # For testing
 
     def __menu_about(self, widget):
         widgets.AboutDialog(self)
