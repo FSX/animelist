@@ -181,7 +181,7 @@ class Plugin(BasePlugin):
             window.set_image(image)
 
         self.al.gui['statusbar'].update('Fetching information from MyAnimeList...')
-        window = InfoWindow('%s/plugins/anime.ui' % self.al.path)
+        window = InfoWindow('%s/plugins/anime/anime.ui' % self.al.path)
 
         t1 = gthreads.AsyncTask(request_data, cb_set_info)
         t1.start(anime_id)
