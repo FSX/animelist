@@ -93,8 +93,8 @@ class Statusbar():
     def update(self, text):
         "Set/Update/Change statusbar text."
 
-        if not self.__statusbar_message_id is None:
-            self.__statusbar.remove_message(0, self.__statusbar_message_id)
+        #if not self.__statusbar_message_id is None:
+        #    self.__statusbar.remove_message(0, self.__statusbar_message_id)
 
         self.__statusbar_message_id = self.__statusbar.push(0, text)
 

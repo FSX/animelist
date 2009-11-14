@@ -13,6 +13,7 @@ import xml.etree.cElementTree as et
 import gtk
 
 from plugin import BasePlugin
+from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
 
@@ -38,12 +39,14 @@ feeds from certain websites and shows the items that are in the watching list.''
         self.box = gtk.VBox()
 
         # Torrents list
-        self.liststore = gtk.ListStore(int, str, str, str, int, str)
+        self.liststore = gtk.ListStore(str, str, str, str, str)
+        ls_sort = gtk.TreeModelSort(self.liststore)
+        ls_sort.set_sort_column_id(4, gtk.SORT_DESCENDING)
 
-        self.treeview = gtk.TreeView(self.liststore)
+        self.treeview = gtk.TreeView(ls_sort)
         self.treeview.set_rules_hint(True)
-        self.treeview.set_search_column(2)
-        self.treeview.set_tooltip_column(2)
+        self.treeview.set_search_column(3)
+        self.treeview.set_tooltip_column(3)
         self.treeview.columns_autosize()
 
         self.__create_columns()
@@ -61,6 +64,9 @@ feeds from certain websites and shows the items that are in the watching list.''
         # Events
         self.al.signal.connect('al-switch-section', self.__switch_section)
 
+        # Load data
+        self.__fill_list()
+
     def _unload_plugin(self):
         pass
 
@@ -73,15 +79,39 @@ feeds from certain websites and shows the items that are in the watching list.''
 
     # List view functions
 
+    def __fill_list(self):
+
+        def get_data(func):
+            return func()
+
+        def add_rows(feed_name, data):
+
+            if data == False:
+                return
+
+            for v in data:
+                self.liststore.append((
+                    None,
+                    feed_name,
+                    v['url'],
+                    v['title'],
+                    v['date']
+                    ))
+
+        # Start threads for fetching data
+        for func in (animesuki_rss_parser, tokyo_toshokan_rss_parser):
+            t = gthreads.AsyncTask(get_data, add_rows)
+            t.start(func)
+
     def __create_columns(self):
         "Create columns."
 
-        # Anime ID
+        # Anime ID (not yet used)
         column = gtk.TreeViewColumn(None, None)
         column.set_visible(False)
         self.treeview.append_column(column)
 
-        # Website name
+        # Feed name
         column = gtk.TreeViewColumn(None, None)
         column.set_visible(False)
         self.treeview.append_column(column)
@@ -93,8 +123,8 @@ feeds from certain websites and shows the items that are in the watching list.''
 
         # Title
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Title', renderer, text=4)
-        column.set_sort_column_id(4)
+        column = gtk.TreeViewColumn('Title', renderer, text=3)
+        column.set_sort_column_id(3)
         column.set_resizable(True)
         column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         column.set_expand(True)
@@ -103,9 +133,12 @@ feeds from certain websites and shows the items that are in the watching list.''
 
         # Date
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Date', renderer, text=5)
-        column.set_sort_column_id(5)
+        column = gtk.TreeViewColumn('Date', renderer, text=4)
+        column.set_sort_column_id(4)
         self.treeview.append_column(column)
+
+# The TokyoToshokanRssParser, AnimeSukiRssParser and BakaBtRssParser functions
+# are used to fetch, parse and prepare the data for the GUI.
 
 def fetch_items(url):
     "Fetches an RSS feed and returns the items in a dict."
@@ -113,7 +146,7 @@ def fetch_items(url):
     try:
         xmlfile = urllib2.urlopen(url)
     except urllib2.URLError:
-        print 'Torrents (plugin): %s' % urllib2.URLError.reason
+        print 'Torrents plugin: %s' % urllib2.URLError.reason
         return False
 
     data = []
@@ -131,37 +164,75 @@ def fetch_items(url):
 
     return data
 
-# The TokyoToshokanRssParser, AnimeSukiRssParser and BakaBtRssParser classes
-# are used to fetch, parse and prepare the data for the GUI.
-
-class TokyoToshokanRssParser():
-    """RSS feed parser for Tokyo Toshokan.
-
-       Url: http://www.tokyotosho.info/
-       Feed: http://www.animesuki.com/rss.php
-       """
-
-    def __init__(self):
-        pass
-
-class AnimeSukiRssParser():
+def animesuki_rss_parser():
     """RSS feed parser for AnimeSuki.
 
        Url: http://animesuki.com/
+       Feed: http://www.animesuki.com/rss.php
+       """
+
+    items = fetch_items('http://www.animesuki.com/rss.php')
+    data = []
+
+    for item in items:
+        data.append({
+            'title': item['title'].replace('&', '&amp;'), # GTK gives an error about an & without this
+            'url': item['link'],
+            'date': item['pubDate']
+            })
+
+    return ('animesuki', data)
+
+def tokyo_toshokan_rss_parser():
+    """RSS feed parser for Tokyo Toshokan.
+
+       Url: http://www.tokyotosho.info/
        Feed: http://tokyotosho.info/rss.php
        """
 
-    def __init__(self):
-        pass
+    items = fetch_items('http://tokyotosho.info/rss.php')
+    data = []
 
-class BakaBtRssParser():
+    for item in items:
+        if item['category'] == 'Anime':
+            data.append({
+                'title': item['title'],
+                'url': item['link'],
+                'date': item['pubDate']
+                })
+
+    return ('tokyotosho', data)
+
+def bakabt_rss_parser():
     """RSS feed parser for BakaBT.
 
        Only power users can use the RSS feed from BakaBT.
        There'll be a GUI to set the feed url.
 
-       Url: http://animesuki.com/
+       Url: http://www.bakabt.com/
        """
 
-    def __init__(self):
-        pass
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
