@@ -9,7 +9,7 @@
 
 import gtk
 
-from plugin import BasePlugin
+from lib.plugin import BasePlugin
 
 class Plugin(BasePlugin):
 

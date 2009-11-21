@@ -15,12 +15,12 @@ pygtk.require('2.0')
 import gobject
 import gtk
 
-import signals
-import config
-import widgets
+from lib import signals
+from lib import config
+from lib import widgets
 from lib.pygtkhelpers import gthreads
 from lib.myanimelist import MAL
-from plugin import PluginSys
+from lib.plugin import PluginSys
 
 gobject.threads_init()
 

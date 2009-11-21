@@ -13,7 +13,7 @@ import webbrowser
 import gtk
 import gobject
 
-from plugin import BasePlugin
+from lib.plugin import BasePlugin
 from lib import utils
 from lib.pygtkhelpers import gthreads
 
@@ -232,10 +232,12 @@ class Plugin(BasePlugin):
             self.menu.info.set_sensitive(True)
             self.menu.delete.set_sensitive(True)
             self.menu.move.set_sensitive(True)
+            self.menu.copy_title.set_sensitive(True)
         else:
             self.menu.info.set_sensitive(False)
             self.menu.delete.set_sensitive(False)
             self.menu.move.set_sensitive(False)
+            self.menu.copy_title.set_sensitive(False)
 
         self.menu.popup(None, None, None, 3, event.time)
 

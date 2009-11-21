@@ -12,7 +12,7 @@ import xml.etree.cElementTree as et
 
 import gtk
 
-from plugin import BasePlugin
+from lib.plugin import BasePlugin
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):

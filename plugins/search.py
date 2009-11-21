@@ -10,7 +10,7 @@
 import gtk
 import pango
 
-from plugin import BasePlugin
+from lib.plugin import BasePlugin
 from lib import utils
 from lib.pygtkhelpers import gthreads
 
