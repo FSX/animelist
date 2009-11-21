@@ -26,9 +26,7 @@ feeds from certain websites and shows the items that are in the watching list.''
         }
 
     def __init__(self, al):
-
-        self.al = al
-        self._load_plugin()
+        BasePlugin.__init__(self, al)
 
     def _load_plugin(self):
 
@@ -66,9 +64,6 @@ feeds from certain websites and shows the items that are in the watching list.''
 
         # Load data
         self.__fill_list()
-
-    def _unload_plugin(self):
-        pass
 
     def __switch_section(self, signal, section_name):
 

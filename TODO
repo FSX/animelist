@@ -1,4 +1,4 @@
-A TODO list AnimeList
+A TODO list
 
 # 0.2 beta1
 
@@ -6,3 +6,5 @@ A TODO list AnimeList
  - Plugin tab in settings window
  - "Get help" window
  - Wait with shutdown after everything is done
+ - Cleanup
+ - Plugin API

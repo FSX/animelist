@@ -11,7 +11,6 @@ import gobject
 
 class Signals(gobject.GObject):
     __gsignals__ = {
-        'al-startup': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
 
         # Connect to this signal if you have to set configuration variables
         'al-shutdown-lvl1': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),

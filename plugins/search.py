@@ -26,10 +26,8 @@ class Plugin(BasePlugin):
         }
 
     def __init__(self, al):
-
-        self.al = al
         self.anime_plugin_loaded = False
-        self._load_plugin()
+        BasePlugin.__init__(self, al)
 
     def _load_plugin(self, widget=None):
 
@@ -107,9 +105,6 @@ class Plugin(BasePlugin):
         self.treeview.connect('button-press-event', self.__show_menu)
         self.al.signal.connect('al-plugin-init-done', self.__plugin_init_done)
         self.al.signal.connect('al-user-verified', self.__reset_api)
-
-    def _unload_plugin(self):
-        pass
 
     def __switch_section(self, widget, section_name):
 
@@ -281,7 +276,7 @@ class Plugin(BasePlugin):
 
         def add_rows():
             if self.data == False:
-                self.al.gui['statusbar'].update('Search failed. Please try again later.')
+                self.al.gui['statusbar'].update('Search: Search failed. Please try again later.')
                 self.search_entry.set_sensitive(True)
                 self.search_button.set_sensitive(True)
                 self.search_entry.grab_focus()
@@ -299,9 +294,9 @@ class Plugin(BasePlugin):
 
             num_results = len(self.data)
             if num_results > 0:
-                self.al.gui['statusbar'].update('Found %d anime.' % num_results)
+                self.al.gui['statusbar'].update('Search: Found %d anime.' % num_results)
             else:
-                self.al.gui['statusbar'].update('No anime with that name.')
+                self.al.gui['statusbar'].update('Search: No anime with that name.')
 
             self.search_entry.set_sensitive(True)
             self.search_button.set_sensitive(True)
@@ -309,7 +304,7 @@ class Plugin(BasePlugin):
 
         self.search_entry.set_sensitive(False)
         self.search_button.set_sensitive(False)
-        self.al.gui['statusbar'].update('Searching...')
+        self.al.gui['statusbar'].update('Search: Searching...')
 
         self.liststore.clear()
         self.data = {}

@@ -16,6 +16,8 @@ import gobject
 from lib import utils
 
 class ToolBar():
+    """The toolbar holds the buttons that enable the user to navigate between the
+       sections. This class extends gtk.Toolbar and adds extra functionality."""
 
     def __init__(self, al, toolbar):
 
@@ -49,10 +51,10 @@ class ToolBar():
 
         self.qeue.append((position, label))
 
-    def set_sensitive(self, sensitive=True):
+    def enable(self, enabled=True):
         "Disable or enable the toolbar."
 
-        self.__toolbar.set_sensitive(sensitive)
+        self.__toolbar.set_sensitive(enabled)
 
     def __on_click(self, widget, label):
         """Called when a button on the sections toolbar is pressed. It makes
@@ -64,7 +66,7 @@ class ToolBar():
 
         self.set_section(label=label)
 
-    def __insert_buttons(self, widget):
+    def __insert_buttons(self, widget=None):
         "Insert all buttons from the qeue in the toolbar."
 
         self.qeue.sort()
@@ -83,23 +85,24 @@ class ToolBar():
         self.__toolbar.show_all()
 
 class Statusbar():
+    "Extends gtk.Statusbar."
 
     def __init__(self, al, statusbar):
 
-        # self.al = al # Is not needed in this class
         self.__statusbar = statusbar
         self.__statusbar_message_id = None
 
     def update(self, text):
         "Set/Update/Change statusbar text."
 
+        # Don't remove the previous text
         #if not self.__statusbar_message_id is None:
         #    self.__statusbar.remove_message(0, self.__statusbar_message_id)
 
         self.__statusbar_message_id = self.__statusbar.push(0, text)
 
     def clear(self, remove_timeout=None):
-        "Clear statusbar."
+        "Clear statusbar. With or without a timeout (int)."
 
         if not self.__statusbar_message_id is None:
             if not remove_timeout is None:
@@ -109,9 +112,9 @@ class Statusbar():
                 self.__statusbar.remove_message(0, self.__statusbar_message_id)
 
 class SettingsDialog():
+    "Spawns a settings dialog and handles the validation of the entered values."
 
     def __init__(self, al):
-        "Spawns a settings dialog."
 
         self.al = al
 
@@ -183,13 +186,14 @@ class SettingsDialog():
         self.al.config.settings['startup_refresh'] = fields['startup_refresh'].get_active()
 
 class AboutDialog(gtk.AboutDialog):
+    "A GTK+ about dialog that displays a description, a link to the website etc."
 
     def __init__(self, al):
-        """A GTK+ about dialog that displays a description, a link to the website etc."""
 
         gtk.AboutDialog.__init__(self)
-        gtk.about_dialog_set_email_hook(self.open_email)
-        gtk.link_button_set_uri_hook(self.open_url)
+        gtk.about_dialog_set_email_hook(self.__open_email)
+        gtk.link_button_set_uri_hook(self.__open_url)
+        self.al = al
 
         self.set_logo(utils.get_image('%s/pixmaps/animelist_logo_256.png' % al.path))
         self.set_name(al.name)
@@ -198,12 +202,24 @@ class AboutDialog(gtk.AboutDialog):
         self.set_copyright('Copyright (c) 2009 Frank Smit')
         self.set_authors(['Frank Smit <61924.00@gmail.com>'])
         self.set_website('http://61924.nl/projects/animelist.html')
+        self.set_license(self.__read_licence_file())
 
         self.run()
         self.destroy()
 
-    def open_url(self, dialog, link, data=None):
+    def __read_licence_file(self):
+        "get the contents of the license file (COPYING) and return it."
+
+        try:
+            with open('%s/COPYING' % self.al.path, 'r') as f:
+                contents = f.read()
+        except IOError:
+            contents = 'No license file found.'
+
+        return contents
+
+    def __open_url(self, dialog, link, data=None):
         webbrowser.open(link)
 
-    def open_email(self, dialog, link, data=None):
+    def __open_email(self, dialog, link, data=None):
         subprocess.call(['xdg-open', 'mailto:%s' % link])

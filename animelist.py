@@ -25,6 +25,8 @@ from plugin import PluginSys
 gobject.threads_init()
 
 class AnimeList():
+    """The main class which loads and starts all the necessary modules, plugins
+       and all other things."""
 
     def __init__(self):
 
@@ -33,9 +35,9 @@ class AnimeList():
         self.name = 'AnimeList'
         self.version = '0.2-dev'
         self._position = (0, 0)
-        self.path = sys.path[0]
+        self.path = sys.path[0] # This is used to load image and other resources
 
-        # Initiate modules
+        # Create signals, load configuration and API
         self.signal = signals.Signals()
         self.config = config.Config(self)
 
@@ -46,11 +48,11 @@ class AnimeList():
             self.config.api['user_agent']
             ))
 
-        # Load GUI
+        # Load GTK Builder (GUI) file
         self.builder = gtk.Builder()
         self.builder.add_from_file('%s/animelist.ui' % self.path)
 
-        # Main window widgets
+        # Add all important widgets to a dictionary for easy access
         self.gui = {
             'window': self.builder.get_object('main_window'),
             'toolbar': widgets.ToolBar(self, self.builder.get_object('mw_toolbar')),
@@ -66,7 +68,7 @@ class AnimeList():
             'systray': self.builder.get_object('statusicon')
             }
 
-        # Load plugins
+        # Load plugins and send signal when all plugins are loaded
         self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
             'plugins': ['anime', 'search', 'torrents']})
         self.plugins = self.pluginsys._instances
@@ -87,9 +89,10 @@ class AnimeList():
             self.config.settings['window']['width'],
             self.config.settings['window']['height'])
 
+        # Make all the GUI widgets visible
         self.gui['window'].show_all()
 
-        # Accelerators
+        # Accelerators for menu items
         accel_group = gtk.AccelGroup()
         self.gui['window'].add_accel_group(accel_group)
 
@@ -118,16 +121,21 @@ class AnimeList():
             self.block_access()
             widgets.SettingsDialog(self)
 
-        # Emit signal when all the stuff is ready
+        # Emit signal when has been loaded and initiated,
+        # except actions started by plugins.
         self.signal.emit('al-init-done')
 
     def __menu_get_help(self, widget):
         print widget # For testing
 
     def __menu_about(self, widget):
+        "Show the 'About' dialog."
+
         widgets.AboutDialog(self)
 
     def __menu_settings(self, widget):
+        "Show the settings dialog."
+
         widgets.SettingsDialog(self)
 
     def __mw_set_position_settings(self, widget):
@@ -164,15 +172,17 @@ class AnimeList():
             self.gui['window'].present()
 
     def block_access(self):
+        "Block access to the GUI, except the menu."
 
         self.config.block_access = True
-        self.gui['toolbar'].set_sensitive(False)
+        self.gui['toolbar'].enable(False)
         self.gui['box'].set_sensitive(False)
 
     def unblock_access(self):
+        "Unblock the access to the GUI."
 
         self.config.block_access = False
-        self.gui['toolbar'].set_sensitive(True)
+        self.gui['toolbar'].enable(True)
         self.gui['box'].set_sensitive(True)
 
     def verify_user(self, widget=None):
@@ -198,6 +208,7 @@ class AnimeList():
         self.block_access()
         self.gui['statusbar'].update('Verifying user details...')
 
+        # Reset API, because the user details have been changed.
         self.mal = MAL((
             self.config.settings['username'],
             self.config.settings['password'],
@@ -210,6 +221,12 @@ class AnimeList():
 
     def quit(self, widget=None):
         "Terminates the application cleanly."
+
+        # There are two shutdown signals, because methods that are connected to
+        # the signals are not executed in the right order.  It could be possible
+        # that settings are written to the disk before the changed settings are
+        # saved.  That's why lvl1 should be used to save all the settings and lvl2
+        # to write everything to the disk.
 
         self.signal.emit('al-shutdown-lvl1')
         self.signal.emit('al-shutdown-lvl2')

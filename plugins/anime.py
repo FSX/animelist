@@ -30,9 +30,7 @@ class Plugin(BasePlugin):
         }
 
     def __init__(self, al):
-
-        self.al = al
-        self._load_plugin()
+        BasePlugin.__init__(self, al)
 
     def _load_plugin(self, widget=None):
 
@@ -74,10 +72,10 @@ class Plugin(BasePlugin):
             # Create lists
             self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
             self.liststore[k].set_sort_func(4, self.__sort_progess)
-            #ls_sort = gtk.TreeModelSort(self.liststore[k])
-            #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
+            ls_sort = gtk.TreeModelSort(self.liststore[k])
+            ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
 
-            self.treeview[k] = gtk.TreeView(self.liststore[k])
+            self.treeview[k] = gtk.TreeView(ls_sort)
             self.treeview[k].set_rules_hint(True)
             self.treeview[k].set_search_column(2)
             self.treeview[k].set_tooltip_column(2)
@@ -113,11 +111,14 @@ class Plugin(BasePlugin):
         self.al.signal.connect('al-switch-section', self.__switch_section)
         self.al.signal.connect('al-user-verified', self.__w_refresh)
 
+        # Make menu visible
         self.menu.show_all()
 
+        # Activate anime API if it isn't
         if self.al.mal.anime is None:
             self.al.mal.init_anime()
 
+        # Only load the anime list if the configured user has been verified
         if self.al.config.user_verified == True:
             self.fill_lists(self.al.config.settings['startup_refresh'])
 
@@ -139,14 +140,14 @@ class Plugin(BasePlugin):
         self.al.mal.init_anime()
 
         # If self.refresh is executed without 'gobject.idle_add' the application
-        # will get a 'Segmentation fault'. I'm not sure why this happens.
+        # will get a 'Segmentation fault'.  I'm not sure why this happens.
         gobject.idle_add(self.refresh)
 
     def __clear_message(self, result):
-        "THis function is called by some funtions when a request has been finished."
+        "This function is called by some funtions when a request has been finished."
 
         if result == False:
-            self.al.gui['statusbar'].update('Could not send changes to MyAnimeList')
+            self.al.gui['statusbar'].update('Anime: Could not send changes to MyAnimeList')
             self.al.gui['statusbar'].clear(5000)
         else:
             self.al.gui['statusbar'].clear(1000)
@@ -158,7 +159,7 @@ class Plugin(BasePlugin):
         #if self.al.config.no_user_defined == False:
         utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
 
-        self.al.gui['statusbar'].update('Saving data to local cache...')
+        self.al.gui['statusbar'].update('Anime: Saving data to local cache...')
         self.al.gui['statusbar'].clear(1000)
 
     def show_information_window(self, anime_id, image_url):
@@ -180,7 +181,7 @@ class Plugin(BasePlugin):
 
             window.set_image(image)
 
-        self.al.gui['statusbar'].update('Fetching information from MyAnimeList...')
+        self.al.gui['statusbar'].update('Anime: Fetching information from MyAnimeList...')
         window = InfoWindow('%s/plugins/anime/anime.ui' % self.al.path)
 
         t1 = gthreads.AsyncTask(request_data, cb_set_info)
@@ -283,7 +284,7 @@ class Plugin(BasePlugin):
                 self.liststore[k].clear()
 
             if self.data is None or self.data == False:
-                self.al.gui['statusbar'].update('Could not refresh/update the data.')
+                self.al.gui['statusbar'].update('Anime: Could not refresh/update the data.')
                 return
 
             if type(self.data) == type({}): # Temperary
@@ -302,7 +303,7 @@ class Plugin(BasePlugin):
             self.al.signal.emit('al-plugin-signal-1')
             self.al.gui['statusbar'].clear(1000)
 
-        self.al.gui['statusbar'].update('Loading data...')
+        self.al.gui['statusbar'].update('Anime: Loading data...')
 
         t = gthreads.AsyncTask(get_data, add_rows)
         t.start(refresh)
@@ -416,7 +417,7 @@ class Plugin(BasePlugin):
 
         if new_progress != old_progress:
 
-            self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
+            self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
             episodes = self.data[anime_id]['episodes']
             if episodes == 0: episodes = '?'
@@ -442,7 +443,7 @@ class Plugin(BasePlugin):
 
         if new_score != old_score and new_score >= 0 and new_score <= 10:
 
-            self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
+            self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
             self.liststore[list_id][row][5] = new_score
             self.data[anime_id]['score'] = new_score
@@ -455,7 +456,7 @@ class Plugin(BasePlugin):
                 'episodes': self.data[anime_id]['watched_episodes'],
                 'score': self.data[anime_id]['score']})
 
-    # Functions for adding, removing and updating anime -----------------------
+    # Functions for adding, removing and updating anime
 
     # Note:
     #  - All these functions are meant for internal use (usage in this class).
@@ -468,7 +469,7 @@ class Plugin(BasePlugin):
             self.__clear_message(result)
             self.__update_item_count()
 
-        self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
+        self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
         self.data[int(params['id'])] = {
             'id':               params['id'],
@@ -504,7 +505,7 @@ class Plugin(BasePlugin):
             self.__clear_message(result)
             self.__update_item_count()
 
-        self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
+        self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
         # Get anime ID and list iter
         selection = self.treeview[self.current_tab_id].get_selection()
@@ -527,7 +528,7 @@ class Plugin(BasePlugin):
             self.__clear_message(result)
             self.__update_item_count()
 
-        self.al.gui['statusbar'].update('Sending changes to MyAnimeList...')
+        self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
         anime_id = self.liststore[current_list][row][0]
 
