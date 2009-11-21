@@ -59,10 +59,14 @@ class Plugin(BasePlugin):
         self.menu.add.get_children()[0].set_label('Add to...')
         self.menu.add_submenu = gtk.Menu()
         self.menu.add.set_submenu(self.menu.add_submenu)
+        self.menu.copy_title = gtk.ImageMenuItem(gtk.STOCK_COPY)
+        self.menu.copy_title.get_children()[0].set_label('Copy title')
 
         self.menu.append(self.menu.info)
         self.menu.append(gtk.SeparatorMenuItem())
         self.menu.append(self.menu.add)
+        self.menu.append(gtk.SeparatorMenuItem())
+        self.menu.append(self.menu.copy_title)
 
         for k, v in enumerate(self.al.config.anime['status']):
             self.menu.add_to[k] = gtk.MenuItem(v.capitalize())
@@ -102,6 +106,7 @@ class Plugin(BasePlugin):
         self.search_entry.connect('key-release-event', self.__handle_key)
         self.search_button.connect('clicked', self.__on_search)
         self.menu.info.connect('activate', self.__show_information)
+        self.menu.copy_title.connect('activate', self.__copy_anime_title)
         self.treeview.connect('button-press-event', self.__show_menu)
         self.al.signal.connect('al-plugin-init-done', self.__plugin_init_done)
         self.al.signal.connect('al-user-verified', self.__reset_api)
@@ -146,6 +151,7 @@ class Plugin(BasePlugin):
 
         if pthinfo is not None:
             self.menu.info.set_sensitive(True)
+            self.menu.copy_title.set_sensitive(True)
 
             path, col, cellx, celly = pthinfo
             treeview.grab_focus()
@@ -160,6 +166,7 @@ class Plugin(BasePlugin):
         else:
             self.menu.info.set_sensitive(False)
             self.menu.add.set_sensitive(False)
+            self.menu.copy_title.set_sensitive(False)
 
         self.menu.popup(None, None, None, 3, event.time)
 
@@ -242,6 +249,15 @@ class Plugin(BasePlugin):
                 return
 
         self.al.plugins['anime'].add(params)
+
+    def __copy_anime_title(self, widget):
+        "Copy the title of the anime to the clipboard."
+
+        selection = self.treeview.get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        anime_title = self.liststore[row][2]
+
+        self.al.clipboard.set_text(anime_title)
 
     def __on_search(self, button):
         "Get text from text field and search."

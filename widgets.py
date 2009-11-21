@@ -11,6 +11,7 @@ import webbrowser
 import subprocess
 
 import gtk
+import pango
 import gobject
 
 from lib import utils

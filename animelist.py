@@ -40,6 +40,7 @@ class AnimeList():
         # Create signals, load configuration and API
         self.signal = signals.Signals()
         self.config = config.Config(self)
+        self.clipboard = gtk.Clipboard()
 
         self.mal = MAL((
             self.config.settings['username'],

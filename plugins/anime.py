@@ -53,15 +53,19 @@ class Plugin(BasePlugin):
         self.menu.delete.get_children()[0].set_label('Delete')
         self.menu.move = gtk.ImageMenuItem(gtk.STOCK_GO_FORWARD)
         self.menu.move.get_children()[0].set_label('Move')
+        self.menu.copy_title = gtk.ImageMenuItem(gtk.STOCK_COPY)
+        self.menu.copy_title.get_children()[0].set_label('Copy title')
         self.menu.refresh = gtk.ImageMenuItem(gtk.STOCK_REFRESH)
         self.menu.save = gtk.ImageMenuItem(gtk.STOCK_SAVE)
         self.menu.move_submenu = gtk.Menu()
         self.menu.move.set_submenu(self.menu.move_submenu)
 
         self.menu.append(self.menu.info)
-        self.menu.append(self.menu.delete)
         self.menu.append(gtk.SeparatorMenuItem())
+        self.menu.append(self.menu.delete)
         self.menu.append(self.menu.move)
+        self.menu.append(gtk.SeparatorMenuItem())
+        self.menu.append(self.menu.copy_title)
         self.menu.append(gtk.SeparatorMenuItem())
         self.menu.append(self.menu.refresh)
         self.menu.append(self.menu.save)
@@ -73,7 +77,7 @@ class Plugin(BasePlugin):
             self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
             self.liststore[k].set_sort_func(4, self.__sort_progess)
 
-            # Enabling this causes weird bugs
+            # Enabling this causes problems with moving/updating anime
             #ls_sort = gtk.TreeModelSort(self.liststore[k])
             #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
 
@@ -107,6 +111,7 @@ class Plugin(BasePlugin):
         self.notebook.connect('switch-page', self.__set_current_tab_id)
         self.menu.info.connect('activate', self.__show_information)
         self.menu.delete.connect('activate', self.__menu_delete)
+        self.menu.copy_title.connect('activate', self.__copy_anime_title)
         self.menu.refresh.connect('activate', self.refresh)
         self.menu.save.connect('activate', self.save)
         self.al.signal.connect('al-shutdown-lvl2', self.save)
@@ -256,6 +261,15 @@ class Plugin(BasePlugin):
         image_url = self.data[anime_id]['image']
 
         self.show_information_window(anime_id, image_url)
+
+    def __copy_anime_title(self, widget):
+        "Copy the title of the anime to the clipboard."
+
+        selection = self.treeview[self.current_tab_id].get_selection()
+        row = selection.get_selected_rows()[1][0][0]
+        anime_title = self.liststore[self.current_tab_id][row][2]
+
+        self.al.clipboard.set_text(anime_title)
 
     # List display/edit functions
 
