@@ -72,10 +72,12 @@ class Plugin(BasePlugin):
             # Create lists
             self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
             self.liststore[k].set_sort_func(4, self.__sort_progess)
-            ls_sort = gtk.TreeModelSort(self.liststore[k])
-            ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
 
-            self.treeview[k] = gtk.TreeView(ls_sort)
+            # Enabling this causes weird bugs
+            #ls_sort = gtk.TreeModelSort(self.liststore[k])
+            #ls_sort.set_sort_column_id(2, gtk.SORT_ASCENDING)
+
+            self.treeview[k] = gtk.TreeView(self.liststore[k])
             self.treeview[k].set_rules_hint(True)
             self.treeview[k].set_search_column(2)
             self.treeview[k].set_tooltip_column(2)
