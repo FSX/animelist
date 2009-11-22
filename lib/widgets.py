@@ -18,48 +18,49 @@ from lib import utils
 
 class ToolBar():
     """The toolbar holds the buttons that enable the user to navigate between the
-       sections. This class extends gtk.Toolbar and adds extra functionality."""
+    sections.  This class extends gtk.Toolbar and adds extra functionality.
+    """
 
     def __init__(self, al, toolbar):
 
         self.al = al
-        self.__toolbar = toolbar
+        self._toolbar = toolbar
         self.buttons = {}
         self.qeue = []
 
-        self.al.signal.connect('al-init-done', self.__insert_buttons)
+        self.al.signal.connect('al-init-done', self._insert_buttons)
 
     def set_section(self, bid=None, label=None):
         """Emit a 'al-switch-section' signal when a button on the sections
-           toolbar is pressed or when called in the script. Plugins can connect
-           to this signal and do the actual 'section switch'."""
+        toolbar is pressed or when called in the script.  Plugins can connect
+        to this signal and do the actual 'section switch'.
+        """
 
         try:
             if bid is not None:
-                button = self.__toolbar.get_children()[bid]
+                button = self._toolbar.get_children()[bid]
                 label = button.get_label()
             elif label is not None:
                 button = self.buttons[label]
         except IndexError:
             return False
-
-        button.set_sensitive(False)
-
-        self.al.signal.emit('al-switch-section', label)
+        else:
+            button.set_sensitive(False)
+            self.al.signal.emit('al-switch-section', label)
 
     def insert(self, label, position=0):
-        "Inserts a button in the qeue."
+        """Insert a button in the qeue."""
 
         self.qeue.append((position, label))
 
     def enable(self, enabled=True):
-        "Disable or enable the toolbar."
+        """Disable or enable the toolbar."""
 
-        self.__toolbar.set_sensitive(enabled)
+        self._toolbar.set_sensitive(enabled)
 
-    def __on_click(self, widget, label):
-        """Called when a button on the sections toolbar is pressed. It makes
-           the clicked button unsensitive and calls `self.set_section`."""
+    def _on_click(self, widget, label):
+        # Private.  Called when a button on the sections toolbar is pressed. It makes
+        # the clicked button unsensitive and calls `self.set_section`.
 
         for k in self.buttons:
             if k != label:
@@ -67,8 +68,8 @@ class ToolBar():
 
         self.set_section(label=label)
 
-    def __insert_buttons(self, widget=None):
-        "Insert all buttons from the qeue in the toolbar."
+    def _insert_buttons(self, widget=None):
+        # Private.  Insert all buttons from the qeue in the toolbar.
 
         self.qeue.sort()
 
@@ -78,42 +79,42 @@ class ToolBar():
 
             self.buttons[label] = gtk.ToolButton(label=label)
             self.buttons[label].set_border_width(2)
-            self.buttons[label].connect('clicked', self.__on_click, label)
+            self.buttons[label].connect('clicked', self._on_click, label)
 
-            self.__toolbar.insert(self.buttons[label], position)
+            self._toolbar.insert(self.buttons[label], position)
 
         self.set_section(0)
-        self.__toolbar.show_all()
+        self._toolbar.show_all()
 
 class Statusbar():
-    "Extends gtk.Statusbar."
+    """Extends gtk.Statusbar."""
 
     def __init__(self, al, statusbar):
 
-        self.__statusbar = statusbar
-        self.__statusbar_message_id = None
+        self._statusbar = statusbar
+        self._statusbar_message_id = None
 
     def update(self, text):
-        "Set/Update/Change statusbar text."
+        """Set/Update/Change statusbar text."""
 
         # Don't remove the previous text
         #if not self.__statusbar_message_id is None:
         #    self.__statusbar.remove_message(0, self.__statusbar_message_id)
 
-        self.__statusbar_message_id = self.__statusbar.push(0, text)
+        self._statusbar_message_id = self._statusbar.push(0, text)
 
     def clear(self, remove_timeout=None):
-        "Clear statusbar. With or without a timeout (int)."
+        """Clear statusbar. With or without a timeout (int)."""
 
-        if not self.__statusbar_message_id is None:
+        if not self._statusbar_message_id is None:
             if not remove_timeout is None:
-                gobject.timeout_add(remove_timeout, self.__statusbar.remove_message, 0,
-                    self.__statusbar_message_id)
+                gobject.timeout_add(remove_timeout, self._statusbar.remove_message, 0,
+                    self._statusbar_message_id)
             else:
-                self.__statusbar.remove_message(0, self.__statusbar_message_id)
+                self._statusbar.remove_message(0, self._statusbar_message_id)
 
 class SettingsDialog():
-    "Spawns a settings dialog and handles the validation of the entered values."
+    """Spawns a settings dialog and handles the validation of the entered values."""
 
     def __init__(self, al):
 
@@ -127,7 +128,7 @@ class SettingsDialog():
             'startup_refresh': self.al.builder.get_object('sd_cb_startrefresh_opt')
             }
 
-        self.__set_fields(fields)
+        self._set_fields(fields)
 
         # Setup dialog
         self.dialog = al.builder.get_object('settings_dialog')
@@ -140,13 +141,13 @@ class SettingsDialog():
 
         # Process/Reset changes
         if response == 1:
-            self.__set_settings(fields)
+            self._set_settings(fields)
         else:
-            self.__set_fields(fields)
+            self._set_fields(fields)
 
-    def __set_fields(self, fields):
-        """Copy the data from self.al.config.settings into all the text fields
-           and checkboxes."""
+    def _set_fields(self, fields):
+        # Private.  Copy the data from self.al.config.settings into all the text fields
+        # and checkboxes.
 
         if self.al.config.settings['username'] is not None:
             fields['username'].set_text(self.al.config.settings['username'])
@@ -161,9 +162,9 @@ class SettingsDialog():
         fields['systray'].set_active(self.al.config.settings['systray'])
         fields['startup_refresh'].set_active(self.al.config.settings['startup_refresh'])
 
-    def __set_settings(self, fields):
-        """Copy all the data from the text fields and checkboxes into
-           self.al.config.settings."""
+    def _set_settings(self, fields):
+        # Private.  Copy all the data from the text fields and checkboxes into
+        # self.al.config.settings.
 
         # Check user details
         user_changed = False
@@ -187,13 +188,13 @@ class SettingsDialog():
         self.al.config.settings['startup_refresh'] = fields['startup_refresh'].get_active()
 
 class AboutDialog(gtk.AboutDialog):
-    "A GTK+ about dialog that displays a description, a link to the website etc."
+    """A GTK+ about dialog that displays a description, a link to the website etc."""
 
     def __init__(self, al):
 
         gtk.AboutDialog.__init__(self)
-        gtk.about_dialog_set_email_hook(self.__open_email)
-        gtk.link_button_set_uri_hook(self.__open_url)
+        gtk.about_dialog_set_email_hook(self._open_email)
+        gtk.link_button_set_uri_hook(self._open_url)
         self.al = al
 
         self.set_logo(utils.get_image('%s/pixmaps/animelist_logo_256.png' % al.path))
@@ -203,13 +204,13 @@ class AboutDialog(gtk.AboutDialog):
         self.set_copyright('Copyright (c) 2009 Frank Smit')
         self.set_authors(['Frank Smit <61924.00@gmail.com>'])
         self.set_website('http://61924.nl/projects/animelist.html')
-        self.set_license(self.__read_licence_file())
+        self.set_license(self._read_licence_file())
 
         self.run()
         self.destroy()
 
-    def __read_licence_file(self):
-        "get the contents of the license file (COPYING) and return it."
+    def _read_licence_file(self):
+        # Private.  Get the contents of the license file (COPYING) and return it.
 
         try:
             with open('%s/COPYING' % self.al.path, 'r') as f:
@@ -219,8 +220,8 @@ class AboutDialog(gtk.AboutDialog):
 
         return contents
 
-    def __open_url(self, dialog, link, data=None):
+    def _open_url(self, dialog, link, data=None):
         webbrowser.open(link)
 
-    def __open_email(self, dialog, link, data=None):
+    def _open_email(self, dialog, link, data=None):
         subprocess.call(['xdg-open', 'mailto:%s' % link])

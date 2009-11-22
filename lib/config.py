@@ -37,8 +37,8 @@ class Config():
             }
 
         # Load settings
-        if os.access(self.al.HOME + '/settings.cfg', os.F_OK | os.W_OK):
-            self.__load_settings()
+        if os.access('%s/settings.cfg' % self.al.HOME, os.F_OK | os.W_OK):
+            self._load_settings()
 
         if self.settings['username'] is None or self.settings['password'] is None:
             self.user_verified, self.block_access = False, True
@@ -77,16 +77,16 @@ class Config():
             }
 
         # Events
-        self.al.signal.connect('al-shutdown-lvl2', self.__save_settings)
+        self.al.signal.connect('al-shutdown-lvl2', self._save_settings)
 
-    def __save_settings(self, widget=None):
-        "Save a pickled, base64 encoded version of self.settings in settings.cfg."
+    def _save_settings(self, widget=None):
+        # Private. Save a pickled, base64 encoded version of self.settings in settings.cfg.
 
         with open(self.al.HOME + '/settings.cfg', 'wb') as f:
             f.write(base64.b64encode(cPickle.dumps((self.user_verified, self.settings), cPickle.HIGHEST_PROTOCOL)))
 
-    def __load_settings(self):
-        "Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings."
+    def _load_settings(self):
+        # Private. Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings.
 
         with open(self.al.HOME + '/settings.cfg', 'rb') as f:
             self.user_verified, self.settings = cPickle.loads(base64.b64decode(f.read()))

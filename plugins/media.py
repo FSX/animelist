@@ -21,9 +21,7 @@ class Plugin(BasePlugin):
         }
 
     def __init__(self, al):
-
-        self.al = al
-        self._load_plugin()
+        BasePlugin.__init__(self, al)
 
     def _load_plugin(self):
 
@@ -35,12 +33,9 @@ class Plugin(BasePlugin):
         self.al.gui['box'].pack_start(self.label)
 
         # Events
-        self.al.signal.connect('al-switch-section', self.__switch_section)
+        self.al.signal.connect('al-switch-section', self._switch_section)
 
-    def _unload_plugin(self):
-        pass
-
-    def __switch_section(self, signal, section_name):
+    def _switch_section(self, signal, section_name):
 
         if section_name == self.plugin_data['fancyname']:
             self.label.show()

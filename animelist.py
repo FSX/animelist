@@ -26,7 +26,8 @@ gobject.threads_init()
 
 class AnimeList():
     """The main class which loads and starts all the necessary modules, plugins
-       and all other things."""
+    and all other things.
+    """
 
     def __init__(self):
 
@@ -106,19 +107,19 @@ class AnimeList():
 
         # Events
         self.gui['menu_quit'].connect('activate', self.quit)
-        self.gui['menu_settings'].connect('activate', self.__menu_settings)
-        self.gui['menu_get_help'].connect('activate', self.__menu_get_help)
-        self.gui['menu_about'].connect('activate', self.__menu_about)
+        self.gui['menu_settings'].connect('activate', self._menu_settings)
+        self.gui['menu_get_help'].connect('activate', self._menu_get_help)
+        self.gui['menu_about'].connect('activate', self._menu_about)
 
-        self.signal.connect('al-shutdown-lvl1', self.__mw_set_position_settings)
+        self.signal.connect('al-shutdown-lvl1', self._mw_set_position_settings)
         self.signal.connect('al-user-changed', self.verify_user)
-        self.gui['window'].connect('window-state-event', self.__mw_state_changed)
-        self.gui['window'].connect('configure-event', self.__mw_store_position)
+        self.gui['window'].connect('window-state-event', self._mw_state_changed)
+        self.gui['window'].connect('configure-event', self._mw_store_position)
         self.gui['window'].connect('destroy', self.quit)
-        self.gui['systray'].connect('activate', self.__st_activate_icon)
+        self.gui['systray'].connect('activate', self._st_activate_icon)
 
         # Check
-        if self.config.user_verified == False:
+        if not self.config.user_verified:
             self.block_access()
             widgets.SettingsDialog(self)
 
@@ -126,21 +127,21 @@ class AnimeList():
         # except actions started by plugins.
         self.signal.emit('al-init-done')
 
-    def __menu_get_help(self, widget):
+    def _menu_get_help(self, widget):
         print widget # For testing
 
-    def __menu_about(self, widget):
-        "Show the 'About' dialog."
+    def _menu_about(self, widget):
+        # Private.  Show the 'About' dialog.
 
         widgets.AboutDialog(self)
 
-    def __menu_settings(self, widget):
-        "Show the settings dialog."
+    def _menu_settings(self, widget):
+        # Private.  Show the settings dialog.
 
         widgets.SettingsDialog(self)
 
-    def __mw_set_position_settings(self, widget):
-        "Save the position and the dimensions of the window in the settings."
+    def _mw_set_position_settings(self, widget):
+        # Private.  Save the position and the dimensions of the window in the settings.
 
         # Only save the position and dimensions when the window is not maximized
         if self.config.settings['window']['maximized'] == False:
@@ -148,22 +149,22 @@ class AnimeList():
             self.config.settings['window']['y'] = self._position[1]
             (self.config.settings['window']['width'], self.config.settings['window']['height']) = self.gui['window'].get_size()
 
-    def __mw_state_changed(self, widget, event):
-        """A callback connected to the window's window-state-event signal. This
-        is used to keep track of whether the window is maximized or not."""
+    def _mw_state_changed(self, widget, event):
+        # Private.  A callback connected to the window's window-state-event signal.
+        # This is used to keep track of whether the window is maximized or not.
 
         if event.new_window_state == gtk.gdk.WINDOW_STATE_MAXIMIZED:
             self.config.settings['window']['maximized'] = True
         else:
             self.config.settings['window']['maximized'] = False
 
-    def __mw_store_position(self, event, position):
-        "Store the position of the window when it's moved or resized."
+    def _mw_store_position(self, event, position):
+        # Private.  Store the position of the window when it's moved or resized.
 
         self._position = (position.x, position.y)
 
-    def __st_activate_icon(self, widget):
-        "Hide and show the main window."
+    def _st_activate_icon(self, widget):
+        # Private.  Hide or show the main windows when the status/systemtray icon has been clicked
 
         if self.gui['window'].get_property('visible'):
             self.gui['window'].hide()
@@ -173,28 +174,28 @@ class AnimeList():
             self.gui['window'].present()
 
     def block_access(self):
-        "Block access to the GUI, except the menu."
+        """Block access to the GUI, except the menu."""
 
         self.config.block_access = True
         self.gui['toolbar'].enable(False)
         self.gui['box'].set_sensitive(False)
 
     def unblock_access(self):
-        "Unblock the access to the GUI."
+        """Unblock the access to the GUI."""
 
         self.config.block_access = False
         self.gui['toolbar'].enable(True)
         self.gui['box'].set_sensitive(True)
 
     def verify_user(self, widget=None):
-        "Verify current user. Block the application when the user is invalid."
+        """Verify current user.  Block the application when the user is invalid."""
 
         def request():
             return self.mal.verify_user()
 
         def callback(result):
 
-            if result == True:
+            if result:
                 self.signal.emit('al-user-verified')
                 self.unblock_access()
 
@@ -221,7 +222,7 @@ class AnimeList():
         t.start()
 
     def quit(self, widget=None):
-        "Terminates the application cleanly."
+        """Terminates the application cleanly."""
 
         # There are two shutdown signals, because methods that are connected to
         # the signals are not executed in the right order.  It could be possible
@@ -235,4 +236,8 @@ class AnimeList():
 
 if __name__ == '__main__':
     AnimeList()
-    gtk.main()
+
+    try:
+        gtk.main()
+    except KeyboardInterrupt:
+        print '\n'

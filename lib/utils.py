@@ -17,7 +17,7 @@ import gtk
 REGEX_HTML_TAG = re.compile(r'<[^<]*?/?>')
 
 # http://code.activestate.com/recipes/545418/
-# A cache file goes from ~49.8KB to ~42.2KB
+# The filesize of a file goes from ~49.8KB to ~42.2KB
 def optimize_pickle(p):
     "Optimize a pickle string by removing unused PUT opcodes."
 
@@ -47,14 +47,14 @@ def optimize_pickle(p):
     return ''.join(s)
 
 def cache_data(path, data):
-    "Cache data with cPickle."
+    """Pickle data and write if to the disk."""
 
     with open(path, 'wb') as f:
         pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
         f.write(pickle)
 
 def get_cache(path):
-    "Get data from cache file with cPickle."
+    """Get data from disk and upickle it."""
 
     with open(path, 'rb') as f:
         contents = cPickle.load(f)
@@ -62,18 +62,18 @@ def get_cache(path):
     return contents
 
 def htmldecode(string):
-    "Decode htmlentities."
+    """Decode htmlentities."""
 
     return string.replace('&apos;', '\'')
 
 def get_image(image):
-    "Returns a gtk.gdk.Pixbuf."
+    """Create a new pixbuf from an image file and return a gtk.gdk.Pixbuf."""
 
     if os.access(image, os.F_OK):
         return gtk.gdk.pixbuf_new_from_file(image)
 
 # http://love-python.blogspot.com/2008/07/strip-html-tags-using-python.html
 def strip_html_tags(string):
-    "Strip HTML tags from a string."
+    """Strip HTML tags from a string."""
 
     return REGEX_HTML_TAG.sub('', string)

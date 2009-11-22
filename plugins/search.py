@@ -15,8 +15,9 @@ from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
-    """The search plugin. Search results can be added to the anime list (if the
-       anime list plugin is enabled ofcourse."""
+    """The search plugin.  Search results can be added to the anime list (if the
+    anime list plugin is enabled ofcourse.
+    """
 
     plugin_data = {
         'name': 'search',
@@ -70,7 +71,7 @@ class Plugin(BasePlugin):
 
         for k, v in enumerate(self.al.config.anime['status']):
             self.menu.add_to[k] = gtk.MenuItem(v.capitalize())
-            self.menu.add_to[k].connect('activate', self.__menu_add_anime, k)
+            self.menu.add_to[k].connect('activate', self._menu_add_anime, k)
             self.menu.add_submenu.append(self.menu.add_to[k])
 
         # Search results list
@@ -82,7 +83,7 @@ class Plugin(BasePlugin):
         self.treeview.set_tooltip_column(2)
         self.treeview.columns_autosize()
 
-        self.__create_columns()
+        self._create_columns()
 
         # Create scrollbox
         frame = gtk.ScrolledWindow()
@@ -102,37 +103,37 @@ class Plugin(BasePlugin):
         self.al.gui['box'].pack_start(self.box)
 
         # Events
-        self.al.signal.connect('al-switch-section', self.__switch_section)
-        self.search_entry.connect('key-release-event', self.__handle_key)
-        self.search_button.connect('clicked', self.__on_search)
-        self.menu.info.connect('activate', self.__show_information)
-        self.menu.copy_title.connect('activate', self.__copy_anime_title)
-        self.treeview.connect('button-press-event', self.__show_menu)
-        self.al.signal.connect('al-plugin-init-done', self.__plugin_init_done)
-        self.al.signal.connect('al-user-verified', self.__reset_api)
+        self.al.signal.connect('al-switch-section', self._switch_section)
+        self.search_entry.connect('key-release-event', self._handle_key)
+        self.search_button.connect('clicked', self._on_search)
+        self.menu.info.connect('activate', self._show_information)
+        self.menu.copy_title.connect('activate', self._copy_anime_title)
+        self.treeview.connect('button-press-event', self._show_menu)
+        self.al.signal.connect('al-plugin-init-done', self._plugin_init_done)
+        self.al.signal.connect('al-user-verified', self._reset_api)
 
-    def __switch_section(self, widget, section_name):
+    def _switch_section(self, widget, section_name):
 
         if section_name == self.plugin_data['fancyname']:
             self.box.show()
         else:
             self.box.hide()
 
-    def __plugin_init_done(self, widget=None):
-        "Check if anime plugin has been loaded."
+    def _plugin_init_done(self, widget=None):
+        # Private.  Check if anime plugin has been loaded.
 
         if 'anime' in self.al.plugins:
             self.anime_plugin_loaded = True
 
     # Misc functions
 
-    def __reset_api(self, widget=None):
+    def _reset_api(self, widget=None):
             self.al.mal.init_anime()
 
     # Widget callbacks
 
-    def __handle_key(self, widget, event):
-        "Handle key events of widgets."
+    def _handle_key(self, widget, event):
+        # Private.  Handle key events of widgets.
 
         string, state = event.string, event.state
         keyname = gtk.gdk.keyval_name(event.keyval)
@@ -140,11 +141,11 @@ class Plugin(BasePlugin):
         if keyname == 'Return':
             self.__on_search(None)
 
-    def __show_menu(self, treeview, event):
-        """Displays the main popup menu on a button-press-event
-           with options for the selected row in the list."""
+    def _show_menu(self, treeview, event):
+        # Private.  Displays the main popup menu on a button-press-event
+        # with options for the selected row in the list.
 
-        if event.button != 3 or self.anime_plugin_loaded == False:  # Only on right click
+        if event.button != 3 or not self.anime_plugin_loaded: # Only on right click
             return False
 
         pthinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
@@ -170,8 +171,8 @@ class Plugin(BasePlugin):
 
         self.menu.popup(None, None, None, 3, event.time)
 
-    def __menu_add_anime(self, menuitem, dest_list):
-        "Add anime to list."
+    def _menu_add_anime(self, menuitem, dest_list):
+        # Private.  Add anime to list.
 
         selection = self.treeview.get_selection()
         anime_id = int(self.liststore[selection.get_selected_rows()[1][0][0]][0])
@@ -250,8 +251,8 @@ class Plugin(BasePlugin):
 
         self.al.plugins['anime'].add(params)
 
-    def __copy_anime_title(self, widget):
-        "Copy the title of the anime to the clipboard."
+    def _copy_anime_title(self, widget):
+        # Private.  Copy the title of the anime to the clipboard.
 
         selection = self.treeview.get_selection()
         row = selection.get_selected_rows()[1][0][0]
@@ -259,8 +260,8 @@ class Plugin(BasePlugin):
 
         self.al.clipboard.set_text(anime_title)
 
-    def __on_search(self, button):
-        "Get text from text field and search."
+    def _on_search(self, button):
+        # Private.  Get text from text field and search.
 
         query = self.search_entry.get_text().strip()
 
@@ -269,10 +270,10 @@ class Plugin(BasePlugin):
             self.search_entry.grab_focus()
             return
 
-        self.__process_search(query)
+        self._process_search(query)
 
-    def __show_information(self, widget):
-        "Show anime information window."
+    def _show_information(self, widget):
+        # Private.  Show anime information window.
 
         # Get anime ID
         selection = self.treeview.get_selection()
@@ -284,14 +285,14 @@ class Plugin(BasePlugin):
 
     # Functions for filling the list with search results
 
-    def __process_search(self, query):
-        "Send search request and put the results in the list."
+    def _process_search(self, query):
+        # Private.  Send search request and put the results in the list.
 
         def get_data(query):
             self.data = self.al.mal.anime.search(query)
 
         def add_rows():
-            if self.data == False:
+            if not self.data:
                 self.al.gui['statusbar'].update('Search: Search failed. Please try again later.')
                 self.search_entry.set_sensitive(True)
                 self.search_button.set_sensitive(True)
@@ -331,18 +332,18 @@ class Plugin(BasePlugin):
 
     # List display functions
 
-    def __cell_status_display(self, column, cell, model, iter):
-        "Set background for status column."
+    def _cell_status_display(self, column, cell, model, iter):
+        # Private.  Set background for status column.
 
         anime_id = int(model.get_value(iter, 0))
         status = self.data[anime_id]['status']
 
         cell.set_property('background-gdk', self.al.config.anime['cstatus'][status])
 
-    def __cell_title_display(self, column, cell, model, iter):
-        "Makes the text bold in rows (animes) that are already in your list."
+    def _cell_title_display(self, column, cell, model, iter):
+        # Private.  Makes the text bold in rows (animes) that are already in your list.
 
-        if self.anime_plugin_loaded == False:
+        if not self.anime_plugin_loaded:
             return
 
         anime_id = int(model.get_value(iter, 0))
@@ -362,8 +363,8 @@ class Plugin(BasePlugin):
             except ValueError:
                 pass
 
-    def __create_columns(self):
-        "Create columns."
+    def _create_columns(self):
+        # Private.  Create columns.
 
         # Anime ID
         column = gtk.TreeViewColumn(None, None)
@@ -376,7 +377,7 @@ class Plugin(BasePlugin):
         column.set_resizable(False)
         column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         column.set_fixed_width(8)
-        column.set_cell_data_func(renderer, self.__cell_status_display)
+        column.set_cell_data_func(renderer, self._cell_status_display)
         self.treeview.append_column(column)
 
         # Title
@@ -386,7 +387,7 @@ class Plugin(BasePlugin):
         column.set_resizable(True)
         column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         column.set_expand(True)
-        column.set_cell_data_func(renderer, self.__cell_title_display)
+        column.set_cell_data_func(renderer, self._cell_title_display)
         self.treeview.append_column(column)
 
         # Type (TV, OVA ...)

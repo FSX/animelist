@@ -38,13 +38,14 @@ class MAL():
         pass
 
     def verify_user(self):
+        """Verify user details."""
 
         try:
             self.request.execute(path='account/verify_credentials', authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
-
-        return True
+        else:
+            return True
 
 class Anime():
 
@@ -54,7 +55,7 @@ class Anime():
         self.request = request
 
     def list(self):
-        "Fetch/Download anime list from MAL."
+        """Fetch/Download anime list from MAL."""
 
         try:
             response = self.request.execute(path='animelist/%s' % urllib.quote(self.username), authenticate=True)
@@ -83,7 +84,7 @@ class Anime():
         return data
 
     def search(self, query):
-        "Fetch/Download anime list from MAL."
+        """Fetch/Download anime list from MAL."""
 
         try:
             response = self.request.execute(path='anime/search?q=%s' % urllib.quote(query), authenticate=True)
@@ -109,49 +110,49 @@ class Anime():
         return data
 
     def add(self, params):
-        "Add anime to list. params = (id, status, episodes, score)."
+        """Add anime to list.  params = (id, status, episodes, score)."""
 
         try:
             response = self.request.execute(path='animelist/anime', params=params, method='POST', authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
-
-        return response
+        else:
+            return response
 
     def update(self, id, params):
-        "Update anime in the list. data = {status, episodes, score}."
+        """Update anime in the list.  data = {status, episodes, score}."""
 
         try:
             response = self.request.execute(path='animelist/anime/%s' % id, params=params, method='PUT', authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
-
-        return response
+        else:
+            return response
 
     def delete(self, id):
-        "Remove anime from the list."
+        """Remove anime from the list."""
 
         try:
             response = self.request.execute(path='animelist/anime/%s' % id, method='DELETE', authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
-
-        # Note: Do 'return response' to return the details of the removed anime.
-        # The returned details could be used to make an undo function.
-        return True
+        else:
+            # Note: Do 'return response' to return the details of the removed anime.
+            # The returned details could be used to make an undo function.
+            return True
 
     def details(self, id):
-        "Get information about an anime."
+        """Get information about an anime."""
 
         try:
             response = self.request.execute(path='anime/%s' % id, authenticate=True)
         except (request.HttpRequestError, request.HttpStatusError):
             return False
-
-        return json.loads(response)
+        else:
+            return json.loads(response)
 
     def image(self, url):
-        "Get the image of the anime."
+        """Get the image of the anime."""
 
         filename, headers = self.request.retrieve(url)
 

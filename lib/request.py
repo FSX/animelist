@@ -22,8 +22,8 @@ class Request():
             filename, headers = urllib.urlretrieve(url)
         except urllib.ContentTooShortError:
             return False
-
-        return (filename, headers)
+        else:
+            return (filename, headers)
 
     def execute(self, path, params=None, method='GET', authenticate=False, ssl=False):
 
@@ -35,11 +35,11 @@ class Request():
         if params is not None:
             params = urllib.urlencode(params)
 
-        if authenticate == True:
+        if authenticate:
             encoded = base64.encodestring('%s:%s' % (self.username, self.password))[:-1]
             headers['Authorization'] = 'Basic %s' % encoded
 
-        if ssl == True:
+        if ssl:
             connection = httplib.HTTPSConnection(self.host)
         else:
             connection = httplib.HTTPConnection(self.host)

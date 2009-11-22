@@ -18,9 +18,10 @@ from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
-    """The anime list plugin. A list with all the animes from the user's MAL list
-       divided into different statuses (completed, watching, etc.). Functions for
-       editing the list are also available for other plugins."""
+    """The anime list plugin.  A list with all the animes from the user's MAL list
+    divided into different statuses (completed, watching, etc.).  Functions for
+    editing the list are also available for other plugins.
+    """
 
     plugin_data = {
         'name': 'anime',
@@ -75,7 +76,7 @@ class Plugin(BasePlugin):
 
             # Create lists
             self.liststore[k] = gtk.ListStore(int, str, str, str, str, int)
-            self.liststore[k].set_sort_func(4, self.__sort_progess)
+            self.liststore[k].set_sort_func(4, self._sort_progess)
 
             # Enabling this causes problems with moving/updating anime
             #ls_sort = gtk.TreeModelSort(self.liststore[k])
@@ -87,12 +88,12 @@ class Plugin(BasePlugin):
             self.treeview[k].set_tooltip_column(2)
             self.treeview[k].columns_autosize()
 
-            self.__create_columns(self.treeview[k], k)
+            self._create_columns(self.treeview[k], k)
 
             # Menu
-            self.treeview[k].connect('button-press-event', self.__show_menu)
+            self.treeview[k].connect('button-press-event', self._show_menu)
             self.menu.move_to[k] = gtk.MenuItem(v.capitalize())
-            self.menu.move_to[k].connect('activate', self.__menu_move_row, k)
+            self.menu.move_to[k].connect('activate', self._menu_move_row, k)
             self.menu.move_submenu.append(self.menu.move_to[k])
 
             # Create scrollbox
@@ -108,15 +109,15 @@ class Plugin(BasePlugin):
         self.al.gui['box'].pack_start(self.notebook)
 
         # Events
-        self.notebook.connect('switch-page', self.__set_current_tab_id)
-        self.menu.info.connect('activate', self.__show_information)
-        self.menu.delete.connect('activate', self.__menu_delete)
-        self.menu.copy_title.connect('activate', self.__copy_anime_title)
+        self.notebook.connect('switch-page', self._set_current_tab_id)
+        self.menu.info.connect('activate', self._show_information)
+        self.menu.delete.connect('activate', self._menu_delete)
+        self.menu.copy_title.connect('activate', self._copy_anime_title)
         self.menu.refresh.connect('activate', self.refresh)
         self.menu.save.connect('activate', self.save)
         self.al.signal.connect('al-shutdown-lvl2', self.save)
-        self.al.signal.connect('al-switch-section', self.__switch_section)
-        self.al.signal.connect('al-user-verified', self.__w_refresh)
+        self.al.signal.connect('al-switch-section', self._switch_section)
+        self.al.signal.connect('al-user-verified', self._w_refresh)
 
         # Make menu visible
         self.menu.show_all()
@@ -132,7 +133,7 @@ class Plugin(BasePlugin):
     def _unload_plugin(self):
         pass
 
-    def __switch_section(self, widget, section_name):
+    def _switch_section(self, widget, section_name):
 
         if section_name == self.plugin_data['fancyname']:
             self.notebook.show()
@@ -141,8 +142,8 @@ class Plugin(BasePlugin):
 
     # Misc functions
 
-    def __w_refresh(self, widget=None):
-        "A wrapper for 'refresh' function."
+    def _w_refresh(self, widget=None):
+        # Private.  A wrapper for 'refresh' function.
 
         self.al.mal.init_anime()
 
@@ -150,8 +151,8 @@ class Plugin(BasePlugin):
         # will get a 'Segmentation fault'.  I'm not sure why this happens.
         gobject.idle_add(self.refresh)
 
-    def __clear_message(self, result):
-        "This function is called by some funtions when a request has been finished."
+    def _clear_message(self, result):
+        # Private.  This function is called by some funtions when a request has been finished.
 
         if result == False:
             self.al.gui['statusbar'].update('Anime: Could not send changes to MyAnimeList')
@@ -161,7 +162,8 @@ class Plugin(BasePlugin):
 
     def save(self, widget=None):
         """Save anime data to local cache. This function is executed when
-           the 'save' button is pressed and when the application shuts down."""
+        the 'save' button is pressed and when the application shuts down.
+        """
 
         #if self.al.config.no_user_defined == False:
         utils.cache_data('%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username']), self.data)
@@ -171,7 +173,8 @@ class Plugin(BasePlugin):
 
     def show_information_window(self, anime_id, image_url):
         """Fetch all the information (and image) and how the information window.
-           This is just a wrapper for the InfoWindow class."""
+        This is just a wrapper for the InfoWindow class.
+        """
 
         def request_data(aid):
             return self.al.mal.anime.details(aid)
@@ -183,7 +186,7 @@ class Plugin(BasePlugin):
 
         def cb_set_image(image):
 
-            if image == False:
+            if not image:
                 return
 
             window.set_image(image)
@@ -197,26 +200,26 @@ class Plugin(BasePlugin):
         t2 = gthreads.AsyncTask(self.al.mal.anime.image, cb_set_image)
         t2.start(image_url)
 
-    def __update_item_count(self):
-        "Display the amount of item/rows of the lists in the tabs."
+    def _update_item_count(self):
+        # Private.  Display the amount of item/rows of the lists in the tabs.
 
         for k, v in enumerate(self.al.config.anime['status']):
             self.notebook.set_tab_label(self.frame[k], gtk.Label('%s (%d)' % (v.capitalize(), len(self.liststore[k]))))
 
     # Widget callbacks
 
-    def __set_current_tab_id(self, notebook, page, page_num):
-        """Update the current tab number and hide the corrent menu item in the
-           'Move to' menu. Note: this method is also called when the tabs are
-           created (at startup) (each time a tab is created)."""
+    def _set_current_tab_id(self, notebook, page, page_num):
+        # Private.  Update the current tab number and hide the corrent menu item in the
+        # 'Move to' menu.  Note: this method is also called when the tabs are
+        # created (at startup) (each time a tab is created)."""
 
         self.menu.move_to[self.current_tab_id].show()
         self.current_tab_id = page_num
         self.menu.move_to[self.current_tab_id].hide()
 
-    def __show_menu(self, treeview, event):
-        """Displays the main popup menu on a button-press-event
-           with options for the selected row in the list."""
+    def _show_menu(self, treeview, event):
+        # Private.  Displays the main popup menu on a button-press-event
+        # with options for the selected row in the list.
 
         if event.button != 3: # Only on right click
             return False
@@ -241,21 +244,21 @@ class Plugin(BasePlugin):
 
         self.menu.popup(None, None, None, 3, event.time)
 
-    def __menu_delete(self, widget):
-        "Wrapper for detele()."
+    def _menu_delete(self, widget):
+        # Private.  Wrapper for detele().
 
         self.delete()
 
-    def __menu_move_row(self, widget, dest_list):
-        "Wrapper method for move()."
+    def _menu_move_row(self, widget, dest_list):
+        # Private.  Wrapper method for move().
 
         selection = self.treeview[self.current_tab_id].get_selection()
         unused, rows = selection.get_selected_rows()
 
         self.move(rows[0][0], self.current_tab_id, dest_list)
 
-    def __show_information(self, widget):
-        "Get the ID and image of the anime and show the information window."
+    def _show_information(self, widget):
+        # Private.  Get the ID and image of the anime and show the information window.
 
         selection = self.treeview[self.current_tab_id].get_selection()
         row = selection.get_selected_rows()[1][0][0]
@@ -264,8 +267,8 @@ class Plugin(BasePlugin):
 
         self.show_information_window(anime_id, image_url)
 
-    def __copy_anime_title(self, widget):
-        "Copy the title of the anime to the clipboard."
+    def _copy_anime_title(self, widget):
+        # Private.  Copy the title of the anime to the clipboard.
 
         selection = self.treeview[self.current_tab_id].get_selection()
         row = selection.get_selected_rows()[1][0][0]
@@ -276,10 +279,10 @@ class Plugin(BasePlugin):
     # List display/edit functions
 
     def fill_lists(self, refresh):
-        "Starts __get_data in a thread and __add_rows when the thread is finished to fill the lists with data."
+        """Starts get_data in a thread and add_rows when the thread is finished to fill the lists with data."""
 
-        # Get data from cache or download it from MAL and save it to the local cache.
         def get_data(refresh):
+            # Get data from cache or download it from MAL and save it to the local cache.
 
             filename = '%s/%s_animelist.cpickle' % (self.al.HOME, self.al.config.settings['username'])
 
@@ -291,21 +294,21 @@ class Plugin(BasePlugin):
                 else:
                     refresh = True
 
-            if refresh == True:
+            if refresh:
                 self.data = self.al.mal.anime.list()
                 utils.cache_data(filename, self.data)
 
-        # Add all anime data to the lists.
         def add_rows():
+            # Add all anime data to the lists.
 
             for k, v in enumerate(self.al.config.anime['status']):
                 self.liststore[k].clear()
 
-            if self.data is None or self.data == False:
+            if self.data is None or not self.data:
                 self.al.gui['statusbar'].update('Anime: Could not refresh/update the data.')
                 return
 
-            if type(self.data) == type({}): # Temperary
+            if isinstance(self.data, dict):
                 for k, v in self.data.iteritems():
                     self.liststore[self.al.config.anime['rstatus'][v['watched_status']]].append((
                         v['id'],    # Anime ID (hidden)
@@ -316,7 +319,7 @@ class Plugin(BasePlugin):
                         v['score']  # Score
                         ))
 
-            self.__update_item_count()
+            self._update_item_count()
 
             self.al.signal.emit('al-plugin-signal-1')
             self.al.gui['statusbar'].clear(1000)
@@ -327,20 +330,20 @@ class Plugin(BasePlugin):
         t.start(refresh)
 
     def refresh(self, widget=None):
-        "Wrapper for fill_lists."
+        """Wrapper for fill_lists."""
 
         self.fill_lists(True)
 
-    def __cell_status_display(self, column, cell, model, iter):
-        "Set background for status column."
+    def _cell_status_display(self, column, cell, model, iter):
+        # Private.  Set background for status column.
 
         anime_id = model.get_value(iter, 0)
         status = self.data[anime_id]['status']
 
         cell.set_property('background-gdk', self.al.config.anime['cstatus'][status])
 
-    def __cell_progress_display(self, column, cell, model, iter):
-        "Put 'watched episodes/episodes' in column."
+    def _cell_progress_display(self, column, cell, model, iter):
+        # Private.  Put 'watched episodes/episodes' in column.
 
         anime_id = model.get_value(iter, 0)
         episodes = self.data[anime_id]['episodes']
@@ -348,13 +351,13 @@ class Plugin(BasePlugin):
 
         cell.set_property('text', '%s/%s' % (self.data[anime_id]['watched_episodes'], episodes))
 
-    def __cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
-        "Split the episodes from the watched episodes."
+    def _cell_progress_start_edit(self, cellrenderer, editable, row, list_id):
+        # Private.  Split the episodes from the watched episodes.
 
         editable.set_text(editable.get_text().split('/', 1)[0])
 
-    def __create_columns(self, treeview, list_id):
-        "Create columns."
+    def _create_columns(self, treeview, list_id):
+        # Private.  Create columns.
 
         # Anime ID
         column = gtk.TreeViewColumn(None, None)
@@ -367,7 +370,7 @@ class Plugin(BasePlugin):
         column.set_resizable(False)
         column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         column.set_fixed_width(8)
-        column.set_cell_data_func(renderer, self.__cell_status_display)
+        column.set_cell_data_func(renderer, self._cell_status_display)
         treeview.append_column(column)
 
         # Title
@@ -388,11 +391,11 @@ class Plugin(BasePlugin):
         # Progess
         renderer = gtk.CellRendererText()
         renderer.set_property('editable', True)
-        renderer.connect('editing-started', self.__cell_progress_start_edit, list_id)
-        renderer.connect('edited', self.__cell_progress_edited, list_id)
+        renderer.connect('editing-started', self._cell_progress_start_edit, list_id)
+        renderer.connect('edited', self._cell_progress_edited, list_id)
         column = gtk.TreeViewColumn('Progress', renderer, text=4)
         column.set_sort_column_id(4)
-        column.set_cell_data_func(renderer, self.__cell_progress_display)
+        column.set_cell_data_func(renderer, self._cell_progress_display)
         treeview.append_column(column)
 
         # Score
@@ -400,13 +403,13 @@ class Plugin(BasePlugin):
         renderer.set_property('editable', True)
         adjustment = gtk.Adjustment(0, 0, 10, 1)
         renderer.set_property('adjustment', adjustment)
-        renderer.connect('edited', self.__cell_score_edited, list_id)
+        renderer.connect('edited', self._cell_score_edited, list_id)
         column = gtk.TreeViewColumn('Score', renderer, text=5)
         column.set_sort_column_id(5)
         treeview.append_column(column)
 
-    def __sort_progess(self, model, iter1, iter2, data=None):
-        "Sort the list by progress (total episodes)."
+    def _sort_progess(self, model, iter1, iter2, data=None):
+        # Private.  Sort the list by progress (total episodes).
 
         (c, order) = model.get_sort_column_id()
 
@@ -426,8 +429,8 @@ class Plugin(BasePlugin):
 
         return 1
 
-    def __cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
-        "Validate given progress and update score cell, local cache and MAL."
+    def _cell_progress_edited(self, cellrenderer, row, new_progress, list_id):
+        # Private.  Validate given progress and update score cell, local cache and MAL.
 
         anime_id = int(self.liststore[list_id][row][0])
         old_progress = self.data[anime_id]['watched_episodes']
@@ -440,20 +443,20 @@ class Plugin(BasePlugin):
             episodes = self.data[anime_id]['episodes']
             if episodes == 0: episodes = '?'
 
-            # This isn't needed because __cell_progress_display already does this
+            # This isn't needed because _cell_progress_display already does this
             # self.liststore[list_id][row][4] = '%s/%s' % (new_progress, episodes)
             self.data[anime_id]['watched_episodes'] = new_progress
 
             # Update MAL
-            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__clear_message)
+            t = gthreads.AsyncTask(self.al.mal.anime.update, self._clear_message)
             t.start(
                 anime_id,
                 {'status': self.data[anime_id]['watched_status'],
                 'episodes': self.data[anime_id]['watched_episodes'],
                 'score': self.data[anime_id]['score']})
 
-    def __cell_score_edited(self, cellrenderer, row, new_score, list_id):
-        "Validate given score and update score cell, local cache and MAL."
+    def _cell_score_edited(self, cellrenderer, row, new_score, list_id):
+        # Private.  Validate given score and update score cell, local cache and MAL.
 
         anime_id = self.liststore[list_id][row][0]
         old_score = self.liststore[list_id][row][5]
@@ -467,7 +470,7 @@ class Plugin(BasePlugin):
             self.data[anime_id]['score'] = new_score
 
             # Update MAL
-            t = gthreads.AsyncTask(self.al.mal.anime.update, self.__clear_message)
+            t = gthreads.AsyncTask(self.al.mal.anime.update, self._clear_message)
             t.start(
                 anime_id,
                 {'status': self.data[anime_id]['watched_status'],
@@ -481,11 +484,11 @@ class Plugin(BasePlugin):
     #    Except for 'add', which is used to add anime from the search section.
 
     def add(self, params):
-        "Prepend a row to a list."
+        """Prepend a row to a list."""
 
         def callback(result):
-            self.__clear_message(result)
-            self.__update_item_count()
+            self._clear_message(result)
+            self._update_item_count()
 
         self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
@@ -517,11 +520,11 @@ class Plugin(BasePlugin):
         t.start(add_params)
 
     def delete(self):
-        "Removes the selected row from the list."
+        """Removes the selected row from the list."""
 
         def callback(result):
-            self.__clear_message(result)
-            self.__update_item_count()
+            self._clear_message(result)
+            self._update_item_count()
 
         self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
@@ -540,11 +543,11 @@ class Plugin(BasePlugin):
         t.start(anime_id)
 
     def move(self, row, current_list, dest_list):
-        "Move a row to an other list."
+        """Move a row to an other list."""
 
         def callback(result):
-            self.__clear_message(result)
-            self.__update_item_count()
+            self._clear_message(result)
+            self._update_item_count()
 
         self.al.gui['statusbar'].update('Anime: Sending changes to MyAnimeList...')
 
@@ -587,11 +590,11 @@ class InfoWindow(gtk.Builder):
             }
 
         self.mal_url = None
-        self.gui['window'].connect('key-release-event', self.__handle_key)
-        self.gui['mal_button'].connect('clicked', self.__on_click)
+        self.gui['window'].connect('key-release-event', self._handle_key)
+        self.gui['mal_button'].connect('clicked', self._on_click)
 
     def set_info(self, data):
-        "Format all the data and add it to all the labels."
+        """Format all the data and add it to all the labels."""
 
         self.gui['window'].show_all()
 
@@ -654,13 +657,13 @@ class InfoWindow(gtk.Builder):
         self.gui['stats_content'].set_markup('<span size="small">%s</span>' % '\n'.join(markup))
 
     def set_image(self, image):
-        "Set the image."
+        """Set the image."""
 
         self.gui['image'].clear()
         self.gui['image'].set_from_file(image)
 
-    def __handle_key(self, widget, event):
-        "Handle key events of widgets."
+    def _handle_key(self, widget, event):
+        # Private.  Handle key events of widgets.
 
         string, state = event.string, event.state
         keyname =  gtk.gdk.keyval_name(event.keyval)
@@ -668,7 +671,7 @@ class InfoWindow(gtk.Builder):
         if keyname == 'Escape':
             self.gui['window'].destroy()
 
-    def __on_click(self, button):
+    def _on_click(self, button):
 
         if self.mal_url is None:
             return

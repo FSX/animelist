@@ -26,7 +26,7 @@ class PluginSys():
     _instances = {}
 
     def __init__(self, al, config):
-        "Adds the plugin directory to the import path and loads the plugin."
+        """Add the plugin directory to the import path and load the plugins."""
 
         self.al = al
 
@@ -36,26 +36,26 @@ class PluginSys():
         self.load(config['plugins'])
 
     def load(self, plugins):
-        "Load a set of plugins and start the loaded plugins."
+        """Load a set of plugins and start the loaded plugins."""
 
         for plugin in plugins:
             __import__(plugin, None, None, [''])
             self._instances[plugin] = sys.modules[plugin].Plugin(self.al)
 
     def unload(self, plugins):
-        "Run the unload function and delete the instance of the plugin."
+        """Run the unload function and delete the instance of the plugin."""
 
         for plugin in plugins:
             self._instances[plugin]._unload_plugin()
             del self._instances[plugin]
 
     def find(self):
-        "Returns the subclasses of the BasePlugin."
+        """Return the subclasses of the BasePlugin."""
 
         return BasePlugin.__subclasses__()
 
     def list(self):
-        "Returns the data of all the plugins in a set."
+        """Return the data of all the plugins in a set."""
 
         plugin_list = []
 
