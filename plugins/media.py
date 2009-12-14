@@ -29,15 +29,12 @@ class Plugin(BasePlugin):
         self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 2)
 
         # GUI
-        self.label = gtk.Label('Media section')
-        self.al.gui['box'].pack_start(self.label)
+        self.main_gui = gtk.Label('Media section')
+        self.al.gui['box'].pack_start(self.main_gui)
 
-        # Events
-        self.al.signal.connect('al-switch-section', self._switch_section)
-
-    def _switch_section(self, signal, section_name):
+    def _switch_section(self, widget, section_name):
 
         if section_name == self.plugin_data['fancyname']:
-            self.label.show()
+            self.main_gui.show()
         else:
-            self.label.hide()
+            self.main_gui.hide()

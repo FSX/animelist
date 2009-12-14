@@ -72,7 +72,7 @@ class AnimeList():
 
         # Load plugins and send signal when all plugins are loaded
         self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
-            'plugins': ['anime', 'search', 'torrents']})
+            'plugins': ['anime', 'search']})
         self.plugins = self.pluginsys._instances
         self.signal.emit('al-plugin-init-done')
 

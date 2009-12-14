@@ -9,6 +9,8 @@
 
 import sys
 
+import gtk
+
 class BasePlugin(object):
 
     def __init__(self, al):

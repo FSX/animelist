@@ -16,6 +16,9 @@ class Request():
     def __init__(self, config):
         self.username, self.password, self.host, self.user_agent = config
 
+    def set_auth():
+        pass
+
     def retrieve(self, url):
 
         try:

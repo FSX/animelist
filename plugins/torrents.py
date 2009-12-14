@@ -7,6 +7,10 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
+# BUGS:
+# - GTK outputs an error when torrent titles contain a &.
+#   This'll disable the tooltip for that row.
+
 import urllib2
 import xml.etree.cElementTree as et
 
@@ -34,7 +38,7 @@ feeds from certain websites and shows the items that are in the watching list.''
         self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 3)
 
         # GUI
-        self.box = gtk.VBox()
+        self.main_gui = gtk.VBox()
 
         # Torrents list
         self.liststore = gtk.ListStore(str, str, str, str, str)
@@ -56,8 +60,8 @@ feeds from certain websites and shows the items that are in the watching list.''
 
         # Pack it together
         frame.add(self.treeview)
-        self.box.pack_start(frame)
-        self.al.gui['box'].pack_start(self.box)
+        self.main_gui.pack_start(frame)
+        self.al.gui['box'].pack_start(self.main_gui)
 
         # Events
         self.al.signal.connect('al-switch-section', self.__switch_section)
@@ -68,9 +72,9 @@ feeds from certain websites and shows the items that are in the watching list.''
     def __switch_section(self, signal, section_name):
 
         if section_name == self.plugin_data['fancyname']:
-            self.box.show()
+            self.main_gui.show()
         else:
-            self.box.hide()
+            self.main_gui.hide()
 
     # List view functions
 
@@ -171,7 +175,7 @@ def animesuki_rss_parser():
 
     for item in items:
         data.append({
-            'title': item['title'].replace('&', '&amp;'), # GTK gives an error about an & without this
+            'title': item['title'],
             'url': item['link'],
             'date': item['pubDate']
             })

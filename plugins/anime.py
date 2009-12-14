@@ -39,8 +39,8 @@ class Plugin(BasePlugin):
         self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 0)
 
         # Main widget
-        self.notebook = gtk.Notebook()
-        self.notebook.set_tab_pos(gtk.POS_TOP)
+        self.main_gui = gtk.Notebook()
+        self.main_gui.set_tab_pos(gtk.POS_TOP)
 
         self.current_tab_id = 0
         self.data, self.liststore, self.treeview, self.tab_label, self.frame = {}, {}, {}, {}, {}
@@ -103,20 +103,20 @@ class Plugin(BasePlugin):
 
             # Paste it together
             self.frame[k].add(self.treeview[k])
-            self.notebook.append_page(self.frame[k], gtk.Label(v.capitalize()))
+            self.main_gui.append_page(self.frame[k], gtk.Label(v.capitalize()))
 
         # Pack
-        self.al.gui['box'].pack_start(self.notebook)
+        self.al.gui['box'].pack_start(self.main_gui)
 
         # Events
-        self.notebook.connect('switch-page', self._set_current_tab_id)
+        self.main_gui.connect('switch-page', self._set_current_tab_id)
         self.menu.info.connect('activate', self._show_information)
         self.menu.delete.connect('activate', self._menu_delete)
         self.menu.copy_title.connect('activate', self._copy_anime_title)
         self.menu.refresh.connect('activate', self.refresh)
         self.menu.save.connect('activate', self.save)
-        self.al.signal.connect('al-shutdown-lvl2', self.save)
         self.al.signal.connect('al-switch-section', self._switch_section)
+        self.al.signal.connect('al-shutdown-lvl2', self.save)
         self.al.signal.connect('al-user-verified', self._w_refresh)
 
         # Make menu visible
@@ -136,9 +136,9 @@ class Plugin(BasePlugin):
     def _switch_section(self, widget, section_name):
 
         if section_name == self.plugin_data['fancyname']:
-            self.notebook.show()
+            self.main_gui.show()
         else:
-            self.notebook.hide()
+            self.main_gui.hide()
 
     # Misc functions
 
@@ -204,7 +204,7 @@ class Plugin(BasePlugin):
         # Private.  Display the amount of item/rows of the lists in the tabs.
 
         for k, v in enumerate(self.al.config.anime['status']):
-            self.notebook.set_tab_label(self.frame[k], gtk.Label('%s (%d)' % (v.capitalize(), len(self.liststore[k]))))
+            self.main_gui.set_tab_label(self.frame[k], gtk.Label('%s (%d)' % (v.capitalize(), len(self.liststore[k]))))
 
     # Widget callbacks
 

@@ -87,7 +87,7 @@ class Anime():
         """Fetch/Download anime list from MAL."""
 
         try:
-            response = self.request.execute(path='anime/search?q=%s' % urllib.quote(query), authenticate=True)
+            response = self.request.execute(path='anime/search?q=%s' % urllib.quote(query))
         except (request.HttpRequestError, request.HttpStatusError):
             return False
 

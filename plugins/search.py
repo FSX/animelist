@@ -36,7 +36,7 @@ class Plugin(BasePlugin):
         self.al.gui['toolbar'].insert(self.plugin_data['fancyname'], 1)
 
         # GUI
-        self.box = gtk.VBox()
+        self.main_gui = gtk.VBox()
 
         self.already_in_list = []
         self.fonts = (pango.FontDescription('normal'), pango.FontDescription('bold'))
@@ -92,15 +92,15 @@ class Plugin(BasePlugin):
 
         # Pack it together
         frame.add(self.treeview)
-        self.box.pack_start(searchbar, False, False)
-        self.box.pack_start(frame)
+        self.main_gui.pack_start(searchbar, False, False)
+        self.main_gui.pack_start(frame)
 
         self.menu.show_all()
 
         if self.al.mal.anime is None:
             self.al.mal.init_anime()
 
-        self.al.gui['box'].pack_start(self.box)
+        self.al.gui['box'].pack_start(self.main_gui)
 
         # Events
         self.al.signal.connect('al-switch-section', self._switch_section)
@@ -115,9 +115,9 @@ class Plugin(BasePlugin):
     def _switch_section(self, widget, section_name):
 
         if section_name == self.plugin_data['fancyname']:
-            self.box.show()
+            self.main_gui.show()
         else:
-            self.box.hide()
+            self.main_gui.hide()
 
     def _plugin_init_done(self, widget=None):
         # Private.  Check if anime plugin has been loaded.
@@ -139,7 +139,7 @@ class Plugin(BasePlugin):
         keyname = gtk.gdk.keyval_name(event.keyval)
 
         if keyname == 'Return':
-            self.__on_search(None)
+            self._on_search(None)
 
     def _show_menu(self, treeview, event):
         # Private.  Displays the main popup menu on a button-press-event
