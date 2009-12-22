@@ -8,18 +8,29 @@
 # =============================================================================
 
 import os
+import sys
 import cPickle
 from pickletools import genops
 import re
+import webbrowser
+import subprocess
 
 import gtk
 
 REGEX_HTML_TAG = re.compile(r'<[^<]*?/?>')
 
+def open_url(url):
+    """Opens the webbrowser and goes to the given url."""
+
+    if sys.platform in ('linux', 'linux2'):
+        subprocess.call(['xdg-open', url])
+    else:
+        webbrowser.open(url)
+
 # http://code.activestate.com/recipes/545418/
 # The filesize of a file goes from ~49.8KB to ~42.2KB
 def optimize_pickle(p):
-    "Optimize a pickle string by removing unused PUT opcodes."
+    """Optimize a pickle string by removing unused PUT opcodes."""
 
     gets = set()      # set of args used by a GET opcode
     puts = []         # (arg, startpos, stoppos) for the PUT opcodes

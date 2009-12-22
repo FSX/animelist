@@ -21,11 +21,13 @@ from lib import widgets
 from lib.pygtkhelpers import gthreads
 from lib.myanimelist import MAL
 from lib.plugin import PluginSys
+from lib.utils import open_url
 
 gobject.threads_init()
 
 class AnimeList():
-    """The main class which loads and starts all the necessary modules, plugins
+    """
+    The main class which loads and starts all the necessary modules, plugins
     and all other things.
     """
 
@@ -36,7 +38,7 @@ class AnimeList():
         self.name = 'AnimeList'
         self.version = '0.2-dev'
         self._position = (0, 0)
-        self.path = sys.path[0] # This is used to load image and other resources
+        self.path = sys.path[0] # This path is used to load image and other resources
 
         # Create signals, load configuration and API
         self.signal = signals.Signals()
@@ -128,7 +130,9 @@ class AnimeList():
         self.signal.emit('al-init-done')
 
     def _menu_get_help(self, widget):
-        print widget # For testing
+        # Private.  Opens the manual.
+
+        open_url('http://61924.nl/animelist-manual.html')
 
     def _menu_about(self, widget):
         # Private.  Show the 'About' dialog.

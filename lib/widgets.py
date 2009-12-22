@@ -7,9 +7,6 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
-import webbrowser
-import subprocess
-
 import gtk
 import pango
 import gobject
@@ -193,8 +190,8 @@ class AboutDialog(gtk.AboutDialog):
     def __init__(self, al):
 
         gtk.AboutDialog.__init__(self)
-        gtk.about_dialog_set_email_hook(self._open_email)
-        gtk.link_button_set_uri_hook(self._open_url)
+        gtk.about_dialog_set_email_hook(self._open_url)
+        gtk.about_dialog_set_url_hook(self._open_url)
         self.al = al
 
         self.set_logo(utils.get_image('%s/pixmaps/animelist_logo_256.png' % al.path))
@@ -221,7 +218,4 @@ class AboutDialog(gtk.AboutDialog):
         return contents
 
     def _open_url(self, dialog, link, data=None):
-        webbrowser.open(link)
-
-    def _open_email(self, dialog, link, data=None):
-        subprocess.call(['xdg-open', 'mailto:%s' % link])
+        utils.open_url(link)

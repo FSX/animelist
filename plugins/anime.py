@@ -8,7 +8,6 @@
 # =============================================================================
 
 import os
-import webbrowser
 
 import gtk
 import gobject
@@ -677,4 +676,4 @@ class InfoWindow(gtk.Builder):
         if self.mal_url is None:
             return
 
-        webbrowser.open(self.mal_url)
+        utils.open_url(self.mal_url)
