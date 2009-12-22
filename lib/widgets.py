@@ -1,7 +1,5 @@
-#!/usr/bin/python
-
 # =============================================================================
-# dialogs.py
+# lib/widgets.py
 #
 # Copyright (c) 2009 Frank Smit (FSX)
 # License: GPL v3, see the COPYING file for details
@@ -14,7 +12,8 @@ import gobject
 from lib import utils
 
 class ToolBar():
-    """The toolbar holds the buttons that enable the user to navigate between the
+    """
+    The toolbar holds the buttons that enable the user to navigate between the
     sections.  This class extends gtk.Toolbar and adds extra functionality.
     """
 
@@ -28,7 +27,8 @@ class ToolBar():
         self.al.signal.connect('al-init-done', self._insert_buttons)
 
     def set_section(self, bid=None, label=None):
-        """Emit a 'al-switch-section' signal when a button on the sections
+        """
+        Emit a 'al-switch-section' signal when a button on the sections
         toolbar is pressed or when called in the script.  Plugins can connect
         to this signal and do the actual 'section switch'.
         """
@@ -183,6 +183,12 @@ class SettingsDialog():
 
         self.al.config.settings['systray'] = fields['systray'].get_active()
         self.al.config.settings['startup_refresh'] = fields['startup_refresh'].get_active()
+
+        # Show or hide the systemtray icon if needed
+        if self.al.config.settings['systray']:
+            self.al.gui['systray'].set_visible(True)
+        else:
+            self.al.gui['systray'].set_visible(False)
 
 class AboutDialog(gtk.AboutDialog):
     """A GTK+ about dialog that displays a description, a link to the website etc."""

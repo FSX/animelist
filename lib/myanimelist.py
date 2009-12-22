@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # =============================================================================
 # lib/myanimelist.py
 # This module is made for the Unofficial MAL API: http://mal-api.com/

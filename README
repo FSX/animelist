@@ -15,7 +15,8 @@ To startup AnimeList you need 'cd' to the AnimeList directory and make "animelis
 (if needed) and do "./animelist.py". A dialog will popup and ask about your login details.
 After you've done that it will load your list.
 
-Send a PM to "http://myanimelist.net/profile/FSX" if you have questions.
+Send a PM to "http://myanimelist.net/profile/FSX" if you have questions. Or visit
+the project page: http://61924.nl/projects/animelist.html
 
  [1]: http://www.gtk.org/
  [2]: http://www.python.org/
@@ -41,6 +42,7 @@ appreciated.
 
 Notes:
 
+ - The *.ui files are gtk.Builder files, which can be edited with Glade 3.
  - Pygtkhelpers is a library from PIDA and is licensed under the LGPL 2 or later.
    The source code can be found at Bitbucket[7].
 

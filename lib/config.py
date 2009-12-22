@@ -1,7 +1,5 @@
-#!/usr/bin/python
-
 # =============================================================================
-# config.py
+# lib/config.py
 #
 # Copyright (c) 2009 Frank Smit (FSX)
 # License: GPL v3, see the COPYING file for details

@@ -7,6 +7,12 @@
 # License: GPL v3, see the COPYING file for details
 # =============================================================================
 
+__author__   = 'Frank Smit'
+__email__    = '61924.00@gmail.com'
+__date__     = 'December 22th, 2009'
+__app_name__ = 'AnimeList'
+__version__  = '0.2-beta1'
+
 import os
 import sys
 
@@ -35,8 +41,8 @@ class AnimeList():
 
         # Set some variables
         self.HOME = os.path.expanduser('~/.animelist')
-        self.name = 'AnimeList'
-        self.version = '0.2-dev'
+        self.name = __app_name__
+        self.version = __version__
         self._position = (0, 0)
         self.path = sys.path[0] # This path is used to load image and other resources
 
@@ -95,6 +101,10 @@ class AnimeList():
 
         # Make all the GUI widgets visible
         self.gui['window'].show_all()
+
+        # Hide the systemtray icon if needed
+        if not self.config.settings['systray']:
+            self.gui['systray'].set_visible(False)
 
         # Accelerators for menu items
         accel_group = gtk.AccelGroup()
