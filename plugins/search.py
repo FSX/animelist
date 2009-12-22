@@ -15,7 +15,8 @@ from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
-    """The search plugin.  Search results can be added to the anime list (if the
+    """
+	The search plugin.  Search results can be added to the anime list (if the
     anime list plugin is enabled ofcourse.
     """
 
@@ -75,12 +76,12 @@ class Plugin(BasePlugin):
             self.menu.add_submenu.append(self.menu.add_to[k])
 
         # Search results list
-        self.liststore = gtk.ListStore(int, str, str, str, int, str)
+        self.liststore = gtk.ListStore(int, str, str, int, str)
 
         self.treeview = gtk.TreeView(self.liststore)
         self.treeview.set_rules_hint(True)
-        self.treeview.set_search_column(2)
-        self.treeview.set_tooltip_column(2)
+        self.treeview.set_search_column(1)
+        self.treeview.set_tooltip_column(1)
         self.treeview.columns_autosize()
 
         self._create_columns()
@@ -180,9 +181,9 @@ class Plugin(BasePlugin):
         params = {
             'id':                 self.data[anime_id]['id'],
             'title':              self.data[anime_id]['title'],
-            'type':               self.data[anime_id]['type'],      # TV, Movie, OVA, ONA, Special, Music
+            'type':               self.data[anime_id]['type'], # TV, Movie, OVA, ONA, Special, Music
             'episodes':           self.data[anime_id]['episodes'],
-            'status':             self.data[anime_id]['status'],    # finished airing, currently airing, not yet aired
+            'status':             'unknown', # finished airing, currently airing, not yet aired, unknown
             'watched_status':     self.al.config.anime['status'][dest_list],
             'watched_episodes':   0,
             'score':              0,
@@ -302,7 +303,7 @@ class Plugin(BasePlugin):
             for k, v in self.data.iteritems():
                 self.liststore.append((
                     v['id'],           # Anime ID (hidden)
-                    None,              # Status
+                    #None,              # Status
                     v['title'],        # Title
                     v['type'],         # Type
                     v['episodes'],     # Episodes
@@ -331,14 +332,6 @@ class Plugin(BasePlugin):
         t.start(query)
 
     # List display functions
-
-    def _cell_status_display(self, column, cell, model, iter):
-        # Private.  Set background for status column.
-
-        anime_id = int(model.get_value(iter, 0))
-        status = self.data[anime_id]['status']
-
-        cell.set_property('background-gdk', self.al.config.anime['cstatus'][status])
 
     def _cell_title_display(self, column, cell, model, iter):
         # Private.  Makes the text bold in rows (animes) that are already in your list.
@@ -371,19 +364,10 @@ class Plugin(BasePlugin):
         column.set_visible(False)
         self.treeview.append_column(column)
 
-        # Status (color)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(None, renderer, text=1)
-        column.set_resizable(False)
-        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-        column.set_fixed_width(8)
-        column.set_cell_data_func(renderer, self._cell_status_display)
-        self.treeview.append_column(column)
-
         # Title
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Title', renderer, text=2)
-        column.set_sort_column_id(2)
+        column = gtk.TreeViewColumn('Title', renderer, text=1)
+        column.set_sort_column_id(1)
         column.set_resizable(True)
         column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         column.set_expand(True)
@@ -392,18 +376,18 @@ class Plugin(BasePlugin):
 
         # Type (TV, OVA ...)
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Type', renderer, text=3)
-        column.set_sort_column_id(3)
+        column = gtk.TreeViewColumn('Type', renderer, text=2)
+        column.set_sort_column_id(2)
         self.treeview.append_column(column)
 
         # Episodes
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Episodes', renderer, text=4)
-        column.set_sort_column_id(4)
+        column = gtk.TreeViewColumn('Episodes', renderer, text=3)
+        column.set_sort_column_id(3)
         self.treeview.append_column(column)
 
         # Score
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Score', renderer, text=5)
-        column.set_sort_column_id(5)
+        column = gtk.TreeViewColumn('Score', renderer, text=4)
+        column.set_sort_column_id(4)
         self.treeview.append_column(column)

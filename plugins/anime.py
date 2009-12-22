@@ -18,7 +18,8 @@ from lib import utils
 from lib.pygtkhelpers import gthreads
 
 class Plugin(BasePlugin):
-    """The anime list plugin.  A list with all the animes from the user's MAL list
+    """
+	The anime list plugin.  A list with all the animes from the user's MAL list
     divided into different statuses (completed, watching, etc.).  Functions for
     editing the list are also available for other plugins.
     """

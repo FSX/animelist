@@ -1,10 +1,17 @@
 A TODO list
 
-# 0.2 beta1
+# 0.2
 
- - Torrents plugin
  - Plugin tab in settings window
  - "Get help" window
+
+# 0.3
+
  - Wait with shutdown after everything is done
  - Cleanup
  - Plugin API
+ - Torrents plugin
+
+# 0.4
+
+ - Media plugin (detect mediaplayers).

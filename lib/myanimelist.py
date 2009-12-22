@@ -102,7 +102,7 @@ class Anime():
                     'title':            utils.htmldecode(e['title']),
                     'type':             e['type'],             # TV, Movie, OVA, ONA, Special, Music
                     'episodes':         int(e['episodes']),
-                    'status':           e['status'],           # finished airing, currently airing, not yet aired
+                    #'status':           e['status'],           # finished airing, currently airing, not yet aired
                     'members_score':    float(e['members_score']),
                     'image':            e['image_url']
                     }
