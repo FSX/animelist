@@ -79,8 +79,11 @@ class AnimeList():
             }
 
         # Load plugins and send signal when all plugins are loaded
+        # The search plugin is temperarly disabled, because the API is a bit broken
+        #self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
+        #    'plugins': ['anime', 'search']})
         self.pluginsys = PluginSys(self, {'plugin_path': '%s/plugins/' % self.path,
-            'plugins': ['anime', 'search']})
+            'plugins': ['anime']})
         self.plugins = self.pluginsys._instances
         self.signal.emit('al-plugin-init-done')
 
