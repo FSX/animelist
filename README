@@ -36,7 +36,7 @@ the project page: http://61924.nl/projects/animelist.html
 
 === Development ===
 
-The source code can be at hg.61924.nl[6] and planned features in the TODO file.
+The source code can be at Github[6] and planned features in the TODO file.
 Any help with testing, especially on other OS than Linux and Windows, is really
 appreciated.
 
@@ -46,5 +46,5 @@ Notes:
  - Pygtkhelpers is a library from PIDA and is licensed under the LGPL 2 or later.
    The source code can be found at Bitbucket[7].
 
- [6]: http://hg.61924.nl/animelist/
+ [6]: http://github.com/FSX/animelist
  [7]: http://bitbucket.org/aafshar/pygtkhelpers-main/overview/
