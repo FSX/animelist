@@ -58,15 +58,24 @@ def optimize_pickle(p):
 def cache_data(path, data):
     """Pickle data and write if to the disk."""
 
-    with open(path, 'wb') as f:
-        pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
-        f.write(pickle)
+    #with open(path, 'wb') as f:
+    #    pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
+    #    f.write(pickle)
+
+    fh = open(path, 'wb')
+    pickle = optimize_pickle(cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL))
+    fh.write(pickle)
+    fh.close()
 
 def get_cache(path):
     """Get data from disk and upickle it."""
 
-    with open(path, 'rb') as f:
-        contents = cPickle.load(f)
+    #with open(path, 'rb') as f:
+    #    contents = cPickle.load(f)
+
+    fh = open(path, 'rb')
+    contents = cPickle.load(fh)
+    fh.close()
 
     return contents
 

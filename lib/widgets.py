@@ -216,8 +216,12 @@ class AboutDialog(gtk.AboutDialog):
         # Private.  Get the contents of the license file (COPYING) and return it.
 
         try:
-            with open('%s/COPYING' % self.al.path, 'r') as f:
-                contents = f.read()
+            #with open('%s/COPYING' % self.al.path, 'r') as f:
+            #    contents = f.read()
+
+            fh = open('%s/COPYING' % self.al.path, 'r')
+            contents = fh.read()
+            fh.close()
         except IOError:
             contents = 'No license file found.'
 

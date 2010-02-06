@@ -81,11 +81,19 @@ class Config():
     def _save_settings(self, widget=None):
         # Private. Save a pickled, base64 encoded version of self.settings in settings.cfg.
 
-        with open(self.al.HOME + '/settings.cfg', 'wb') as f:
-            f.write(base64.b64encode(cPickle.dumps((self.user_verified, self.settings), cPickle.HIGHEST_PROTOCOL)))
+        #with open(self.al.HOME + '/settings.cfg', 'wb') as f:
+        #    f.write(base64.b64encode(cPickle.dumps((self.user_verified, self.settings), cPickle.HIGHEST_PROTOCOL)))
+
+        fh = open(self.al.HOME + '/settings.cfg', 'wb')
+        fh.write(base64.b64encode(cPickle.dumps((self.user_verified, self.settings), cPickle.HIGHEST_PROTOCOL)))
+        fh.close()
 
     def _load_settings(self):
         # Private. Load contents from settings.cfg, base64 decode, unpickle and assign it to self.settings.
 
-        with open(self.al.HOME + '/settings.cfg', 'rb') as f:
-            self.user_verified, self.settings = cPickle.loads(base64.b64decode(f.read()))
+        #with open(self.al.HOME + '/settings.cfg', 'rb') as f:
+        #    self.user_verified, self.settings = cPickle.loads(base64.b64decode(f.read()))
+
+        fh = open(self.al.HOME + '/settings.cfg', 'rb')
+        self.user_verified, self.settings = cPickle.loads(base64.b64decode(fh.read()))
+        fh.close()
