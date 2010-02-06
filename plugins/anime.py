@@ -47,7 +47,7 @@ class Plugin(BasePlugin):
         self.menu = gtk.Menu()
         self.menu.move_to = {}
 
-        #self.menu.info = gtk.ImageMenuItem(gtk.STOCK_DIALOG_INFO)
+        self.menu.info = gtk.ImageMenuItem(gtk.STOCK_DIALOG_INFO)
         self.menu.delete = gtk.ImageMenuItem(gtk.STOCK_REMOVE)
         self.menu.delete.get_children()[0].set_label('Delete')
         self.menu.move = gtk.ImageMenuItem(gtk.STOCK_GO_FORWARD)
@@ -59,8 +59,8 @@ class Plugin(BasePlugin):
         self.menu.move_submenu = gtk.Menu()
         self.menu.move.set_submenu(self.menu.move_submenu)
 
-        #self.menu.append(self.menu.info)
-        #self.menu.append(gtk.SeparatorMenuItem())
+        self.menu.append(self.menu.info)
+        self.menu.append(gtk.SeparatorMenuItem())
         self.menu.append(self.menu.delete)
         self.menu.append(self.menu.move)
         self.menu.append(gtk.SeparatorMenuItem())
@@ -108,7 +108,7 @@ class Plugin(BasePlugin):
 
         # Events
         self.main_gui.connect('switch-page', self._set_current_tab_id)
-        #self.menu.info.connect('activate', self._show_information)
+        self.menu.info.connect('activate', self._show_information)
         self.menu.delete.connect('activate', self._menu_delete)
         self.menu.copy_title.connect('activate', self._copy_anime_title)
         self.menu.refresh.connect('activate', self.refresh)
@@ -230,12 +230,12 @@ class Plugin(BasePlugin):
             treeview.grab_focus()
             treeview.set_cursor(path, col, 0)
 
-            #self.menu.info.set_sensitive(True)
+            self.menu.info.set_sensitive(True)
             self.menu.delete.set_sensitive(True)
             self.menu.move.set_sensitive(True)
             self.menu.copy_title.set_sensitive(True)
         else:
-            #self.menu.info.set_sensitive(False)
+            self.menu.info.set_sensitive(False)
             self.menu.delete.set_sensitive(False)
             self.menu.move.set_sensitive(False)
             self.menu.copy_title.set_sensitive(False)
