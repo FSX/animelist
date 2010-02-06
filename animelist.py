@@ -9,9 +9,9 @@
 
 __author__   = 'Frank Smit'
 __email__    = '61924.00@gmail.com'
-__date__     = 'December 22th, 2009'
+__date__     = 'February 7th, 2010'
 __app_name__ = 'AnimeList'
-__version__  = '0.2-beta1'
+__version__  = '0.2'
 
 import os
 import sys
@@ -37,7 +37,7 @@ class AnimeList():
     and all other things.
     """
 
-    def __init__(self):
+    def __init__(self, cli_options=[]):
 
         # Set some variables
         self.HOME = os.path.expanduser('~/.animelist')
@@ -101,6 +101,10 @@ class AnimeList():
 
         # Make all the GUI widgets visible
         self.gui['window'].show_all()
+
+        # Hide window at startup
+        if '--background' in cli_options:
+            self._st_activate_icon()
 
         # Hide the systemtray icon if needed
         if not self.config.settings['systray']:
@@ -177,7 +181,7 @@ class AnimeList():
 
         self._position = (position.x, position.y)
 
-    def _st_activate_icon(self, widget):
+    def _st_activate_icon(self, widget=None):
         # Private.  Hide or show the main windows when the status/systemtray icon has been clicked
 
         if self.gui['window'].get_property('visible'):
@@ -249,7 +253,8 @@ class AnimeList():
         gtk.main_quit()
 
 if __name__ == '__main__':
-    AnimeList()
+
+    AnimeList(sys.argv[1:])
 
     try:
         gtk.main()

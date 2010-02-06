@@ -1,7 +1,7 @@
 === Introduction ===
 
 AnimeList is still under development and not everything works yet and stuff can be bugged.
-Only tested on Linux (Arch linux) and Windows. It has not been test on any other
+Only tested on Linux (Arch linux), Windows and Mac OS X. It has not been test on any other
 opererating systems.
 
 Before you can use AnimeList you jave to install GTK[1], Python[2], PyGTK[3], PyCairo[3], PyGObject[3].
@@ -33,6 +33,7 @@ the project page: http://61924.nl/projects/animelist.html
  * Works on Linux, Windows and maybe Mac OS X (not tested).
  * Login details are encoded before they're saved (your username and password
    are not saved as plain text).
+ * Start in background with: animelist.py --background
 
 === Development ===
 

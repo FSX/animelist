@@ -2,15 +2,8 @@ A TODO list
 
 # 0.2
 
- - Done
+ - Run in background (hide window at startup).
 
 # 0.3
 
- - Wait with shutdown after everything is done
- - Cleanup
- - Plugin API
- - Torrents plugin
-
-# 0.4
-
- - Media plugin (detect mediaplayers).
+ - This version will be based on QT so it also looks nice on Mac OS X and Windows.
