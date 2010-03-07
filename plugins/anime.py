@@ -8,6 +8,7 @@
 import os
 
 import gtk
+import pango
 import gobject
 
 from lib.plugin import BasePlugin
@@ -373,6 +374,8 @@ class Plugin(BasePlugin):
 
         # Title
         renderer = gtk.CellRendererText()
+        renderer.set_property('ellipsize-set', True)
+        renderer.set_property('ellipsize', pango.ELLIPSIZE_END)
         column = gtk.TreeViewColumn('Title', renderer, text=2)
         column.set_sort_column_id(2)
         column.set_resizable(True)
